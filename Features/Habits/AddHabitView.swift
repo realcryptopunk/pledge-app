@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 // MARK: - Page State
 
@@ -29,6 +30,14 @@ struct AddHabitView: View {
     @State private var stakeAmountString = "10"
     @State private var selectedDays: Set<Int> = [1, 2, 3, 4, 5, 6, 7]
 
+    // MARK: - Location State
+
+    @State private var locationLatitude: Double?
+    @State private var locationLongitude: Double?
+    @State private var locationRadius: Double? = 150
+    @State private var locationName: String?
+    @State private var showLocationPicker = false
+
     // MARK: - Icon Data
 
     private let iconCategories: [(String, [String])] = [
@@ -53,6 +62,7 @@ struct AddHabitView: View {
         !habitName.trimmingCharacters(in: .whitespaces).isEmpty
         && !selectedDays.isEmpty
         && stakeAmount >= 1
+        && (selectedVerification != .location || locationLatitude != nil)
     }
 
     private var resolvedTargetValue: Double {
@@ -109,6 +119,9 @@ struct AddHabitView: View {
                         nameAndIconSection
                         habitTypeSection
                         verificationSection
+                        if selectedVerification == .location {
+                            locationSection
+                        }
                         targetValueSection
                         stakeAmountSection
                         scheduleSection
@@ -132,6 +145,14 @@ struct AddHabitView: View {
                             .foregroundColor(.secondary.opacity(0.6))
                     }
                 }
+            }
+            .sheet(isPresented: $showLocationPicker) {
+                LocationPickerView(
+                    latitude: $locationLatitude,
+                    longitude: $locationLongitude,
+                    radius: $locationRadius,
+                    locationName: $locationName
+                )
             }
         }
     }
@@ -279,6 +300,102 @@ struct AddHabitView: View {
                         Image(systemName: selectedVerification == method ? "checkmark.circle.fill" : "circle")
                             .font(.system(size: 20))
                             .foregroundColor(selectedVerification == method ? theme.surface : .secondary.opacity(0.4))
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
+        }
+        .cleanCard()
+    }
+
+    // MARK: - Location Section
+
+    private var locationSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("LOCATION")
+                .pledgeCaption()
+                .foregroundColor(.secondary)
+                .tracking(1)
+
+            if let lat = locationLatitude, let lng = locationLongitude {
+                // Location is set — show name, map preview, and change button
+                VStack(spacing: 12) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundColor(theme.surface)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(locationName ?? "Selected Location")
+                                .pledgeHeadline()
+                                .foregroundColor(.primary)
+                                .lineLimit(1)
+
+                            Text("\(Int(locationRadius ?? 150))m radius")
+                                .pledgeCaption()
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+                    }
+
+                    // Map preview
+                    let coord = CLLocationCoordinate2D(latitude: lat, longitude: lng)
+                    let previewRadius = locationRadius ?? 150
+
+                    Map(initialPosition: .region(MKCoordinateRegion(
+                        center: coord,
+                        latitudinalMeters: max(previewRadius * 4, 1000),
+                        longitudinalMeters: max(previewRadius * 4, 1000)
+                    ))) {
+                        Annotation("", coordinate: coord) {
+                            Image(systemName: "mappin.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(theme.surface)
+                                .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
+                        }
+
+                        MapCircle(center: coord, radius: previewRadius)
+                            .foregroundStyle(theme.surface.opacity(0.15))
+                            .stroke(theme.surface.opacity(0.4), lineWidth: 1.5)
+                    }
+                    .mapStyle(.standard(elevation: .flat))
+                    .frame(height: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .allowsHitTesting(false)
+
+                    Button {
+                        PPHaptic.selection()
+                        showLocationPicker = true
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.system(size: 12))
+                            Text("Change Location")
+                        }
+                    }
+                    .buttonStyle(GhostButtonStyle())
+                }
+            } else {
+                // No location set — show set location button
+                Button {
+                    PPHaptic.selection()
+                    showLocationPicker = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(theme.surface)
+
+                        Text("Set Location")
+                            .pledgeCallout()
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.secondary.opacity(0.5))
                     }
                     .padding(.vertical, 8)
                 }
@@ -560,7 +677,11 @@ struct AddHabitView: View {
             verificationType: selectedVerification,
             isActive: true,
             currentStreak: 0,
-            successRate: 0
+            successRate: 0,
+            locationLatitude: selectedVerification == .location ? locationLatitude : nil,
+            locationLongitude: selectedVerification == .location ? locationLongitude : nil,
+            locationRadius: selectedVerification == .location ? locationRadius : nil,
+            locationName: selectedVerification == .location ? locationName : nil
         )
         isFirstPledge = appState.habits.isEmpty
         appState.addHabit(habit)
@@ -580,6 +701,11 @@ struct AddHabitView: View {
         selectedDays = Set(1...7)
         createdHabit = nil
         isFirstPledge = false
+        locationLatitude = nil
+        locationLongitude = nil
+        locationRadius = 150
+        locationName = nil
+        showLocationPicker = false
     }
 
     // MARK: - Helpers
