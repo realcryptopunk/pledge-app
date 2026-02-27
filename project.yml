@@ -1,0 +1,39 @@
+name: PledgeApp
+options:
+  bundleIdPrefix: com.pledge
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: ""
+targets:
+  PledgeApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: PledgeApp.swift
+      - path: Core
+      - path: Features
+    entitlements:
+      path: PledgeApp.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access:
+          - health-records
+    settings:
+      base:
+        INFOPLIST_GENERATION: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.pledge.app
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Pledge uses your health data to automatically verify habits like steps, sleep, and workouts."
+        INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Pledge records your habit completion to HealthKit."
+        INFOPLIST_KEY_NSMotionUsageDescription: "Pledge uses motion data to verify step-based habits."
