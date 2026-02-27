@@ -1,9 +1,21 @@
 import SwiftUI
 
+// MARK: - Page State
+
+enum CelebrationPage: Equatable {
+    case form, celebration, streak
+}
+
 struct AddHabitView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.dismiss) private var dismiss
     @Environment(\.themeColors) var theme
+
+    // MARK: - Page State
+
+    @State private var currentPage: CelebrationPage = .form
+    @State private var createdHabit: Habit?
+    @State private var isFirstPledge = false
 
     // MARK: - Form State
 
@@ -55,6 +67,39 @@ struct AddHabitView: View {
     // MARK: - Body
 
     var body: some View {
+        ZStack {
+            switch currentPage {
+            case .form:
+                formView
+                    .transition(.slideBack)
+            case .celebration:
+                if let habit = createdHabit {
+                    PledgeCelebrationView(habit: habit, isFirstPledge: isFirstPledge) {
+                        withAnimation(.springBounce) { currentPage = .streak }
+                    }
+                    .transition(.slideIn)
+                }
+            case .streak:
+                if let habit = createdHabit {
+                    PledgeStreakStartView(
+                        habit: habit,
+                        totalPledgeCount: appState.habits.count,
+                        onAddAnother: {
+                            resetForm()
+                            withAnimation(.springBounce) { currentPage = .form }
+                        },
+                        onDone: { dismiss() }
+                    )
+                    .transition(.slideIn)
+                }
+            }
+        }
+        .animation(.springBounce, value: currentPage)
+    }
+
+    // MARK: - Form View
+
+    private var formView: some View {
         NavigationStack {
             ZStack {
                 WaterBackgroundView()
@@ -517,9 +562,24 @@ struct AddHabitView: View {
             currentStreak: 0,
             successRate: 0
         )
+        isFirstPledge = appState.habits.isEmpty
         appState.addHabit(habit)
-        PPHaptic.success()
-        dismiss()
+        createdHabit = habit
+        withAnimation(.springBounce) { currentPage = .celebration }
+    }
+
+    private func resetForm() {
+        habitName = ""
+        selectedIcon = "🏃"
+        selectedType = .workout
+        selectedVerification = .manual
+        targetValue = 30
+        targetTimeHour = 6
+        targetTimeMinute = 0
+        stakeAmountString = "10"
+        selectedDays = Set(1...7)
+        createdHabit = nil
+        isFirstPledge = false
     }
 
     // MARK: - Helpers
@@ -539,8 +599,10 @@ struct AddHabitView: View {
 
     private func availableVerifications(for type: HabitType) -> [VerificationType] {
         switch type {
-        case .steps, .sleep, .workout:
+        case .steps, .sleep:
             return [.healthKit, .manual]
+        case .workout:
+            return [.healthKit, .location, .manual]
         case .screenTime:
             return [.manual]
         case .wakeUp:
@@ -549,7 +611,9 @@ struct AddHabitView: View {
             return [.manual]
         case .coldShower:
             return [.manual, .photo]
-        case .noSocial, .noJunkFood:
+        case .noJunkFood:
+            return [.location, .manual]
+        case .noSocial:
             return [.manual]
         case .water:
             return [.manual]
@@ -585,7 +649,7 @@ struct AddHabitView: View {
         case .healthKit: return "Automatic via Apple Health"
         case .manual: return "Self-report daily"
         case .photo: return "Upload a photo to verify"
-        case .location: return "Verify by GPS location"
+        case .location: return "Auto-verify by GPS location"
         case .screenTimeAPI: return "Reads Screen Time data"
         case .auto: return "Verified automatically"
         case .inApp: return "Track within the app"

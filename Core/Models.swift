@@ -14,8 +14,25 @@ struct Habit: Identifiable, Codable {
     var isActive: Bool
     var currentStreak: Int
     var successRate: Double
-    
-    init(id: UUID = UUID(), name: String, icon: String, type: HabitType, stakeAmount: Double = 10, schedule: [Int] = [1,2,3,4,5,6,7], targetValue: Double = 0, verificationType: VerificationType = .auto, isActive: Bool = true, currentStreak: Int = 0, successRate: Double = 0) {
+
+    // MARK: - Location Fields (optional for backward compatibility)
+
+    var locationLatitude: Double?
+    var locationLongitude: Double?
+    var locationRadius: Double?    // meters, default 150
+    var locationName: String?      // "Planet Fitness", "Home", etc.
+
+    // MARK: - Location Computed Properties
+
+    var hasLocation: Bool {
+        locationLatitude != nil && locationLongitude != nil
+    }
+
+    var geofenceIdentifier: String {
+        "habit-\(id.uuidString)"
+    }
+
+    init(id: UUID = UUID(), name: String, icon: String, type: HabitType, stakeAmount: Double = 10, schedule: [Int] = [1,2,3,4,5,6,7], targetValue: Double = 0, verificationType: VerificationType = .auto, isActive: Bool = true, currentStreak: Int = 0, successRate: Double = 0, locationLatitude: Double? = nil, locationLongitude: Double? = nil, locationRadius: Double? = nil, locationName: String? = nil) {
         self.id = id
         self.name = name
         self.icon = icon
@@ -27,6 +44,10 @@ struct Habit: Identifiable, Codable {
         self.isActive = isActive
         self.currentStreak = currentStreak
         self.successRate = successRate
+        self.locationLatitude = locationLatitude
+        self.locationLongitude = locationLongitude
+        self.locationRadius = locationRadius
+        self.locationName = locationName
     }
 }
 
