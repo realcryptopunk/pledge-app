@@ -14,6 +14,11 @@ class AppState: ObservableObject {
     @Published var investmentGrowth: Double = 5.8
     @Published var todayHabits: [TodayHabit] = []
     @Published var recentActivity: [ActivityItem] = []
+    @Published var isVerifying = false
+
+    // MARK: - Services
+
+    let verificationService = HabitVerificationService(healthKitManager: HealthKitManager.shared)
 
     // MARK: - Computed Properties
 
@@ -63,13 +68,113 @@ class AppState: ObservableObject {
         updateStreakCount()
     }
 
-    // MARK: - Verification
+    // MARK: - Health Permissions
 
-    func verifyHabit(_ todayHabitId: UUID) {
+    func requestHealthPermissions() async {
+        // Only request if any habits use HealthKit verification
+        let hasHealthKitHabits = habits.contains { habit in
+            habit.verificationType == .healthKit ||
+            habit.type == .steps || habit.type == .sleep || habit.type == .workout
+        }
+        guard hasHealthKitHabits else { return }
+
+        do {
+            try await HealthKitManager.shared.requestAuthorization()
+        } catch {
+            // Permission denied or unavailable — verification will gracefully handle this
+            print("HealthKit authorization failed: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Auto Verification
+
+    func verifyTodayHabits() async {
+        guard !todayHabits.isEmpty else { return }
+
+        isVerifying = true
+        defer { isVerifying = false }
+
+        // Only verify habits that are still pending
+        let pendingHabits = todayHabits.filter { $0.status == .pending }.map { $0.habit }
+        guard !pendingHabits.isEmpty else { return }
+
+        let results = await verificationService.verifyAllHabits(pendingHabits, for: Date())
+
+        for (habitId, result) in results {
+            guard let index = todayHabits.firstIndex(where: { $0.habit.id == habitId }) else { continue }
+            // Only update if the result is definitive (.verified or .failed)
+            // Leave .pending results alone so the user can still manually verify
+            guard result.status == .verified || result.status == .failed else {
+                // Update detail text even for pending (e.g., "Health data unavailable")
+                todayHabits[index].detail = result.detail
+                continue
+            }
+
+            todayHabits[index].status = result.status
+            todayHabits[index].detail = result.detail
+
+            if result.status == .verified {
+                todayHabits[index].verifiedAt = Date()
+                // Update streak
+                if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
+                    habits[habitIndex].currentStreak += 1
+                }
+                // Create activity item
+                let activity = ActivityItem(
+                    icon: "✅",
+                    title: "\(todayHabits[index].habit.name) verified",
+                    detail: "$\(Int(todayHabits[index].habit.stakeAmount)) saved",
+                    isFailure: false
+                )
+                recentActivity.insert(activity, at: 0)
+            } else if result.status == .failed {
+                // Miss your habit, fund your future
+                let stakeAmount = todayHabits[index].habit.stakeAmount
+                investmentPoolValue += stakeAmount
+                // Reset streak
+                if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
+                    habits[habitIndex].currentStreak = 0
+                }
+                // Create activity item
+                let activity = ActivityItem(
+                    icon: "📈",
+                    title: "Stake invested",
+                    detail: "$\(Int(stakeAmount)) from \(todayHabits[index].habit.name)",
+                    isFailure: true
+                )
+                recentActivity.insert(activity, at: 0)
+            }
+        }
+
+        updateStreakCount()
+        saveHabits()
+    }
+
+    // MARK: - Manual Verification
+
+    func manuallyVerifyHabit(_ todayHabitId: UUID) {
         guard let index = todayHabits.firstIndex(where: { $0.id == todayHabitId }) else { return }
         todayHabits[index].status = .verified
         todayHabits[index].verifiedAt = Date()
         todayHabits[index].detail = "Verified \(timeString(from: Date()))"
+
+        // Update streak
+        let habitId = todayHabits[index].habit.id
+        if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
+            habits[habitIndex].currentStreak += 1
+        }
+
+        // Create activity item
+        let activity = ActivityItem(
+            icon: "✅",
+            title: "\(todayHabits[index].habit.name) verified",
+            detail: "$\(Int(todayHabits[index].habit.stakeAmount)) saved",
+            isFailure: false
+        )
+        recentActivity.insert(activity, at: 0)
+
+        updateStreakCount()
+        saveHabits()
     }
 
     // MARK: - Today Habits Generation

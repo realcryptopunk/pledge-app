@@ -23,6 +23,9 @@ struct HomeView: View {
                 .padding(.horizontal, 20)
             }
         }
+        .task {
+            await appState.verifyTodayHabits()
+        }
         .sheet(isPresented: $showAddFunds) {
             AddFundsSheet(appState: appState)
         }
@@ -123,12 +126,25 @@ struct HomeView: View {
 
     // MARK: - Habit List Section
 
+    /// Whether this habit type uses HealthKit for auto-verification.
+    private func isHealthKitType(_ type: HabitType) -> Bool {
+        type == .steps || type == .sleep || type == .workout
+    }
+
     private var habitListSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("TODAY")
-                .pledgeCaption()
-                .foregroundColor(.secondary)
-                .tracking(1)
+            HStack {
+                Text("TODAY")
+                    .pledgeCaption()
+                    .foregroundColor(.secondary)
+                    .tracking(1)
+
+                if appState.isVerifying {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                        .padding(.leading, 4)
+                }
+            }
 
             if appState.todayHabits.isEmpty {
                 // MARK: Empty State
@@ -168,13 +184,24 @@ struct HomeView: View {
                             StatRowDivider()
                                 .padding(.horizontal, 4)
                         }
-                        HabitRowView(todayHabit: todayHabit, onVerify: {
-                            PPHaptic.success()
-                            withAnimation(.springBounce) {
-                                appState.verifyHabit(todayHabit.id)
+                        HabitRowView(
+                            todayHabit: todayHabit,
+                            isHealthKit: isHealthKitType(todayHabit.habit.type),
+                            isVerifying: appState.isVerifying,
+                            onVerify: {
+                                PPHaptic.success()
+                                withAnimation(.springBounce) {
+                                    appState.manuallyVerifyHabit(todayHabit.id)
+                                }
+                            },
+                            onRefresh: {
+                                PPHaptic.light()
+                                Task {
+                                    await appState.verifyTodayHabits()
+                                }
                             }
-                        })
-                            .staggerIn(index: index)
+                        )
+                        .staggerIn(index: index)
                     }
                 }
                 .cleanCard()
@@ -432,7 +459,10 @@ struct AddFundsSheet: View {
 
 struct HabitRowView: View {
     let todayHabit: TodayHabit
+    var isHealthKit: Bool = false
+    var isVerifying: Bool = false
     var onVerify: (() -> Void)? = nil
+    var onRefresh: (() -> Void)? = nil
     @Environment(\.themeColors) var theme
 
     var statusIcon: some View {
@@ -442,8 +472,13 @@ struct HabitRowView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.pledgeGreen)
             case .pending:
-                Image(systemName: "clock.fill")
-                    .foregroundColor(.pledgeOrange)
+                if isVerifying && isHealthKit {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                } else {
+                    Image(systemName: "clock.fill")
+                        .foregroundColor(.pledgeOrange)
+                }
             case .failed:
                 Image(systemName: "xmark.circle.fill")
                     .foregroundColor(.pledgeRed)
@@ -467,7 +502,8 @@ struct HabitRowView: View {
                         .foregroundColor(.primary)
                     Text(todayHabit.detail)
                         .pledgeCaption()
-                        .foregroundColor(.secondary)
+                        .foregroundColor(todayHabit.status == .failed ? .pledgeRed :
+                                         todayHabit.status == .verified ? .pledgeGreen : .secondary)
                 }
 
                 Spacer()
@@ -495,13 +531,29 @@ struct HabitRowView: View {
                 .frame(height: 4)
             }
 
-            if todayHabit.status == .pending && todayHabit.progress == nil && todayHabit.habit.type != .sleep {
+            if todayHabit.status == .pending {
                 HStack {
                     Spacer()
-                    Button("Verify Now") {
-                        onVerify?()
+                    if isHealthKit {
+                        // HealthKit habits get a Refresh button to re-run auto-verification
+                        Button {
+                            onRefresh?()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.system(size: 11, weight: .semibold))
+                                Text("Refresh")
+                            }
+                        }
+                        .buttonStyle(SmallCapsuleStyle())
+                        .disabled(isVerifying)
+                    } else {
+                        // Manual habits get a Verify Now button
+                        Button("Verify Now") {
+                            onVerify?()
+                        }
+                        .buttonStyle(SmallCapsuleStyle())
                     }
-                    .buttonStyle(SmallCapsuleStyle())
                 }
             }
         }
