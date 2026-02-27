@@ -1,4 +1,5 @@
 import Foundation
+import CoreLocation
 
 // MARK: - Verification Result
 
@@ -15,15 +16,22 @@ struct VerificationResult {
 class HabitVerificationService {
 
     private let healthKitManager: HealthKitManager
+    private let locationManager: LocationManager
 
-    init(healthKitManager: HealthKitManager) {
+    init(healthKitManager: HealthKitManager, locationManager: LocationManager) {
         self.healthKitManager = healthKitManager
+        self.locationManager = locationManager
     }
 
     // MARK: - Single Habit Verification
 
     /// Verifies a single habit against its data source for the given date.
     func verifyHabit(_ habit: Habit, for date: Date) async -> VerificationResult {
+        // Location-verified habits use geofence monitoring, not pull-based verification
+        if habit.verificationType == .location {
+            return verifyByLocation(habit)
+        }
+
         switch habit.type {
         case .steps:
             return await verifySteps(habit, for: date)
@@ -144,6 +152,79 @@ class HabitVerificationService {
                 detail: "Health data unavailable"
             )
         }
+    }
+
+    // MARK: - Location Verifier
+
+    private func verifyByLocation(_ habit: Habit) -> VerificationResult {
+        guard habit.hasLocation,
+              let lat = habit.locationLatitude,
+              let lon = habit.locationLongitude else {
+            return VerificationResult(
+                status: .pending,
+                actualValue: nil,
+                targetValue: habit.targetValue,
+                detail: "Set a location to enable verification"
+            )
+        }
+
+        // Ensure the region is being monitored
+        let radius = habit.locationRadius ?? 150
+        let region = locationManager.makeRegion(
+            identifier: habit.geofenceIdentifier,
+            latitude: lat,
+            longitude: lon,
+            radius: radius
+        )
+        locationManager.startMonitoring(region: region)
+
+        let locationLabel = habit.locationName ?? "location"
+        return VerificationResult(
+            status: .pending,
+            actualValue: nil,
+            targetValue: habit.targetValue,
+            detail: "Monitoring \(locationLabel)..."
+        )
+    }
+
+    /// Handles a geofence event triggered by LocationManager notifications.
+    /// - Parameters:
+    ///   - regionIdentifier: The geofence region identifier (format: "habit-{uuid}")
+    ///   - entered: true if the user entered the region, false if exited
+    ///   - habits: Current list of habits to look up the matching habit
+    /// - Returns: A tuple of (habitId, VerificationResult) if a matching habit was found, nil otherwise.
+    func handleGeofenceEvent(regionIdentifier: String, entered: Bool, habits: [Habit]) -> (UUID, VerificationResult)? {
+        // Parse habit ID from region identifier (format: "habit-{uuid}")
+        guard regionIdentifier.hasPrefix("habit-") else { return nil }
+        let uuidString = String(regionIdentifier.dropFirst(6)) // "habit-".count == 6
+        guard let habitId = UUID(uuidString: uuidString) else { return nil }
+        guard let habit = habits.first(where: { $0.id == habitId }) else { return nil }
+
+        // Only process entry events for location verification
+        if entered {
+            if habit.type == .noJunkFood {
+                // Entering a forbidden zone = FAILURE
+                let locationLabel = habit.locationName ?? "restricted area"
+                return (habitId, VerificationResult(
+                    status: .failed,
+                    actualValue: nil,
+                    targetValue: habit.targetValue,
+                    detail: "Entered \(locationLabel)"
+                ))
+            } else {
+                // Entering target zone (gym, etc.) = SUCCESS
+                let locationLabel = habit.locationName ?? "location"
+                return (habitId, VerificationResult(
+                    status: .verified,
+                    actualValue: nil,
+                    targetValue: habit.targetValue,
+                    detail: "Arrived at \(locationLabel)"
+                ))
+            }
+        }
+
+        // Exit events: no action for now (outdoor time tracking deferred)
+        return nil
     }
 
     private func verifyWorkout(_ habit: Habit, for date: Date) async -> VerificationResult {

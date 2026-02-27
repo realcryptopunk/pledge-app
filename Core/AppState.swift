@@ -18,7 +18,10 @@ class AppState: ObservableObject {
 
     // MARK: - Services
 
-    let verificationService = HabitVerificationService(healthKitManager: HealthKitManager.shared)
+    let verificationService = HabitVerificationService(
+        healthKitManager: HealthKitManager.shared,
+        locationManager: LocationManager.shared
+    )
 
     // MARK: - Computed Properties
 
@@ -40,6 +43,8 @@ class AppState: ObservableObject {
         loadHabits()
         generateTodayHabits()
         updateStreakCount()
+        setupGeofenceMonitoring()
+        observeGeofenceNotifications()
     }
 
     // MARK: - Habit CRUD
@@ -49,6 +54,10 @@ class AppState: ObservableObject {
         saveHabits()
         generateTodayHabits()
         updateStreakCount()
+        // Start geofence monitoring if this is a location-verified habit
+        if habit.verificationType == .location && habit.hasLocation {
+            startGeofenceForHabit(habit)
+        }
     }
 
     func deleteHabit(_ habit: Habit) {
@@ -84,6 +93,104 @@ class AppState: ObservableObject {
             // Permission denied or unavailable — verification will gracefully handle this
             print("HealthKit authorization failed: \(error.localizedDescription)")
         }
+    }
+
+    // MARK: - Geofence Monitoring
+
+    /// Sets up geofence monitoring for all active location-verified habits.
+    private func setupGeofenceMonitoring() {
+        let locationHabits = habits.filter {
+            $0.isActive && $0.verificationType == .location && $0.hasLocation
+        }
+        for habit in locationHabits {
+            startGeofenceForHabit(habit)
+        }
+    }
+
+    /// Starts geofence monitoring for a single habit.
+    private func startGeofenceForHabit(_ habit: Habit) {
+        guard let lat = habit.locationLatitude,
+              let lon = habit.locationLongitude else { return }
+        let radius = habit.locationRadius ?? 150
+        let region = LocationManager.shared.makeRegion(
+            identifier: habit.geofenceIdentifier,
+            latitude: lat,
+            longitude: lon,
+            radius: radius
+        )
+        LocationManager.shared.startMonitoring(region: region)
+    }
+
+    /// Observes geofence entry/exit notifications from LocationManager.
+    private func observeGeofenceNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: .geofenceEntry,
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            guard let regionId = notification.userInfo?["regionIdentifier"] as? String else { return }
+            Task { @MainActor [weak self] in
+                self?.handleGeofenceNotification(regionIdentifier: regionId, entered: true)
+            }
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: .geofenceExit,
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            guard let regionId = notification.userInfo?["regionIdentifier"] as? String else { return }
+            Task { @MainActor [weak self] in
+                self?.handleGeofenceNotification(regionIdentifier: regionId, entered: false)
+            }
+        }
+    }
+
+    /// Processes a geofence event by delegating to the verification service and updating state.
+    private func handleGeofenceNotification(regionIdentifier: String, entered: Bool) {
+        guard let (habitId, result) = verificationService.handleGeofenceEvent(
+            regionIdentifier: regionIdentifier,
+            entered: entered,
+            habits: habits
+        ) else { return }
+
+        guard let index = todayHabits.firstIndex(where: { $0.habit.id == habitId }) else { return }
+
+        // Only update if still pending
+        guard todayHabits[index].status == .pending else { return }
+
+        todayHabits[index].status = result.status
+        todayHabits[index].detail = result.detail
+
+        if result.status == .verified {
+            todayHabits[index].verifiedAt = Date()
+            if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
+                habits[habitIndex].currentStreak += 1
+            }
+            let activity = ActivityItem(
+                icon: "✅",
+                title: "\(todayHabits[index].habit.name) verified",
+                detail: "$\(Int(todayHabits[index].habit.stakeAmount)) saved",
+                isFailure: false
+            )
+            recentActivity.insert(activity, at: 0)
+        } else if result.status == .failed {
+            let stakeAmount = todayHabits[index].habit.stakeAmount
+            investmentPoolValue += stakeAmount
+            if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
+                habits[habitIndex].currentStreak = 0
+            }
+            let activity = ActivityItem(
+                icon: "📈",
+                title: "Stake invested",
+                detail: "$\(Int(stakeAmount)) from \(todayHabits[index].habit.name)",
+                isFailure: true
+            )
+            recentActivity.insert(activity, at: 0)
+        }
+
+        updateStreakCount()
+        saveHabits()
     }
 
     // MARK: - Auto Verification
