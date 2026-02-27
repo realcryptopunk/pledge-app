@@ -8,6 +8,10 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     DEVELOPMENT_TEAM: ""
+packages:
+  Vortex:
+    url: https://github.com/twostraws/Vortex
+    from: "1.0.0"
 targets:
   PledgeApp:
     type: application
@@ -16,16 +20,17 @@ targets:
       - path: PledgeApp.swift
       - path: Core
       - path: Features
+    dependencies:
+      - package: Vortex
     entitlements:
       path: PledgeApp.entitlements
       properties:
         com.apple.developer.healthkit: true
-        com.apple.developer.healthkit.access:
-          - health-records
+        com.apple.developer.healthkit.access: []
     settings:
       base:
         INFOPLIST_GENERATION: YES
-        PRODUCT_BUNDLE_IDENTIFIER: com.pledge.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.navro.pledgeapp
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
         GENERATE_INFOPLIST_FILE: YES
@@ -37,3 +42,6 @@ targets:
         INFOPLIST_KEY_NSHealthShareUsageDescription: "Pledge uses your health data to automatically verify habits like steps, sleep, and workouts."
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Pledge records your habit completion to HealthKit."
         INFOPLIST_KEY_NSMotionUsageDescription: "Pledge uses motion data to verify step-based habits."
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Pledge uses your location to verify habits like gym attendance and outdoor time."
+        INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Pledge monitors your location in the background to automatically verify location-based habits like gym visits."
+        INFOPLIST_KEY_UIBackgroundModes: "location"
