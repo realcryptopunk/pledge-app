@@ -42,6 +42,7 @@ targets:
         INFOPLIST_KEY_NSHealthShareUsageDescription: "Pledge uses your health data to automatically verify habits like steps, sleep, and workouts."
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Pledge records your habit completion to HealthKit."
         INFOPLIST_KEY_NSMotionUsageDescription: "Pledge uses motion data to verify step-based habits."
+        INFOPLIST_KEY_NSCameraUsageDescription: "Pledge uses your camera to count exercise reps like pushups using body pose detection."
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Pledge uses your location to verify habits like gym attendance and outdoor time."
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Pledge monitors your location in the background to automatically verify location-based habits like gym visits."
         INFOPLIST_KEY_UIBackgroundModes: "location"

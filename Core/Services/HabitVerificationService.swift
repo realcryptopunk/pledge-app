@@ -32,6 +32,16 @@ class HabitVerificationService {
             return verifyByLocation(habit)
         }
 
+        // Vision-verified habits use camera pose detection (pushups, squats, etc.)
+        if habit.verificationType == .vision {
+            return VerificationResult(
+                status: .pending,
+                actualValue: nil,
+                targetValue: habit.targetValue,
+                detail: "Open camera to count reps"
+            )
+        }
+
         switch habit.type {
         case .steps:
             return await verifySteps(habit, for: date)

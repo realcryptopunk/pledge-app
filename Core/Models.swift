@@ -72,6 +72,7 @@ enum VerificationType: String, Codable {
     case screenTimeAPI = "screenTime"
     case photo
     case location
+    case vision
     case manual
     case inApp
 }

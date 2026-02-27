@@ -728,7 +728,7 @@ struct AddHabitView: View {
         case .steps, .sleep:
             return [.healthKit, .manual]
         case .workout:
-            return [.healthKit, .location, .manual]
+            return [.healthKit, .vision, .location, .manual]
         case .screenTime:
             return [.manual]
         case .wakeUp:
@@ -752,6 +752,7 @@ struct AddHabitView: View {
         case .manual: return "hand.tap.fill"
         case .photo: return "camera.fill"
         case .location: return "location.fill"
+        case .vision: return "figure.mixed.cardio"
         case .screenTimeAPI: return "hourglass"
         case .auto: return "gearshape.fill"
         case .inApp: return "iphone"
@@ -764,6 +765,7 @@ struct AddHabitView: View {
         case .manual: return "Manual"
         case .photo: return "Photo Proof"
         case .location: return "Location"
+        case .vision: return "Camera Tracking"
         case .screenTimeAPI: return "Screen Time"
         case .auto: return "Automatic"
         case .inApp: return "In-App"
@@ -776,6 +778,7 @@ struct AddHabitView: View {
         case .manual: return "Self-report daily"
         case .photo: return "Upload a photo to verify"
         case .location: return "Auto-verify by GPS location"
+        case .vision: return "Count reps with camera pose detection"
         case .screenTimeAPI: return "Reads Screen Time data"
         case .auto: return "Verified automatically"
         case .inApp: return "Track within the app"
