@@ -88,7 +88,7 @@ enum HabitStatus: String, Codable {
 
 // MARK: - Today Habit (View Model)
 
-struct TodayHabit: Identifiable {
+struct TodayHabit: Identifiable, Codable {
     let id: UUID
     let habit: Habit
     var status: HabitStatus
@@ -99,7 +99,7 @@ struct TodayHabit: Identifiable {
 
 // MARK: - Activity Item
 
-struct ActivityItem: Identifiable {
+struct ActivityItem: Identifiable, Codable {
     let id: UUID
     let icon: String
     let title: String
