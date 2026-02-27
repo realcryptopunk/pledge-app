@@ -20,8 +20,8 @@ struct AddHabitView: View {
 
     // MARK: - Form State
 
-    @State private var habitName = ""
-    @State private var selectedIcon = "🏃"
+    @State private var habitName = "Daily Workout"
+    @State private var selectedIcon = "🏋️"
     @State private var selectedType: HabitType = .workout
     @State private var selectedVerification: VerificationType = .manual
     @State private var targetValue: Double = 30
@@ -37,14 +37,6 @@ struct AddHabitView: View {
     @State private var locationRadius: Double? = 150
     @State private var locationName: String?
     @State private var showLocationPicker = false
-
-    // MARK: - Icon Data
-
-    private let iconCategories: [(String, [String])] = [
-        ("Fitness", ["🏃", "💪", "🏋️", "🧘", "🚴", "🏊"]),
-        ("Health", ["💤", "💧", "🥗", "🧊", "💊", "🫁"]),
-        ("Mind", ["📚", "🧠", "📝", "🎯", "⏰", "📵"])
-    ]
 
     // MARK: - Day Labels
 
@@ -116,8 +108,7 @@ struct AddHabitView: View {
 
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 20) {
-                        nameAndIconSection
-                        habitTypeSection
+                        newPledgeSection
                         verificationSection
                         if selectedVerification == .location {
                             locationSection
@@ -157,107 +148,43 @@ struct AddHabitView: View {
         }
     }
 
-    // MARK: - Name & Icon Section
+    // MARK: - New Pledge Section (Type Wheel Picker)
 
-    private var nameAndIconSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("NAME & ICON")
-                .pledgeCaption()
-                .foregroundColor(.secondary)
-                .tracking(1)
-
-            TextField("Habit name", text: $habitName)
-                .pledgeHeadline()
-                .foregroundColor(.primary)
-                .padding(14)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(Color.primary.opacity(0.1), lineWidth: 0.5)
-                )
-
-            ForEach(iconCategories, id: \.0) { category, icons in
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(category)
-                        .pledgeCaption()
-                        .foregroundColor(.secondary.opacity(0.7))
-
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(icons, id: \.self) { icon in
-                                Button {
-                                    PPHaptic.selection()
-                                    withAnimation(.quickSnap) {
-                                        selectedIcon = icon
-                                    }
-                                } label: {
-                                    Text(icon)
-                                        .font(.system(size: 24))
-                                        .frame(width: 44, height: 44)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                .fill(selectedIcon == icon
-                                                      ? LinearGradient(colors: [theme.buttonTop, theme.buttonBottom], startPoint: .top, endPoint: .bottom)
-                                                      : LinearGradient(colors: [Color.primary.opacity(0.08), Color.primary.opacity(0.03)], startPoint: .top, endPoint: .bottom)
-                                                )
-                                        )
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                .stroke(selectedIcon == icon ? Color.white.opacity(0.3) : Color.primary.opacity(0.1), lineWidth: 0.5)
-                                        )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .cleanCard()
-    }
-
-    // MARK: - Habit Type Section
-
-    private var habitTypeSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private var newPledgeSection: some View {
+        VStack(spacing: 16) {
             Text("HABIT TYPE")
                 .pledgeCaption()
                 .foregroundColor(.secondary)
                 .tracking(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 8)], spacing: 8) {
+            // Selected type display
+            HStack(spacing: 12) {
+                Text(selectedIcon)
+                    .font(.system(size: 36))
+
+                Text(selectedType.rawValue)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundColor(.primary)
+            }
+            .frame(maxWidth: .infinity)
+
+            // Wheel picker
+            Picker("Habit Type", selection: $selectedType) {
                 ForEach(HabitType.allCases, id: \.self) { type in
-                    Button {
-                        PPHaptic.selection()
-                        withAnimation(.quickSnap) {
-                            selectedType = type
-                            selectedVerification = defaultVerification(for: type)
-                            targetValue = defaultTargetValue(for: type)
-                        }
-                    } label: {
-                        Text(type.rawValue)
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(selectedType == type ? .white : .primary)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 10)
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                Capsule()
-                                    .fill(selectedType == type
-                                          ? LinearGradient(colors: [theme.buttonTop, theme.buttonBottom], startPoint: .top, endPoint: .bottom)
-                                          : LinearGradient(colors: [Color.primary.opacity(0.08), Color.primary.opacity(0.03)], startPoint: .top, endPoint: .bottom)
-                                    )
-                            )
-                            .overlay(
-                                Capsule()
-                                    .stroke(selectedType == type ? Color.white.opacity(0.3) : Color.primary.opacity(0.1), lineWidth: 0.5)
-                            )
-                            .clipShape(Capsule())
-                    }
+                    Text("\(type.defaultIcon)  \(type.rawValue)").tag(type)
+                }
+            }
+            .pickerStyle(.wheel)
+            .frame(height: 150)
+            .clipped()
+            .onChange(of: selectedType) { _, newType in
+                PPHaptic.selection()
+                withAnimation(.quickSnap) {
+                    selectedIcon = newType.defaultIcon
+                    habitName = newType.rawValue
+                    selectedVerification = defaultVerification(for: newType)
+                    targetValue = defaultTargetValue(for: newType)
                 }
             }
         }
@@ -690,8 +617,8 @@ struct AddHabitView: View {
     }
 
     private func resetForm() {
-        habitName = ""
-        selectedIcon = "🏃"
+        habitName = "Daily Workout"
+        selectedIcon = "🏋️"
         selectedType = .workout
         selectedVerification = .manual
         targetValue = 30
@@ -712,8 +639,10 @@ struct AddHabitView: View {
 
     private func defaultVerification(for type: HabitType) -> VerificationType {
         switch type {
-        case .steps, .sleep, .workout:
+        case .steps, .sleep, .workout, .gym:
             return .healthKit
+        case .pushups:
+            return .vision
         case .screenTime:
             return .manual
         case .wakeUp:
@@ -727,8 +656,10 @@ struct AddHabitView: View {
         switch type {
         case .steps, .sleep:
             return [.healthKit, .manual]
-        case .workout:
-            return [.healthKit, .vision, .location, .manual]
+        case .workout, .gym:
+            return [.healthKit, .location, .manual]
+        case .pushups:
+            return [.vision, .manual]
         case .screenTime:
             return [.manual]
         case .wakeUp:
@@ -799,8 +730,10 @@ struct AddHabitView: View {
             return TargetConfig(label: "Daily step goal", unit: "steps", min: 1000, max: 50000, step: 1000)
         case .sleep:
             return TargetConfig(label: "Hours of sleep", unit: "hours", min: 4, max: 12, step: 1)
-        case .workout:
+        case .workout, .gym:
             return TargetConfig(label: "Workout duration", unit: "minutes", min: 10, max: 120, step: 5)
+        case .pushups:
+            return TargetConfig(label: "Pushup count", unit: "reps", min: 5, max: 200, step: 5)
         case .screenTime:
             return TargetConfig(label: "Max screen time", unit: "hours", min: 1, max: 12, step: 1)
         case .water:
@@ -818,7 +751,8 @@ struct AddHabitView: View {
         switch type {
         case .steps: return 10000
         case .sleep: return 7
-        case .workout: return 30
+        case .workout, .gym: return 30
+        case .pushups: return 20
         case .screenTime: return 2
         case .water: return 8
         case .meditate: return 10

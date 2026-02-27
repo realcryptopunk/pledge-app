@@ -7,7 +7,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: "Y8LCDK623F"
 packages:
   Vortex:
     url: https://github.com/twostraws/Vortex

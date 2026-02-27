@@ -4,57 +4,63 @@ struct OnboardingPage2: View {
     @State private var titleVisible = false
     @State private var subtitleVisible = false
     @State private var chartProgress: CGFloat = 0
-    
+    @Environment(\.themeColors) var theme
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
-            
-            // Chart illustration
+
             ZStack {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(Color.pledgeGrayUltraAdaptive)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                    )
                     .frame(height: 220)
-                
+
                 VStack(spacing: 16) {
-                    // Animated chart line
                     ChartLineView(progress: chartProgress)
                         .frame(height: 100)
                         .padding(.horizontal, 32)
-                    
+
                     HStack(spacing: 8) {
                         Image(systemName: "dollarsign.circle.fill")
                             .foregroundColor(.pledgeGreen)
                         Text("Your penalties, invested")
                             .pledgeCaption()
-                            .foregroundColor(.pledgeGray)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
+            .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
             .padding(.horizontal, 32)
-            
+
             Spacer().frame(height: 48)
-            
+
             VStack(spacing: 4) {
                 Text("What if every failure")
                     .pledgeHero(32)
-                    .foregroundColor(.pledgeBlackAdaptive)
-                
+                    .foregroundColor(.primary)
+                    .embossed(.raised)
+
                 Text("made you richer?")
                     .pledgeHero(32)
-                    .foregroundColor(.pledgeBlackAdaptive)
+                    .foregroundColor(.primary)
+                    .embossed(.raised)
             }
             .multilineTextAlignment(.center)
             .opacity(titleVisible ? 1 : 0)
             .offset(y: titleVisible ? 0 : 10)
-            
+
             Spacer().frame(height: 16)
-            
+
             Text("When you miss a pledge, we invest the money for you. You're building discipline or building wealth.")
                 .pledgeBody()
-                .foregroundColor(.pledgeGray)
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .opacity(subtitleVisible ? 1 : 0)
-            
+
             Spacer()
         }
         .padding(.horizontal, 24)
@@ -70,12 +76,13 @@ struct OnboardingPage2: View {
 
 struct ChartLineView: View {
     var progress: CGFloat
-    
+    @Environment(\.themeColors) var theme
+
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
             let h = geo.size.height
-            
+
             let points: [CGPoint] = [
                 CGPoint(x: 0, y: h * 0.8),
                 CGPoint(x: w * 0.15, y: h * 0.7),
@@ -86,7 +93,7 @@ struct ChartLineView: View {
                 CGPoint(x: w * 0.9, y: h * 0.25),
                 CGPoint(x: w, y: h * 0.15),
             ]
-            
+
             Path { path in
                 path.move(to: points[0])
                 for point in points.dropFirst() {
@@ -94,9 +101,8 @@ struct ChartLineView: View {
                 }
             }
             .trim(from: 0, to: progress)
-            .stroke(Color.pledgeViolet, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-            
-            // Area fill
+            .stroke(theme.surface, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+
             Path { path in
                 path.move(to: points[0])
                 for point in points.dropFirst() {
@@ -108,7 +114,7 @@ struct ChartLineView: View {
             }
             .fill(
                 LinearGradient(
-                    colors: [Color.pledgeViolet.opacity(0.15), Color.pledgeViolet.opacity(0)],
+                    colors: [theme.surface.opacity(0.2), theme.surface.opacity(0)],
                     startPoint: .top,
                     endPoint: .bottom
                 )
@@ -119,5 +125,9 @@ struct ChartLineView: View {
 }
 
 #Preview {
-    OnboardingPage2()
+    ZStack {
+        WaterBackgroundView()
+        OnboardingPage2()
+    }
+    .environmentObject(AppState())
 }

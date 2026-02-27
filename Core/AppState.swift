@@ -3,6 +3,7 @@ import SwiftUI
 @MainActor
 class AppState: ObservableObject {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
+    @AppStorage("hasCompletedSetup") var hasCompletedSetup = false
     @AppStorage("backgroundTheme") var backgroundTheme: BackgroundTheme = .aqua
     @Published var isAuthenticated = true
     @Published var userName = "Nav"
@@ -15,6 +16,10 @@ class AppState: ObservableObject {
     @Published var todayHabits: [TodayHabit] = []
     @Published var recentActivity: [ActivityItem] = []
     @Published var isVerifying = false
+
+    // MARK: - Yield
+
+    private var yieldTimer: Timer?
 
     // MARK: - Services
 
@@ -45,6 +50,22 @@ class AppState: ObservableObject {
         updateStreakCount()
         setupGeofenceMonitoring()
         observeGeofenceNotifications()
+        startYieldTimer()
+    }
+
+    // MARK: - Yield Timer
+
+    private func startYieldTimer() {
+        yieldTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.applyYieldTick()
+            }
+        }
+    }
+
+    private func applyYieldTick() {
+        vaultBalance += 0.01
+        investmentPoolValue += 0.01
     }
 
     // MARK: - Habit CRUD
@@ -83,7 +104,7 @@ class AppState: ObservableObject {
         // Only request if any habits use HealthKit verification
         let hasHealthKitHabits = habits.contains { habit in
             habit.verificationType == .healthKit ||
-            habit.type == .steps || habit.type == .sleep || habit.type == .workout
+            habit.type == .steps || habit.type == .sleep || habit.type == .workout || habit.type == .gym
         }
         guard hasHealthKitHabits else { return }
 
@@ -355,8 +376,10 @@ class AppState: ObservableObject {
             let hour = Int(habit.targetValue)
             let minute = Int((habit.targetValue - Double(hour)) * 60)
             return "Wake by \(hour):\(String(format: "%02d", minute)) AM"
-        case .workout:
+        case .workout, .gym:
             return "\(Int(habit.targetValue)) min goal"
+        case .pushups:
+            return "\(Int(habit.targetValue)) rep goal"
         case .steps:
             return "\(Int(habit.targetValue)) step goal"
         case .screenTime:
@@ -384,6 +407,7 @@ class AppState: ObservableObject {
 
     func signOut() {
         hasCompletedOnboarding = false
+        hasCompletedSetup = false
         isAuthenticated = false
     }
 }

@@ -28,8 +28,6 @@ class LocationManager: NSObject, ObservableObject {
         locationManager = CLLocationManager()
         super.init()
         locationManager.delegate = self
-        locationManager.allowsBackgroundLocationUpdates = true
-        locationManager.pausesLocationUpdatesAutomatically = false
 
         // Sync initial authorization state
         authorizationStatus = locationManager.authorizationStatus

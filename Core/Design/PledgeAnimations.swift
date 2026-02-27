@@ -6,6 +6,7 @@ extension Animation {
     static let springBounce = Animation.spring(response: 0.5, dampingFraction: 0.75)
     static let quickSnap = Animation.spring(response: 0.3, dampingFraction: 0.85)
     static let heroCountUp = Animation.easeOut(duration: 1.2)
+    static let aquaPress = Animation.spring(response: 0.25, dampingFraction: 0.6)
 }
 
 // MARK: - Stagger In Modifier
@@ -13,7 +14,7 @@ extension Animation {
 struct StaggerInModifier: ViewModifier {
     let index: Int
     @State private var isVisible = false
-    
+
     func body(content: Content) -> some View {
         content
             .offset(y: isVisible ? 0 : 20)
@@ -30,7 +31,7 @@ struct StaggerInModifier: ViewModifier {
 
 struct CardPressModifier: ViewModifier {
     @State private var isPressed = false
-    
+
     func body(content: Content) -> some View {
         content
             .scaleEffect(isPressed ? 0.97 : 1.0)
@@ -47,7 +48,7 @@ struct CardPressModifier: ViewModifier {
 
 struct BadgeScaleModifier: ViewModifier {
     @State private var scale: CGFloat = 0
-    
+
     func body(content: Content) -> some View {
         content
             .scaleEffect(scale)
@@ -64,7 +65,7 @@ struct BadgeScaleModifier: ViewModifier {
 struct ShakeAlertModifier: ViewModifier {
     @Binding var trigger: Bool
     @State private var offset: CGFloat = 0
-    
+
     func body(content: Content) -> some View {
         content
             .offset(x: offset)
@@ -74,7 +75,7 @@ struct ShakeAlertModifier: ViewModifier {
                 }
             }
     }
-    
+
     private func shake() {
         let sequence: [(CGFloat, Double)] = [
             (8, 0.05), (-8, 0.05), (6, 0.05), (-6, 0.05), (0, 0.05)
@@ -100,15 +101,15 @@ extension View {
     func staggerIn(index: Int) -> some View {
         modifier(StaggerInModifier(index: index))
     }
-    
+
     func cardPress() -> some View {
         modifier(CardPressModifier())
     }
-    
+
     func badgeScale() -> some View {
         modifier(BadgeScaleModifier())
     }
-    
+
     func shakeAlert(trigger: Binding<Bool>) -> some View {
         modifier(ShakeAlertModifier(trigger: trigger))
     }
@@ -121,7 +122,7 @@ extension AnyTransition {
         insertion: .move(edge: .trailing).combined(with: .opacity),
         removal: .move(edge: .leading).combined(with: .opacity)
     )
-    
+
     static let slideBack = AnyTransition.asymmetric(
         insertion: .move(edge: .leading).combined(with: .opacity),
         removal: .move(edge: .trailing).combined(with: .opacity)

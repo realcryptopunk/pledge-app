@@ -2,53 +2,57 @@ import SwiftUI
 
 struct OnboardingPage3: View {
     let onGetStarted: () -> Void
-    
+
     @State private var buttonVisible = false
-    
-    private let steps: [(icon: String, color: Color, title: String, desc: String)] = [
-        ("🎯", .pledgeBlue, "Set a habit", "Wake up early, work out, limit screen time"),
-        ("💰", .pledgeGreen, "Stake your money", "$10 says you'll follow through"),
-        ("📈", .pledgeViolet, "Miss it? It's invested.", "Your penalty grows in your portfolio"),
-    ]
-    
+    @Environment(\.themeColors) var theme
+
+    private var steps: [(icon: String, color: Color, title: String, desc: String)] {
+        [
+            ("🎯", theme.light, "Set a habit", "Wake up early, work out, limit screen time"),
+            ("💰", .pledgeGreen, "Stake your money", "$10 says you'll follow through"),
+            ("📈", theme.surface, "Miss it? It's invested.", "Your penalty grows in your portfolio"),
+        ]
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
-            
+
             VStack(spacing: 12) {
                 ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
                     HStack(spacing: 16) {
-                        // Icon circle
                         ZStack {
                             Circle()
-                                .fill(step.color.opacity(0.15))
+                                .fill(step.color.opacity(0.2))
                                 .frame(width: 48, height: 48)
+                                .overlay(
+                                    Circle()
+                                        .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                                )
                             Text(step.icon)
                                 .font(.system(size: 22))
                         }
-                        
+
                         VStack(alignment: .leading, spacing: 2) {
                             Text(step.title)
                                 .pledgeHeadline()
-                                .foregroundColor(.pledgeBlackAdaptive)
+                                .foregroundColor(.primary)
                             Text(step.desc)
                                 .pledgeCaption()
-                                .foregroundColor(.pledgeGray)
+                                .foregroundColor(.secondary)
                         }
-                        
+
                         Spacer()
                     }
                     .padding(16)
-                    .background(Color.pledgeGrayUltraAdaptive)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .aquaGlass(cornerRadius: 16)
                     .staggerIn(index: index)
                 }
             }
             .padding(.horizontal, 24)
-            
+
             Spacer()
-            
-            // Get Started button
+
             Button {
                 PPHaptic.medium()
                 onGetStarted()
@@ -70,5 +74,9 @@ struct OnboardingPage3: View {
 }
 
 #Preview {
-    OnboardingPage3(onGetStarted: {})
+    ZStack {
+        WaterBackgroundView()
+        OnboardingPage3(onGetStarted: {})
+    }
+    .environmentObject(AppState())
 }

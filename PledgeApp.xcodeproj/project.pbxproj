@@ -1,0 +1,635 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		064DB25B56D57C68022954E4 /* SetupSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDC77336647A692AF44789B /* SetupSuccessView.swift */; };
+		098867D06C181213AA675461 /* AquaGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93BE91C85702554B2F2DAC79 /* AquaGlass.swift */; };
+		0AA72C7828051137A15E352E /* PortfolioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B7BEDFB20FA262572543418 /* PortfolioView.swift */; };
+		0E44C8B3C8D8EDE9AA98CBEC /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC9B4DA152DFDD26C57996E /* HomeView.swift */; };
+		0F9D18EA5C5FCAF96C4762E3 /* SocialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610F2A5B8B1B27FD1B711639 /* SocialView.swift */; };
+		10C8E3BA883765DED6AC2ACB /* PledgeAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D64C5317E01BAAA55673FC /* PledgeAnimations.swift */; };
+		143D9648A4E58D487DD68A70 /* PledgeHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7657D7B3133359058ABB5E8 /* PledgeHaptics.swift */; };
+		18F054B1D6BA1C438C3970AE /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226031696306ADAA024AC893 /* SplashView.swift */; };
+		1BCF3C7F5DFF196E87FDCB18 /* PushupCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58804F5578B3CF9EA06B192F /* PushupCounterView.swift */; };
+		1FCE8DE6571B33EC34F35849 /* AquaTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9798D8F8A6AEF76AA1D917F6 /* AquaTypography.swift */; };
+		20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01DDB6F0EF3836344A536ED /* CustomNumberPad.swift */; };
+		229422FECE24CAD71401142C /* OnboardingPage3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C52DDE25BB46980AD48293B /* OnboardingPage3.swift */; };
+		22AB9AF5C33E17075CF65E12 /* SetupFlowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */; };
+		2428B545A002E9D9BB61A63B /* OTPVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F972C640227A6F06A78179F9 /* OTPVerificationView.swift */; };
+		264AEA5A0F0BEDA751994396 /* HabitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */; };
+		353297DBC620DF24D00539E2 /* PledgeColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3603D641055EF684271BE52 /* PledgeColors.swift */; };
+		35348CC84A4F6578A23814B4 /* FloatingOrbs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0287D00457685B4E1A541B5C /* FloatingOrbs.swift */; };
+		38E678827F41CD55A520C8DF /* OnboardingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543165F4AAA64710E8571E76 /* OnboardingContainerView.swift */; };
+		3C788C62222C7F3021A3B9F1 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBE06B51B9FF761CB1CA4860 /* SettingsView.swift */; };
+		3CF91096A59FA657323512D9 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BCCB87D5708C7FE91E53D05 /* AppState.swift */; };
+		44118F76DB19099644F32234 /* OnboardingPage1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568C76CE688E0322BC13127C /* OnboardingPage1.swift */; };
+		46E1F19F4DB181D841692C2E /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517A347A9B0345FA9A58EB78 /* Models.swift */; };
+		4933E492BC27A5D57DC89379 /* PledgeTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E5D6102C9AC89775547155 /* PledgeTypography.swift */; };
+		4B56FF67AAFB290919CD5450 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128E92EA1C63BDC919AC5A21 /* HealthKitManager.swift */; };
+		4F56B37109A8EB02530E2BA6 /* PhoneEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F816B777427E304C8DAC387F /* PhoneEntryView.swift */; };
+		50E0CA1A3BC652160F86A410 /* SetupDepositView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 208911E19F8F90C9A88BD75C /* SetupDepositView.swift */; };
+		52A19F180109CC802B7ADFB3 /* AquaTextures.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A6CE9566B67549CC9D674E /* AquaTextures.swift */; };
+		57D4690B106472E554E6F86B /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4AB7F258E58E8BE02C3CB08 /* MainTabView.swift */; };
+		61159CB611DF082EF7A98B55 /* PledgeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A01AB3752386F6E773267F /* PledgeApp.swift */; };
+		638B78F401097CAE9F7CA750 /* BackgroundTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 193BC0361253F9527274DE7E /* BackgroundTheme.swift */; };
+		690727D8DDDA58C403D37CE0 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */; };
+		6C12ED84926FDE95F2B7589D /* RollingCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AE16CCB1A575FB480FD9C9 /* RollingCounter.swift */; };
+		6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B142E203612DBFEE96E71FB /* ConfigureHabitsView.swift */; };
+		826146575315FE85B0C76628 /* PledgeStreakStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8021AE389456CF118680E361 /* PledgeStreakStartView.swift */; };
+		89E5E47AEB99B094AFFCA792 /* PledgeCelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F65311B09BEFD24A3CD2602 /* PledgeCelebrationView.swift */; };
+		9B35B0AF2088CF71E4BDDA7C /* PledgeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D8376BCD890EE15E97BF80 /* PledgeCards.swift */; };
+		9C5E20CDC94DD8903B1C47CE /* SetStakesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EB4E1730AF827ED92F5817 /* SetStakesView.swift */; };
+		9E3249FA8972FFEA2B31870A /* Vortex in Frameworks */ = {isa = PBXBuildFile; productRef = 6F4550AC64675E0303E4FF39 /* Vortex */; };
+		A9B9E0E3E636430C55A46547 /* SetupContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A80A7CCD0CE6FEBB8AA3036 /* SetupContainerView.swift */; };
+		AD74C7EA99482EAB10FCFCFC /* AquaBevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F537B7F56B97FC7B1F35D4 /* AquaBevel.swift */; };
+		D3C4BB43675033C5B4E52EDB /* ChooseHabitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718A352A42414E5955FA4C23 /* ChooseHabitsView.swift */; };
+		D8678D84509A0CE43C43805D /* HabitVerificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D48D6DD71A8C9D93755239D /* HabitVerificationService.swift */; };
+		D89840663A6473CCCF905B47 /* AddHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E816F07B42664E00A0614018 /* AddHabitView.swift */; };
+		E3AAD82C42C7174CBC551300 /* PledgeButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC231027668FF614F7560CA /* PledgeButtons.swift */; };
+		E99B7B6BF90E737C9028E111 /* OnboardingPage2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 087EB6E8BE7B3360F8B1C4F6 /* OnboardingPage2.swift */; };
+		F00E76FB854E201C734C24AD /* HabitDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB58423F408CFE8100F0F66B /* HabitDetailSheet.swift */; };
+		F2166B8F2108410540658772 /* LocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D03F8D12D74554C800FB1114 /* LocationPickerView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0287D00457685B4E1A541B5C /* FloatingOrbs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingOrbs.swift; sourceTree = "<group>"; };
+		087EB6E8BE7B3360F8B1C4F6 /* OnboardingPage2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPage2.swift; sourceTree = "<group>"; };
+		128E92EA1C63BDC919AC5A21 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		193BC0361253F9527274DE7E /* BackgroundTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTheme.swift; sourceTree = "<group>"; };
+		1A80A7CCD0CE6FEBB8AA3036 /* SetupContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupContainerView.swift; sourceTree = "<group>"; };
+		1B7BEDFB20FA262572543418 /* PortfolioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioView.swift; sourceTree = "<group>"; };
+		208911E19F8F90C9A88BD75C /* SetupDepositView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupDepositView.swift; sourceTree = "<group>"; };
+		226031696306ADAA024AC893 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		23F537B7F56B97FC7B1F35D4 /* AquaBevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaBevel.swift; sourceTree = "<group>"; };
+		38D8376BCD890EE15E97BF80 /* PledgeCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeCards.swift; sourceTree = "<group>"; };
+		45D64C5317E01BAAA55673FC /* PledgeAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeAnimations.swift; sourceTree = "<group>"; };
+		49A01AB3752386F6E773267F /* PledgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeApp.swift; sourceTree = "<group>"; };
+		4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowState.swift; sourceTree = "<group>"; };
+		517A347A9B0345FA9A58EB78 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		51AE16CCB1A575FB480FD9C9 /* RollingCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingCounter.swift; sourceTree = "<group>"; };
+		543165F4AAA64710E8571E76 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
+		568C76CE688E0322BC13127C /* OnboardingPage1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPage1.swift; sourceTree = "<group>"; };
+		58804F5578B3CF9EA06B192F /* PushupCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushupCounterView.swift; sourceTree = "<group>"; };
+		5B142E203612DBFEE96E71FB /* ConfigureHabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigureHabitsView.swift; sourceTree = "<group>"; };
+		5CC9B4DA152DFDD26C57996E /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		5D48D6DD71A8C9D93755239D /* HabitVerificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitVerificationService.swift; sourceTree = "<group>"; };
+		610F2A5B8B1B27FD1B711639 /* SocialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialView.swift; sourceTree = "<group>"; };
+		6BCCB87D5708C7FE91E53D05 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		718A352A42414E5955FA4C23 /* ChooseHabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseHabitsView.swift; sourceTree = "<group>"; };
+		7C52DDE25BB46980AD48293B /* OnboardingPage3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPage3.swift; sourceTree = "<group>"; };
+		7DDC77336647A692AF44789B /* SetupSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupSuccessView.swift; sourceTree = "<group>"; };
+		8021AE389456CF118680E361 /* PledgeStreakStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeStreakStartView.swift; sourceTree = "<group>"; };
+		8BC231027668FF614F7560CA /* PledgeButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeButtons.swift; sourceTree = "<group>"; };
+		93BE91C85702554B2F2DAC79 /* AquaGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaGlass.swift; sourceTree = "<group>"; };
+		9798D8F8A6AEF76AA1D917F6 /* AquaTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaTypography.swift; sourceTree = "<group>"; };
+		9F65311B09BEFD24A3CD2602 /* PledgeCelebrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeCelebrationView.swift; sourceTree = "<group>"; };
+		A4AB7F258E58E8BE02C3CB08 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		B5E5D6102C9AC89775547155 /* PledgeTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeTypography.swift; sourceTree = "<group>"; };
+		B8C338151783FE4C3B8FF523 /* PledgeApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PledgeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7657D7B3133359058ABB5E8 /* PledgeHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeHaptics.swift; sourceTree = "<group>"; };
+		D01DDB6F0EF3836344A536ED /* CustomNumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNumberPad.swift; sourceTree = "<group>"; };
+		D03F8D12D74554C800FB1114 /* LocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
+		E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitsView.swift; sourceTree = "<group>"; };
+		E5A6CE9566B67549CC9D674E /* AquaTextures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaTextures.swift; sourceTree = "<group>"; };
+		E816F07B42664E00A0614018 /* AddHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHabitView.swift; sourceTree = "<group>"; };
+		EB58423F408CFE8100F0F66B /* HabitDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitDetailSheet.swift; sourceTree = "<group>"; };
+		EBE06B51B9FF761CB1CA4860 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F3603D641055EF684271BE52 /* PledgeColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeColors.swift; sourceTree = "<group>"; };
+		F6EB4E1730AF827ED92F5817 /* SetStakesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetStakesView.swift; sourceTree = "<group>"; };
+		F816B777427E304C8DAC387F /* PhoneEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneEntryView.swift; sourceTree = "<group>"; };
+		F972C640227A6F06A78179F9 /* OTPVerificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTPVerificationView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B29CFEF34B06663DF1C0B283 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E3249FA8972FFEA2B31870A /* Vortex in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0209CFF5B16F1911DEA30034 = {
+			isa = PBXGroup;
+			children = (
+				49A01AB3752386F6E773267F /* PledgeApp.swift */,
+				50DED0B13A2C9F4A4B64928A /* Core */,
+				81C8A179ECB5DCA5DCAF3265 /* Features */,
+				6B4FCA4BDA93C3E1A4B19A32 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1979C1439EF5391350001BC6 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				5D48D6DD71A8C9D93755239D /* HabitVerificationService.swift */,
+				128E92EA1C63BDC919AC5A21 /* HealthKitManager.swift */,
+				E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		282F94196AC4189A01013F0E /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				F972C640227A6F06A78179F9 /* OTPVerificationView.swift */,
+				F816B777427E304C8DAC387F /* PhoneEntryView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		50DED0B13A2C9F4A4B64928A /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				6BCCB87D5708C7FE91E53D05 /* AppState.swift */,
+				517A347A9B0345FA9A58EB78 /* Models.swift */,
+				845CB51DABBFFDBEEFB46833 /* Design */,
+				1979C1439EF5391350001BC6 /* Services */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		53F43EA0ED375C647415FE44 /* Setup */ = {
+			isa = PBXGroup;
+			children = (
+				718A352A42414E5955FA4C23 /* ChooseHabitsView.swift */,
+				5B142E203612DBFEE96E71FB /* ConfigureHabitsView.swift */,
+				F6EB4E1730AF827ED92F5817 /* SetStakesView.swift */,
+				1A80A7CCD0CE6FEBB8AA3036 /* SetupContainerView.swift */,
+				208911E19F8F90C9A88BD75C /* SetupDepositView.swift */,
+				4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */,
+				7DDC77336647A692AF44789B /* SetupSuccessView.swift */,
+			);
+			path = Setup;
+			sourceTree = "<group>";
+		};
+		60A464B733AD2DCE110ABD16 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				5CC9B4DA152DFDD26C57996E /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		6B4FCA4BDA93C3E1A4B19A32 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B8C338151783FE4C3B8FF523 /* PledgeApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		81C8A179ECB5DCA5DCAF3265 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				282F94196AC4189A01013F0E /* Auth */,
+				F43C481554E8735EC4A9C0B1 /* Habits */,
+				60A464B733AD2DCE110ABD16 /* Home */,
+				97B5BCFD4C58FD1535887044 /* Main */,
+				EE9B0845D73704766E60A431 /* Onboarding */,
+				DBB1A914C8EF7D591EAAA3FC /* Portfolio */,
+				B5B01DBC4AA02924601B33FA /* Settings */,
+				53F43EA0ED375C647415FE44 /* Setup */,
+				ECC37D6440EB78FC7F9AC84F /* Social */,
+				953B8C2307520E22CCBD4826 /* Splash */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		845CB51DABBFFDBEEFB46833 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				23F537B7F56B97FC7B1F35D4 /* AquaBevel.swift */,
+				93BE91C85702554B2F2DAC79 /* AquaGlass.swift */,
+				E5A6CE9566B67549CC9D674E /* AquaTextures.swift */,
+				9798D8F8A6AEF76AA1D917F6 /* AquaTypography.swift */,
+				193BC0361253F9527274DE7E /* BackgroundTheme.swift */,
+				D01DDB6F0EF3836344A536ED /* CustomNumberPad.swift */,
+				0287D00457685B4E1A541B5C /* FloatingOrbs.swift */,
+				45D64C5317E01BAAA55673FC /* PledgeAnimations.swift */,
+				8BC231027668FF614F7560CA /* PledgeButtons.swift */,
+				38D8376BCD890EE15E97BF80 /* PledgeCards.swift */,
+				F3603D641055EF684271BE52 /* PledgeColors.swift */,
+				C7657D7B3133359058ABB5E8 /* PledgeHaptics.swift */,
+				B5E5D6102C9AC89775547155 /* PledgeTypography.swift */,
+				51AE16CCB1A575FB480FD9C9 /* RollingCounter.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		953B8C2307520E22CCBD4826 /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				226031696306ADAA024AC893 /* SplashView.swift */,
+			);
+			path = Splash;
+			sourceTree = "<group>";
+		};
+		97B5BCFD4C58FD1535887044 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				A4AB7F258E58E8BE02C3CB08 /* MainTabView.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		B5B01DBC4AA02924601B33FA /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				EBE06B51B9FF761CB1CA4860 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		DBB1A914C8EF7D591EAAA3FC /* Portfolio */ = {
+			isa = PBXGroup;
+			children = (
+				1B7BEDFB20FA262572543418 /* PortfolioView.swift */,
+			);
+			path = Portfolio;
+			sourceTree = "<group>";
+		};
+		ECC37D6440EB78FC7F9AC84F /* Social */ = {
+			isa = PBXGroup;
+			children = (
+				610F2A5B8B1B27FD1B711639 /* SocialView.swift */,
+			);
+			path = Social;
+			sourceTree = "<group>";
+		};
+		EE9B0845D73704766E60A431 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				543165F4AAA64710E8571E76 /* OnboardingContainerView.swift */,
+				568C76CE688E0322BC13127C /* OnboardingPage1.swift */,
+				087EB6E8BE7B3360F8B1C4F6 /* OnboardingPage2.swift */,
+				7C52DDE25BB46980AD48293B /* OnboardingPage3.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		F43C481554E8735EC4A9C0B1 /* Habits */ = {
+			isa = PBXGroup;
+			children = (
+				E816F07B42664E00A0614018 /* AddHabitView.swift */,
+				EB58423F408CFE8100F0F66B /* HabitDetailSheet.swift */,
+				E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */,
+				D03F8D12D74554C800FB1114 /* LocationPickerView.swift */,
+				9F65311B09BEFD24A3CD2602 /* PledgeCelebrationView.swift */,
+				8021AE389456CF118680E361 /* PledgeStreakStartView.swift */,
+				58804F5578B3CF9EA06B192F /* PushupCounterView.swift */,
+			);
+			path = Habits;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		578630FA62F50A2F2C71BE36 /* PledgeApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 63A08181FD6D1F589D731B5A /* Build configuration list for PBXNativeTarget "PledgeApp" */;
+			buildPhases = (
+				963E32550606341405367C2D /* Sources */,
+				B29CFEF34B06663DF1C0B283 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PledgeApp;
+			packageProductDependencies = (
+				6F4550AC64675E0303E4FF39 /* Vortex */,
+			);
+			productName = PledgeApp;
+			productReference = B8C338151783FE4C3B8FF523 /* PledgeApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5F669A91320CBAAA7D0CC844 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					578630FA62F50A2F2C71BE36 = {
+						DevelopmentTeam = Y8LCDK623F;
+					};
+				};
+			};
+			buildConfigurationList = 995B99E4A208EBFD5117DA7F /* Build configuration list for PBXProject "PledgeApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 0209CFF5B16F1911DEA30034;
+			packageReferences = (
+				A279F73A8637152C8D577B10 /* XCRemoteSwiftPackageReference "Vortex" */,
+			);
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				578630FA62F50A2F2C71BE36 /* PledgeApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		963E32550606341405367C2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D89840663A6473CCCF905B47 /* AddHabitView.swift in Sources */,
+				3CF91096A59FA657323512D9 /* AppState.swift in Sources */,
+				AD74C7EA99482EAB10FCFCFC /* AquaBevel.swift in Sources */,
+				098867D06C181213AA675461 /* AquaGlass.swift in Sources */,
+				52A19F180109CC802B7ADFB3 /* AquaTextures.swift in Sources */,
+				1FCE8DE6571B33EC34F35849 /* AquaTypography.swift in Sources */,
+				638B78F401097CAE9F7CA750 /* BackgroundTheme.swift in Sources */,
+				D3C4BB43675033C5B4E52EDB /* ChooseHabitsView.swift in Sources */,
+				6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */,
+				20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */,
+				35348CC84A4F6578A23814B4 /* FloatingOrbs.swift in Sources */,
+				F00E76FB854E201C734C24AD /* HabitDetailSheet.swift in Sources */,
+				D8678D84509A0CE43C43805D /* HabitVerificationService.swift in Sources */,
+				264AEA5A0F0BEDA751994396 /* HabitsView.swift in Sources */,
+				4B56FF67AAFB290919CD5450 /* HealthKitManager.swift in Sources */,
+				0E44C8B3C8D8EDE9AA98CBEC /* HomeView.swift in Sources */,
+				690727D8DDDA58C403D37CE0 /* LocationManager.swift in Sources */,
+				F2166B8F2108410540658772 /* LocationPickerView.swift in Sources */,
+				57D4690B106472E554E6F86B /* MainTabView.swift in Sources */,
+				46E1F19F4DB181D841692C2E /* Models.swift in Sources */,
+				2428B545A002E9D9BB61A63B /* OTPVerificationView.swift in Sources */,
+				38E678827F41CD55A520C8DF /* OnboardingContainerView.swift in Sources */,
+				44118F76DB19099644F32234 /* OnboardingPage1.swift in Sources */,
+				E99B7B6BF90E737C9028E111 /* OnboardingPage2.swift in Sources */,
+				229422FECE24CAD71401142C /* OnboardingPage3.swift in Sources */,
+				4F56B37109A8EB02530E2BA6 /* PhoneEntryView.swift in Sources */,
+				10C8E3BA883765DED6AC2ACB /* PledgeAnimations.swift in Sources */,
+				61159CB611DF082EF7A98B55 /* PledgeApp.swift in Sources */,
+				E3AAD82C42C7174CBC551300 /* PledgeButtons.swift in Sources */,
+				9B35B0AF2088CF71E4BDDA7C /* PledgeCards.swift in Sources */,
+				89E5E47AEB99B094AFFCA792 /* PledgeCelebrationView.swift in Sources */,
+				353297DBC620DF24D00539E2 /* PledgeColors.swift in Sources */,
+				143D9648A4E58D487DD68A70 /* PledgeHaptics.swift in Sources */,
+				826146575315FE85B0C76628 /* PledgeStreakStartView.swift in Sources */,
+				4933E492BC27A5D57DC89379 /* PledgeTypography.swift in Sources */,
+				0AA72C7828051137A15E352E /* PortfolioView.swift in Sources */,
+				1BCF3C7F5DFF196E87FDCB18 /* PushupCounterView.swift in Sources */,
+				6C12ED84926FDE95F2B7589D /* RollingCounter.swift in Sources */,
+				9C5E20CDC94DD8903B1C47CE /* SetStakesView.swift in Sources */,
+				3C788C62222C7F3021A3B9F1 /* SettingsView.swift in Sources */,
+				A9B9E0E3E636430C55A46547 /* SetupContainerView.swift in Sources */,
+				50E0CA1A3BC652160F86A410 /* SetupDepositView.swift in Sources */,
+				22AB9AF5C33E17075CF65E12 /* SetupFlowState.swift in Sources */,
+				064DB25B56D57C68022954E4 /* SetupSuccessView.swift in Sources */,
+				0F9D18EA5C5FCAF96C4762E3 /* SocialView.swift in Sources */,
+				18F054B1D6BA1C438C3970AE /* SplashView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2E4FA7E3B034F5E745EA989C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PledgeApp.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pledge uses your camera to count exercise reps like pushups using body pose detection.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Pledge uses your health data to automatically verify habits like steps, sleep, and workouts.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Pledge records your habit completion to HealthKit.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Pledge monitors your location in the background to automatically verify location-based habits like gym visits.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Pledge uses your location to verify habits like gym attendance and outdoor time.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Pledge uses motion data to verify step-based habits.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = location;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.navro.pledgeapp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		84339F3DA20E7772D4B91CC6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = Y8LCDK623F;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		A45DD34D81E47F0BF8ADB529 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = Y8LCDK623F;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		AFE59393B5F0A8815E8EC299 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PledgeApp.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Pledge uses your camera to count exercise reps like pushups using body pose detection.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Pledge uses your health data to automatically verify habits like steps, sleep, and workouts.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Pledge records your habit completion to HealthKit.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Pledge monitors your location in the background to automatically verify location-based habits like gym visits.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Pledge uses your location to verify habits like gym attendance and outdoor time.";
+				INFOPLIST_KEY_NSMotionUsageDescription = "Pledge uses motion data to verify step-based habits.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = location;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.navro.pledgeapp;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		63A08181FD6D1F589D731B5A /* Build configuration list for PBXNativeTarget "PledgeApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2E4FA7E3B034F5E745EA989C /* Debug */,
+				AFE59393B5F0A8815E8EC299 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		995B99E4A208EBFD5117DA7F /* Build configuration list for PBXProject "PledgeApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A45DD34D81E47F0BF8ADB529 /* Debug */,
+				84339F3DA20E7772D4B91CC6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A279F73A8637152C8D577B10 /* XCRemoteSwiftPackageReference "Vortex" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/Vortex";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6F4550AC64675E0303E4FF39 /* Vortex */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A279F73A8637152C8D577B10 /* XCRemoteSwiftPackageReference "Vortex" */;
+			productName = Vortex;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 5F669A91320CBAAA7D0CC844 /* Project object */;
+}

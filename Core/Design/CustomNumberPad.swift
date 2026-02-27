@@ -4,31 +4,46 @@ struct NumberPadView: View {
     @Binding var value: String
     var maxDigits: Int = 6
     var allowDecimal: Bool = true
-    
+
     private let keys: [[String]] = [
         ["1", "2", "3"],
         ["4", "5", "6"],
         ["7", "8", "9"],
         [".", "0", "←"]
     ]
-    
+
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 4) {
             ForEach(keys, id: \.self) { row in
-                HStack(spacing: 0) {
+                HStack(spacing: 4) {
                     ForEach(row, id: \.self) { key in
-                        NumberPadKey(key: key) {
+                        Button {
                             handleTap(key)
+                        } label: {
+                            Group {
+                                if key == "←" {
+                                    Image(systemName: "delete.left")
+                                        .font(.system(size: 20, weight: .medium))
+                                } else {
+                                    Text(key)
+                                        .font(.system(size: 24, weight: .regular, design: .rounded))
+                                }
+                            }
+                            .foregroundColor(.primary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .contentShape(Rectangle())
                         }
+                        .buttonStyle(NumberPadKeyStyle())
                     }
                 }
             }
         }
     }
-    
+
     private func handleTap(_ key: String) {
         PPHaptic.light()
-        
+
         switch key {
         case "←":
             if !value.isEmpty {
@@ -39,10 +54,8 @@ struct NumberPadView: View {
                 value += value.isEmpty ? "0." : "."
             }
         default:
-            // Enforce max digits (excluding decimal point)
             let digits = value.replacingOccurrences(of: ".", with: "")
             if digits.count < maxDigits {
-                // Limit decimal places to 2
                 if let dotIndex = value.firstIndex(of: ".") {
                     let decimals = value[value.index(after: dotIndex)...]
                     if decimals.count >= 2 { return }
@@ -53,51 +66,31 @@ struct NumberPadView: View {
     }
 }
 
-struct NumberPadKey: View {
-    let key: String
-    let action: () -> Void
-    
-    @State private var isPressed = false
-    
-    var body: some View {
-        Button(action: action) {
-            Group {
-                if key == "←" {
-                    Image(systemName: "delete.left")
-                        .font(.system(size: 22, weight: .regular))
-                } else {
-                    Text(key)
-                        .font(.system(size: 28, weight: .regular))
-                }
-            }
-            .foregroundColor(.pledgeBlackAdaptive)
-            .frame(maxWidth: .infinity)
-            .frame(height: 64)
+// MARK: - Key Style
+
+private struct NumberPadKeyStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.pledgeGrayUltraAdaptive.opacity(isPressed ? 1 : 0))
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(configuration.isPressed ? Color.primary.opacity(0.1) : Color.clear)
             )
-            .scaleEffect(isPressed ? 0.95 : 1.0)
-        }
-        .buttonStyle(.plain)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    withAnimation(.linear(duration: 0.05)) { isPressed = true }
-                }
-                .onEnded { _ in
-                    withAnimation(.linear(duration: 0.15)) { isPressed = false }
-                }
-        )
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
 #Preview {
     @Previewable @State var value = "25"
-    VStack {
-        Text("$\(value)")
-            .font(.system(size: 72, weight: .black, design: .rounded))
-        NumberPadView(value: $value)
+    ZStack {
+        WaterBackgroundView()
+        VStack {
+            Text("$\(value)")
+                .font(.system(size: 72, weight: .black, design: .rounded))
+                .foregroundColor(.primary)
+            NumberPadView(value: $value)
+        }
+        .padding()
     }
-    .padding()
+    .environmentObject(AppState())
 }

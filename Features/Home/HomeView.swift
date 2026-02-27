@@ -5,22 +5,29 @@ struct HomeView: View {
     @State private var showAddFunds = false
     @State private var showAddHabit = false
     @State private var addFundsAmount = ""
+    @State private var pushupHabit: TodayHabit?
+    @State private var showHabitDetail: TodayHabit?
+    @State private var scrollProxy: ScrollViewProxy?
     @Environment(\.themeColors) var theme
 
     var body: some View {
         ZStack {
             WaterBackgroundView()
 
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 24) {
-                    headerSection
-                    streakBadge
-                    todayPledgesCard
-                    habitListSection
-                    recentActivitySection
-                    Spacer().frame(height: 20)
+            ScrollViewReader { proxy in
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        headerSection
+                        streakBadge
+                        todayPledgesCard
+                        habitListSection
+                            .id("habitList")
+                        recentActivitySection
+                        Spacer().frame(height: 20)
+                    }
+                    .padding(.horizontal, 20)
                 }
-                .padding(.horizontal, 20)
+                .onAppear { scrollProxy = proxy }
             }
         }
         .task {
@@ -32,6 +39,20 @@ struct HomeView: View {
         .sheet(isPresented: $showAddHabit) {
             AddHabitView()
                 .environmentObject(appState)
+        }
+        .sheet(item: $showHabitDetail) { todayHabit in
+            HabitDetailSheet(todayHabit: todayHabit)
+        }
+        .fullScreenCover(item: $pushupHabit) { todayHabit in
+            PushupCounterView(
+                targetReps: Int(todayHabit.habit.targetValue)
+            ) { count in
+                PPHaptic.success()
+                withAnimation(.springBounce) {
+                    appState.manuallyVerifyHabit(todayHabit.id)
+                }
+                pushupHabit = nil
+            }
         }
     }
 
@@ -45,11 +66,14 @@ struct HomeView: View {
                         .pledgeCaption()
                         .foregroundColor(.secondary)
 
-                    Text("$\(appState.vaultBalance, specifier: "%.2f")")
-                        .pledgeHero(56)
-                        .foregroundColor(.primary)
-                        .embossed(.raised)
-                        .contentTransition(.numericText())
+                    RollingCounterView(
+                        value: appState.vaultBalance,
+                        decimalPlaces: 2,
+                        mainSize: 48,
+                        decimalSize: 28,
+                        trailingSize: 20
+                    )
+                    .embossed(.raised)
 
                     Text("+\(appState.todayChangePercent, specifier: "%.1f")% this month")
                         .pledgeCaption()
@@ -73,13 +97,23 @@ struct HomeView: View {
                 }
             }
 
-            Button {
-                PPHaptic.medium()
-                showAddFunds = true
-            } label: {
-                Text("Add funds")
+            HStack(spacing: 12) {
+                Button {
+                    PPHaptic.medium()
+                    showAddFunds = true
+                } label: {
+                    Text("Add Funds")
+                }
+                .buttonStyle(PrimaryCapsuleStyle())
+
+                Button {
+                    PPHaptic.medium()
+                    showAddHabit = true
+                } label: {
+                    Text("Add Habit")
+                }
+                .buttonStyle(AccentCapsuleStyle())
             }
-            .buttonStyle(PrimaryCapsuleStyle())
         }
         .padding(.top, 8)
     }
@@ -87,7 +121,12 @@ struct HomeView: View {
     // MARK: - Today Pledges Card
 
     private var todayPledgesCard: some View {
-        Button { } label: {
+        Button {
+            PPHaptic.light()
+            withAnimation(.springBounce) {
+                scrollProxy?.scrollTo("habitList", anchor: .top)
+            }
+        } label: {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Today's Pledges")
@@ -118,7 +157,7 @@ struct HomeView: View {
                         .pledgeMonoSmall()
                 }
             }
-            .accentCard(theme.buttonTop)
+            .accentCard(theme.deep)
         }
         .buttonStyle(.plain)
         .cardPress()
@@ -128,7 +167,7 @@ struct HomeView: View {
 
     /// Whether this habit type uses HealthKit for auto-verification.
     private func isHealthKitType(_ type: HabitType) -> Bool {
-        type == .steps || type == .sleep || type == .workout
+        type == .steps || type == .sleep || type == .workout || type == .gym
     }
 
     private var habitListSection: some View {
@@ -187,6 +226,7 @@ struct HomeView: View {
                         HabitRowView(
                             todayHabit: todayHabit,
                             isHealthKit: isHealthKitType(todayHabit.habit.type),
+                            isVision: todayHabit.habit.verificationType == .vision,
                             isVerifying: appState.isVerifying,
                             onVerify: {
                                 PPHaptic.success()
@@ -199,8 +239,17 @@ struct HomeView: View {
                                 Task {
                                     await appState.verifyTodayHabits()
                                 }
+                            },
+                            onOpenCamera: {
+                                PPHaptic.medium()
+                                pushupHabit = todayHabit
                             }
                         )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            PPHaptic.light()
+                            showHabitDetail = todayHabit
+                        }
                         .staggerIn(index: index)
                     }
                 }
@@ -460,9 +509,11 @@ struct AddFundsSheet: View {
 struct HabitRowView: View {
     let todayHabit: TodayHabit
     var isHealthKit: Bool = false
+    var isVision: Bool = false
     var isVerifying: Bool = false
     var onVerify: (() -> Void)? = nil
     var onRefresh: (() -> Void)? = nil
+    var onOpenCamera: (() -> Void)? = nil
     @Environment(\.themeColors) var theme
 
     var statusIcon: some View {
@@ -534,7 +585,19 @@ struct HabitRowView: View {
             if todayHabit.status == .pending {
                 HStack {
                     Spacer()
-                    if isHealthKit {
+                    if isVision {
+                        // Vision habits open the camera for rep counting
+                        Button {
+                            onOpenCamera?()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 11, weight: .semibold))
+                                Text("Open Camera")
+                            }
+                        }
+                        .buttonStyle(SmallCapsuleStyle())
+                    } else if isHealthKit {
                         // HealthKit habits get a Refresh button to re-run auto-verification
                         Button {
                             onRefresh?()

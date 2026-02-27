@@ -17,6 +17,9 @@ struct PledgeApp: App {
                 } else if !appState.isAuthenticated {
                     PhoneEntryView()
                         .transition(.slideIn)
+                } else if !appState.hasCompletedSetup {
+                    SetupContainerView()
+                        .transition(.slideIn)
                 } else {
                     MainTabView()
                         .transition(.opacity)
@@ -28,6 +31,7 @@ struct PledgeApp: App {
             .animation(.easeInOut(duration: 0.4), value: showSplash)
             .animation(.springBounce, value: appState.hasCompletedOnboarding)
             .animation(.springBounce, value: appState.isAuthenticated)
+            .animation(.springBounce, value: appState.hasCompletedSetup)
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     showSplash = false

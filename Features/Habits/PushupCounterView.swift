@@ -344,15 +344,10 @@ final class PoseDetectionCamera: NSObject, ObservableObject {
             captureSession.addOutput(videoOutput)
         }
 
-        // Set orientation for portrait mode
-        if let connection = videoOutput.connection(with: .video) {
-            if connection.isVideoRotationAngleSupported(90) {
-                connection.videoRotationAngle = 90
-            }
-            if connection.isVideoMirroringSupported {
-                connection.isVideoMirrored = true
-            }
-        }
+        // Note: we do NOT set videoRotationAngle or isVideoMirrored on the
+        // data output connection. The raw landscape buffer goes to Vision with
+        // an explicit .right orientation hint instead. The preview layer handles
+        // its own rotation and mirroring independently.
 
         captureSession.commitConfiguration()
     }
@@ -385,7 +380,7 @@ extension PoseDetectionCamera: AVCaptureVideoDataOutputSampleBufferDelegate {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
         let request = VNDetectHumanBodyPoseRequest()
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right, options: [:])
 
         do {
             try handler.perform([request])

@@ -4,11 +4,12 @@ struct OnboardingContainerView: View {
     @EnvironmentObject var appState: AppState
     @State private var currentPage = 0
     @Namespace private var dotNS
-    
+    @Environment(\.themeColors) var theme
+
     var body: some View {
         ZStack {
-            Color.pledgeBgAdaptive.ignoresSafeArea()
-            
+            WaterBackgroundView()
+
             VStack(spacing: 0) {
                 TabView(selection: $currentPage) {
                     OnboardingPage1()
@@ -24,18 +25,18 @@ struct OnboardingContainerView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.springBounce, value: currentPage)
-                
-                // Custom page dots
+
                 HStack(spacing: 8) {
                     ForEach(0..<3, id: \.self) { index in
                         if index == currentPage {
                             Capsule()
-                                .fill(Color.pledgeBlackAdaptive)
+                                .fill(theme.surface)
                                 .frame(width: 24, height: 8)
+                                .shadow(color: theme.surface.opacity(0.5), radius: 4)
                                 .matchedGeometryEffect(id: "dot", in: dotNS)
                         } else {
                             Circle()
-                                .fill(Color.pledgeGrayLight)
+                                .fill(Color.secondary.opacity(0.4))
                                 .frame(width: 8, height: 8)
                                 .onTapGesture {
                                     withAnimation(.quickSnap) {
@@ -46,8 +47,7 @@ struct OnboardingContainerView: View {
                     }
                 }
                 .padding(.bottom, 32)
-                
-                // Next / Skip
+
                 if currentPage < 2 {
                     HStack {
                         Button("Skip") {
@@ -56,15 +56,15 @@ struct OnboardingContainerView: View {
                             }
                         }
                         .buttonStyle(GhostButtonStyle())
-                        
+
                         Spacer()
-                        
+
                         Button("Next") {
                             withAnimation(.quickSnap) {
                                 currentPage += 1
                             }
                         }
-                        .buttonStyle(GhostButtonStyle(color: .pledgeBlackAdaptive))
+                        .buttonStyle(GhostButtonStyle(color: .primary))
                     }
                     .padding(.horizontal, 24)
                     .padding(.bottom, 16)

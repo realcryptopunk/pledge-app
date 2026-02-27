@@ -47,8 +47,16 @@ class HabitVerificationService {
             return await verifySteps(habit, for: date)
         case .sleep:
             return await verifySleep(habit, for: date)
-        case .workout:
+        case .workout, .gym:
             return await verifyWorkout(habit, for: date)
+        case .pushups:
+            // Pushups use vision/camera verification — manual fallback
+            return VerificationResult(
+                status: .pending,
+                actualValue: nil,
+                targetValue: habit.targetValue,
+                detail: "Open camera to count reps"
+            )
         case .wakeUp:
             // Wake up verification needs alarm/motion detection which is complex
             return VerificationResult(

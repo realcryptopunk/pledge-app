@@ -4,22 +4,29 @@ struct SplashView: View {
     @State private var logoScale: CGFloat = 0.8
     @State private var logoOpacity: Double = 0
     @State private var wordmarkOpacity: Double = 0
-    
+    @Environment(\.themeColors) var theme
+
     var body: some View {
         ZStack {
-            Color.pledgeBgAdaptive
-                .ignoresSafeArea()
-            
+            WaterBackgroundView()
+
             VStack(spacing: 12) {
                 Image(systemName: "checkmark.shield.fill")
                     .font(.system(size: 48))
-                    .foregroundColor(.pledgeBlackAdaptive)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [theme.surface, theme.light],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .scaleEffect(logoScale)
                     .opacity(logoOpacity)
-                
+
                 Text("Pledge")
                     .pledgeTitle()
-                    .foregroundColor(.pledgeBlackAdaptive)
+                    .foregroundColor(.primary)
+                    .embossed(.raised)
                     .opacity(wordmarkOpacity)
             }
         }
@@ -37,4 +44,5 @@ struct SplashView: View {
 
 #Preview {
     SplashView()
+        .environmentObject(AppState())
 }

@@ -4,6 +4,7 @@ struct HabitsView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.themeColors) var theme
     @State private var showAddHabit = false
+    @State private var selectedHabit: TodayHabit?
 
     var body: some View {
         NavigationStack {
@@ -133,6 +134,19 @@ struct HabitsView: View {
                                                 .foregroundColor(.secondary.opacity(0.5))
                                         }
                                         .padding(.vertical, 14)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            PPHaptic.light()
+                                            let todayMatch = appState.todayHabits.first { $0.habit.id == habit.id }
+                                            selectedHabit = todayMatch ?? TodayHabit(
+                                                id: UUID(),
+                                                habit: habit,
+                                                status: .pending,
+                                                detail: "",
+                                                verifiedAt: nil,
+                                                progress: nil
+                                            )
+                                        }
                                         .staggerIn(index: index)
                                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                             Button(role: .destructive) {
@@ -169,6 +183,9 @@ struct HabitsView: View {
             .sheet(isPresented: $showAddHabit) {
                 AddHabitView()
                     .environmentObject(appState)
+            }
+            .sheet(item: $selectedHabit) { todayHabit in
+                HabitDetailSheet(todayHabit: todayHabit)
             }
         }
     }

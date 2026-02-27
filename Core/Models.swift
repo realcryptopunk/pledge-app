@@ -54,6 +54,8 @@ struct Habit: Identifiable, Codable {
 enum HabitType: String, Codable, CaseIterable {
     case wakeUp = "Wake Up Early"
     case workout = "Daily Workout"
+    case gym = "Go to Gym"
+    case pushups = "Pushups"
     case steps = "Step Goal"
     case screenTime = "Screen Time"
     case sleep = "Sleep On Time"
