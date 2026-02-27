@@ -1,0 +1,146 @@
+import Foundation
+
+// MARK: - Habit
+
+struct Habit: Identifiable, Codable {
+    let id: UUID
+    var name: String
+    var icon: String
+    var type: HabitType
+    var stakeAmount: Double
+    var schedule: [Int] // 1=Mon, 7=Sun
+    var targetValue: Double
+    var verificationType: VerificationType
+    var isActive: Bool
+    var currentStreak: Int
+    var successRate: Double
+    
+    init(id: UUID = UUID(), name: String, icon: String, type: HabitType, stakeAmount: Double = 10, schedule: [Int] = [1,2,3,4,5,6,7], targetValue: Double = 0, verificationType: VerificationType = .auto, isActive: Bool = true, currentStreak: Int = 0, successRate: Double = 0) {
+        self.id = id
+        self.name = name
+        self.icon = icon
+        self.type = type
+        self.stakeAmount = stakeAmount
+        self.schedule = schedule
+        self.targetValue = targetValue
+        self.verificationType = verificationType
+        self.isActive = isActive
+        self.currentStreak = currentStreak
+        self.successRate = successRate
+    }
+}
+
+enum HabitType: String, Codable, CaseIterable {
+    case wakeUp = "Wake Up Early"
+    case workout = "Daily Workout"
+    case steps = "Step Goal"
+    case screenTime = "Screen Time"
+    case sleep = "Sleep On Time"
+    case meditate = "Meditate"
+    case noSocial = "No Social Media"
+    case read = "Read"
+    case coldShower = "Cold Shower"
+    case journal = "Journal"
+    case water = "Drink Water"
+    case noJunkFood = "No Junk Food"
+}
+
+enum VerificationType: String, Codable {
+    case auto
+    case healthKit
+    case screenTimeAPI = "screenTime"
+    case photo
+    case location
+    case manual
+    case inApp
+}
+
+// MARK: - Habit Log
+
+struct HabitLog: Identifiable, Codable {
+    let id: UUID
+    let habitId: UUID
+    let date: Date
+    var status: HabitStatus
+    var verifiedAt: Date?
+    var penaltyAmount: Double
+    var investedAmount: Double
+    var feeAmount: Double
+    
+    init(id: UUID = UUID(), habitId: UUID, date: Date = Date(), status: HabitStatus, verifiedAt: Date? = nil, penaltyAmount: Double = 0, investedAmount: Double = 0, feeAmount: Double = 0) {
+        self.id = id
+        self.habitId = habitId
+        self.date = date
+        self.status = status
+        self.verifiedAt = verifiedAt
+        self.penaltyAmount = penaltyAmount
+        self.investedAmount = investedAmount
+        self.feeAmount = feeAmount
+    }
+}
+
+enum HabitStatus: String, Codable {
+    case verified
+    case failed
+    case skipped
+    case pending
+}
+
+// MARK: - Today Habit (View Model)
+
+struct TodayHabit: Identifiable {
+    let id: UUID
+    let habit: Habit
+    var status: HabitStatus
+    var detail: String
+    var verifiedAt: Date?
+    var progress: Double? // 0-1 for screen time etc
+}
+
+// MARK: - Activity Item
+
+struct ActivityItem: Identifiable {
+    let id: UUID
+    let icon: String
+    let title: String
+    let detail: String
+    let isFailure: Bool
+    let date: Date
+    
+    init(id: UUID = UUID(), icon: String, title: String, detail: String, isFailure: Bool, date: Date = Date()) {
+        self.id = id
+        self.icon = icon
+        self.title = title
+        self.detail = detail
+        self.isFailure = isFailure
+        self.date = date
+    }
+}
+
+// MARK: - Mock Data
+
+extension Habit {
+    static let mockHabits: [Habit] = [
+        Habit(name: "Wake Up 6:00 AM", icon: "⏰", type: .wakeUp, stakeAmount: 10, schedule: [1,2,3,4,5,6,7], targetValue: 6, verificationType: .auto, currentStreak: 23, successRate: 0.87),
+        Habit(name: "Gym Session (30+ min)", icon: "🏋️", type: .workout, stakeAmount: 10, schedule: [1,2,3,4,5], targetValue: 30, verificationType: .healthKit, currentStreak: 8, successRate: 0.72),
+        Habit(name: "Screen Time < 3hrs", icon: "📵", type: .screenTime, stakeAmount: 25, schedule: [1,2,3,4,5,6,7], targetValue: 3, verificationType: .screenTimeAPI, currentStreak: 5, successRate: 0.65),
+        Habit(name: "Sleep by 11:00 PM", icon: "😴", type: .sleep, stakeAmount: 10, schedule: [1,2,3,4,5,6,7], targetValue: 23, verificationType: .auto, currentStreak: 14, successRate: 0.80),
+    ]
+}
+
+extension TodayHabit {
+    static let mockToday: [TodayHabit] = [
+        TodayHabit(id: UUID(), habit: Habit.mockHabits[0], status: .verified, detail: "Verified 5:47 AM", verifiedAt: Date()),
+        TodayHabit(id: UUID(), habit: Habit.mockHabits[1], status: .pending, detail: "Closes 11:59 PM"),
+        TodayHabit(id: UUID(), habit: Habit.mockHabits[2], status: .pending, detail: "1h 47m used", progress: 0.58),
+        TodayHabit(id: UUID(), habit: Habit.mockHabits[3], status: .pending, detail: "Verifies tomorrow AM"),
+    ]
+}
+
+extension ActivityItem {
+    static let mockActivity: [ActivityItem] = [
+        ActivityItem(icon: "❌", title: "Missed gym · yesterday", detail: "$10 → Investment Pool", isFailure: true),
+        ActivityItem(icon: "✅", title: "Woke up 5:52 AM · yesterday", detail: "$10 saved", isFailure: false),
+        ActivityItem(icon: "✅", title: "Screen < 3hrs · yesterday", detail: "$25 saved", isFailure: false),
+    ]
+}
