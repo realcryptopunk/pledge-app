@@ -12,6 +12,9 @@ packages:
   Vortex:
     url: https://github.com/twostraws/Vortex
     from: "1.0.0"
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.0.0"
 targets:
   PledgeApp:
     type: application
@@ -23,11 +26,15 @@ targets:
       - path: Assets.xcassets
     dependencies:
       - package: Vortex
+      - package: Supabase
+        product: Supabase
     entitlements:
       path: PledgeApp.entitlements
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
+        com.apple.developer.applesignin:
+          - Default
     settings:
       base:
         CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION: YES

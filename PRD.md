@@ -9,13 +9,13 @@
 
 ## 1. Executive Summary
 
-Pledge is an iOS app that combines habit tracking with financial accountability. Users stake real money on their daily habits. When they fail, the staked money is automatically invested into a diversified crypto portfolio on their behalf, time-locked for a set period. Users are either disciplined or building wealth — they win either way.
+Pledge is an iOS app that combines habit tracking with financial accountability. Users stake real money on their daily habits. When they fail, the staked money is automatically converted into fixed-yield Pendle Principal Tokens (PTs) — stablecoin-based, zero-coupon bond-like instruments that mature at a guaranteed value. The time-lock is built into the asset itself. Users are either disciplined or building wealth — they win either way.
 
 **One-liner:** *"Miss your habit, fund your future."*
 
 **Category:** Health & Fitness
 **Platform:** iOS 26+ (iPhone first, Apple Watch V1.1)
-**Monetization:** Platform fee on penalties + Premium subscription + Yield spread
+**Monetization:** Platform fee on penalties + Premium subscription + PT yield spread
 **Target Launch:** Q3 2026
 
 ---
@@ -80,8 +80,8 @@ Screen 1: "What if missing a habit made you richer?"
 Screen 2: Choose your habits (pick 1-3)
 Screen 3: Set your stakes ($5 / $10 / $25 per habit per day)
 Screen 4: Set your vault lock period (30 / 90 / 365 days)
-Screen 5: Add payment method (Apple Pay / Card via Stripe)
-Screen 6: Deposit initial balance ($50 minimum)
+Screen 5: Add payment method (Coinbase Onramp — Apple Pay / Card / Coinbase account)
+Screen 6: Deposit initial balance ($50 minimum → USDC on Arbitrum)
 Screen 7: Set verification methods for each habit
 Screen 8: You're live — first habit starts tomorrow
 ```
@@ -120,9 +120,10 @@ Screen 8: You're live — first habit starts tomorrow
 
 #### Deposit
 - Minimum deposit: $50
-- Payment via Apple Pay or credit/debit card (Stripe)
-- Deposited funds held in user's Vault Balance
-- Funds displayed in USD at all times
+- Payment via Coinbase Onramp (Apple Pay, debit card, bank transfer, or Coinbase account)
+- Funds on-ramped directly to USDC on Arbitrum One
+- Deposited USDC held in PledgeVault.sol smart contract
+- Funds displayed in USD at all times (1 USDC ≈ $1)
 
 #### Stake Configuration
 - Per-habit daily stake: $5 / $10 / $25 / Custom
@@ -140,10 +141,10 @@ Screen 8: You're live — first habit starts tomorrow
 │   ├─ Verified within grace → ✅ No penalty. Streak +1.
 │   │
 │   └─ Still not verified → 💸 Penalty triggered
-│       ├─ Stake amount deducted from Vault Balance
-│       ├─ 80% → Investment Pool (auto-buy crypto)
-│       ├─ 20% → Platform fee (Vault's revenue)
-│       └─ Push notification: "Missed wake-up. $10 invested. Portfolio: $247"
+│       ├─ Stake amount deducted from USDC Vault Balance
+│       ├─ 80% → Pendle PT purchase (USDC → PT-aUSDC via Pendle Router V4)
+│       ├─ 20% → Platform fee (Pledge revenue, held in USDC)
+│       └─ Push notification: "Missed wake-up. $10 invested in PT. Matures Jun 26."
 │
 └─ Habit SKIPPED (free pass used) → ⏸️ No penalty. No streak.
 ```
@@ -155,7 +156,7 @@ Screen 8: You're live — first habit starts tomorrow
 - Suspicious patterns flagged (e.g., 10K steps at 11:58 PM)
 - ML model for photo fraud detection (stock photos, screenshots)
 
-### 5.4 Investment Pool (Obfuscated Crypto)
+### 5.4 Investment Pool (Pendle Principal Tokens)
 
 #### What the User Sees
 ```
@@ -163,44 +164,53 @@ Screen 8: You're live — first habit starts tomorrow
 │  💰 Your Investment Pool            │
 │                                     │
 │  Total Invested:    $247.00         │
-│  Current Value:     $261.38         │
-│  Growth:            +5.8%           │
+│  Projected Value:   $259.35         │
+│  Fixed Yield:       +4.99% APY     │
 │                                     │
-│  ████████████░░░░  47 days left     │
+│  ┌──────────────────────────────┐   │
+│  │  PT-aUSDC Position           │   │
+│  │  Purchased: $247.00          │   │
+│  │  Face Value: $259.35         │   │
+│  │  Maturity: Jun 26, 2026      │   │
+│  │  ████████████░░░░  89 days   │   │
+│  └──────────────────────────────┘   │
 │                                     │
-│  Allocation:                        │
-│  ├── Bitcoin    40%  ████           │
-│  ├── Ethereum   30%  ███            │
-│  └── Stables    30%  ███            │
-│                                     │
-│  [Unlock History]                   │
+│  [Maturity History]                 │
 └─────────────────────────────────────┘
 ```
 
 #### What's Actually Happening
-- Penalty USD → Stripe → On-ramp partner (Bridge/MoonPay) → USDC on Arbitrum
-- USDC auto-swapped to portfolio allocation via DEX (Uniswap on Arbitrum)
-- Default allocation: 40% BTC (wBTC), 30% ETH, 30% USDC
-- Premium users can customize allocation
-- Funds held in per-user smart contract vault (time-locked)
+- Penalty USDC → Pendle Router V4 → Purchase PT (Principal Token) at discount
+- PT is a zero-coupon bond: buy at $0.95, redeems for $1.00 at maturity
+- Example: $10 penalty buys ~$10.50 face value of PT-aUSDC (5% implied yield)
+- Platform selects best stablecoin PT market on Pendle (aUSDC, GLP, sDAI, etc.)
+- All positions held in PledgeVault.sol on Arbitrum One
 - No seed phrases, no wallet, no crypto jargon exposed to user
+- User sees "fixed yield savings" — never sees "crypto" or "DeFi"
 
-#### Portfolio Strategies
-| Strategy | Allocation | Risk | Available |
-|---|---|---|---|
-| **Conservative** | 20% BTC / 10% ETH / 70% USDC | Low | Free |
-| **Balanced** | 40% BTC / 30% ETH / 30% USDC | Medium | Free (default) |
-| **Aggressive** | 50% BTC / 40% ETH / 10% USDC | High | Premium |
-| **Custom** | User-defined | Varies | Premium |
+#### How Pendle PTs Work
+```
+Today                          Maturity Date
+  │                                │
+  │  Buy PT at discount            │  PT redeems for full value
+  │  $0.95 per $1 face value      │  $1.00 per token
+  │                                │
+  │  ──────────────────────────►   │
+  │     Time = yield accrual       │
+  │     (no price volatility)      │
+```
+- **Fixed yield** — return is locked in at purchase. No market risk on stablecoins.
+- **Time-lock is built in** — PTs can't be redeemed early at full value. This IS the lock period.
+- **Stablecoin-only** — no BTC/ETH volatility. Underlying is always USD-pegged.
 
-#### Vesting / Unlock
-- Lock periods: 30 days / 90 days / 365 days
-- Longer lock = shown as "more disciplined" (gamification)
-- Unlocked funds can be:
-  - Withdrawn to bank (off-ramp via Bridge/Stripe)
+#### Maturity / Unlock
+- PT maturity dates range from 30 days to 12 months (platform selects appropriate market)
+- Matured PTs are auto-redeemed to USDC via Chainlink Keepers
+- Redeemed USDC can be:
+  - Withdrawn to bank (off-ramp via Coinbase Offramp)
   - Re-staked into vault balance
-  - Left to continue growing
-- Early withdrawal penalty: 10% fee (discourages gaming the system)
+  - Rolled into new PT position (compounding)
+- **No early withdrawal penalty fee** — but selling PT before maturity on Pendle AMM means receiving slightly less than face value (market-determined, typically 0.5-2% less)
 
 ### 5.5 Dashboard / Home Screen
 
@@ -221,15 +231,15 @@ Screen 8: You're live — first habit starts tomorrow
 │  └────────────────────────────────┘  │
 │                                      │
 │  ┌─────────┐  ┌─────────────────┐   │
-│  │ 🔥 23   │  │ 💰 $261         │   │
-│  │ day     │  │ investment      │   │
-│  │ streak  │  │ pool (+5.8%)    │   │
+│  │ 🔥 23   │  │ 💰 $259         │   │
+│  │ day     │  │ savings pool    │   │
+│  │ streak  │  │ 4.9% fixed      │   │
 │  └─────────┘  └─────────────────┘   │
 │                                      │
 │  ┌────────────────────────────────┐  │
 │  │  THIS WEEK                     │  │
 │  │  M ✅ T ✅ W ✅ T ✅ F ⏳ S · S · │  │
-│  │  $35 saved / $10 invested     │  │
+│  │  $35 saved / $10 in PT         │  │
 │  └────────────────────────────────┘  │
 │                                      │
 │  ┌────────────────────────────────┐  │
@@ -257,7 +267,7 @@ Screen 8: You're live — first habit starts tomorrow
 
 #### Shareable Cards
 - Auto-generated streak cards for Instagram/TikTok
-- "23 days disciplined. $45 invested. +5.8% growth."
+- "23 days disciplined. $45 invested. 4.9% fixed yield."
 - Portfolio milestone celebrations ("Your vault hit $1,000! 🎉")
 
 ### 5.7 Notifications Strategy
@@ -267,10 +277,10 @@ Screen 8: You're live — first habit starts tomorrow
 | Morning habit start | Habit start time | "Rise and shine. $10 on the line. ⏰" |
 | Habit approaching deadline | 2 hours before cutoff | "$10 says you can't finish your workout 💪" |
 | Habit missed (grace period) | Cutoff time | "30 minutes to save your $10. Verify now." |
-| Penalty triggered | Cutoff + 30 min | "Missed it. $10 invested. Portfolio: $261 📈" |
+| Penalty triggered | Cutoff + 30 min | "Missed it. $10 invested at 4.9% yield. Matures Jun 26 📈" |
 | Streak milestone | On achievement | "🔥 30 day streak! You've saved $300 in stakes." |
-| Portfolio growth | Weekly | "Your investment pool grew 2.3% this week → $267" |
-| Vault unlock approaching | 7 days before | "Your $247 vault unlocks in 7 days! 🔓" |
+| PT maturity approaching | Weekly | "Your $247 position matures in 12 days → $259 at maturity" |
+| PT matured | On maturity date | "Your PT matured! $259 USDC ready to withdraw or re-invest 🔓" |
 | Friend activity | Real-time | "Jake just missed his gym stake. +$10 to his vault 😂" |
 
 ### 5.8 Widgets & Lock Screen
@@ -317,8 +327,7 @@ Screen 8: You're live — first habit starts tomorrow
 |---|---|---|---|
 | Habits | 2 | Unlimited | Unlimited |
 | Verification | Auto only | Auto + Photo + Location | Auto + Photo + Location |
-| Portfolio strategy | Balanced only | All strategies + Custom | All strategies + Custom |
-| Vault lock periods | 30 days only | 30 / 90 / 365 days | 30 / 90 / 365 days |
+| PT maturity selection | Auto (platform picks) | Choose maturity date | Choose maturity date |
 | Free passes | 1/week | 3/week | 3/week |
 | Accountability partners | 1 | Unlimited | Unlimited |
 | Analytics | Basic | Advanced (trends, predictions) | Advanced |
@@ -326,15 +335,18 @@ Screen 8: You're live — first habit starts tomorrow
 
 **Projection:** 10% conversion × 50K users × $8/mo avg = **$40K/mo**
 
-#### Stream 3: Yield Spread (Passive)
-- Idle vault funds earn DeFi yield (Aave, Compound on Arbitrum)
-- Pass through 60% of yield to user, keep 40%
-- **Projection:** $5M aggregate vault balance × 6% DeFi yield × 40% spread = **$120K/year**
+#### Stream 3: PT Yield Spread (Passive)
+- Platform buys PTs at market discount (e.g., 5% implied yield)
+- Pass through majority of fixed yield to user, keep spread (e.g., user gets 4%, platform keeps 1%)
+- Yield is deterministic — locked in at purchase time, no variable DeFi rates
+- **Projection:** $5M aggregate PT positions × ~1% spread = **$50K/year** (grows with AUM)
 
-#### Stream 4: Withdrawal Fees
-- Standard withdrawal: free
-- Early withdrawal (before lock expires): 10% fee
-- Instant withdrawal (same day): 2% fee
+#### Stream 4: Early Withdrawal (Market-Based)
+- Matured PT withdrawal: free (PT redeems at face value)
+- Early withdrawal (before PT maturity): user sells PT on Pendle AMM at market price
+  - Typical discount: 0.5-2% below face value depending on time to maturity
+  - Platform takes no fee — the "penalty" is the natural market discount
+  - Transparent: user sees exact amount they'll receive before confirming
 
 ### 6.2 Unit Economics
 
@@ -371,8 +383,8 @@ Screen 8: You're live — first habit starts tomorrow
 │                                                   │
 │  ├── Auth Service (Firebase Auth / phone + email) │
 │  ├── Habit Engine (verification + penalty logic)  │
-│  ├── Payment Service (Stripe Connect)             │
-│  ├── Investment Service (crypto orchestration)    │
+│  ├── Onramp Service (Coinbase Onramp SDK)         │
+│  ├── Investment Service (Pendle PT orchestration) │
 │  ├── Notification Service (APNs + FCM)            │
 │  ├── Social Service (friends + leaderboards)      │
 │  └── Analytics (Mixpanel / Amplitude)             │
@@ -380,16 +392,15 @@ Screen 8: You're live — first habit starts tomorrow
            │
            ▼
 ┌──────────────────────────────────────────────────┐
-│           Crypto Layer (Arbitrum)                  │
+│           Crypto Layer (Arbitrum One)              │
 │                                                   │
-│  ├── VaultFactory.sol (deploy per-user vaults)    │
-│  ├── UserVault.sol (time-locked, multi-asset)     │
-│  ├── SwapRouter.sol (USDC → BTC/ETH via Uniswap) │
-│  └── Treasury.sol (platform fees + yield mgmt)    │
+│  ├── PledgeVault.sol (USDC deposits + PT mgmt)    │
+│  ├── Pendle Router V4 (USDC → PT swaps)           │
+│  └── Chainlink Keepers (auto-redeem matured PTs)  │
 │                                                   │
-│  On-ramp: Bridge / MoonPay                        │
-│  Off-ramp: Bridge / Stripe                        │
-│  Yield: Aave V3 on Arbitrum                       │
+│  On-ramp: Coinbase Onramp (fiat → USDC Arbitrum)  │
+│  Off-ramp: Coinbase Offramp (USDC → fiat)         │
+│  Yield: Pendle PT discount (fixed, no DeFi pool)  │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -402,9 +413,10 @@ Screen 8: You're live — first habit starts tomorrow
 | Backend | Node.js + Hono (or Bun) on Railway/Fly.io |
 | Database | Supabase (Postgres) + Redis for caching |
 | Auth | Firebase Auth (phone + Apple Sign In) |
-| Payments | Stripe Connect + Apple IAP (subscriptions) |
-| Crypto | Arbitrum One, Solidity, ethers.js |
-| On/Off-ramp | Bridge API or MoonPay |
+| Payments | Coinbase Onramp SDK + Apple IAP (subscriptions) |
+| Crypto | Arbitrum One + Pendle V2 + Pendle Hosted SDK, Solidity, ethers.js |
+| On/Off-ramp | Coinbase Onramp / Offramp |
+| Automation | Chainlink Keepers (auto-redeem matured PTs) |
 | Push | Firebase Cloud Messaging + APNs |
 | Analytics | Mixpanel |
 | CI/CD | GitHub Actions + Fastlane |
@@ -412,27 +424,36 @@ Screen 8: You're live — first habit starts tomorrow
 
 ### 7.3 Smart Contracts
 
-#### VaultFactory.sol
+#### PledgeVault.sol (Single Contract)
 ```
-- createVault(user, lockPeriod) → deploys UserVault
-- getUserVault(user) → returns vault address
+Core Functions:
+- deposit(amount)         → receive USDC into user's vault balance
+- investInPT(amount, market) → swap USDC → PT via Pendle Router V4
+- redeemPT(ptAddress)     → redeem matured PT back to USDC
+- withdraw(amount)        → transfer USDC to user's wallet
+- getUserPosition(user)   → returns USDC balance + PT positions
+
+View Functions:
+- getActivePositions(user) → list of PT positions with maturity dates
+- getProjectedValue(user)  → total value at maturity (all PTs at face value)
+- getRedeemableValue(user) → value of matured PTs ready to claim
+
+Admin Functions:
+- updatePendleRouter(addr) → update Pendle Router address
+- collectFees(amount)      → withdraw platform fees
+- pause() / unpause()      → emergency controls
+
+Integration Addresses (Arbitrum One):
+- Pendle Router V4: 0x888888888889758F76e7103c6CbF23ABbF58F946
+- USDC:            0xaf88d065e77c8cC2239327C5EDb3A432268e5831
+- PT Markets:      Selected dynamically based on best yield + liquidity
 ```
 
-#### UserVault.sol
+#### Chainlink Keepers Integration
 ```
-- deposit(amount, token) → receives USDC
-- invest(allocation) → swaps to BTC/ETH per strategy
-- getBalance() → returns current portfolio value
-- getUnlockDate() → returns unlock timestamp
-- withdraw() → transfers to user (only after lock)
-- earlyWithdraw() → transfers minus 10% penalty
-```
-
-#### Treasury.sol
-```
-- collectFee(amount) → receives platform fees
-- deployYield(amount) → deposits to Aave
-- harvestYield() → collects yield
+- checkUpkeep()    → scan for matured PT positions across all users
+- performUpkeep()  → auto-redeem matured PTs back to USDC in vault
+- Runs on schedule (daily check for newly matured positions)
 ```
 
 ---
@@ -442,9 +463,9 @@ Screen 8: You're live — first habit starts tomorrow
 ### Users
 ```
 id, phone, email, name, created_at, is_premium,
-premium_expires_at, stripe_customer_id, vault_address,
-vault_balance_usd, total_staked, total_penalties,
-total_invested, current_streak, longest_streak
+premium_expires_at, coinbase_user_id, vault_address,
+vault_balance_usdc, total_staked, total_penalties,
+total_invested_in_pts, current_streak, longest_streak
 ```
 
 ### Habits
@@ -463,16 +484,18 @@ invested_amount, fee_amount
 
 ### Vault Transactions
 ```
-id, user_id, type (deposit/penalty/investment/withdrawal/fee),
-amount_usd, amount_crypto, token, tx_hash,
+id, user_id, type (deposit/pt_purchase/pt_redeem/withdrawal/fee),
+amount_usdc, tx_hash, pt_address (nullable),
 created_at
 ```
 
-### Investment Pools
+### PT Positions
 ```
-id, user_id, strategy, total_deposited_usd,
-current_value_usd, btc_amount, eth_amount, usdc_amount,
-lock_period_days, unlock_date, status (locked/unlocked/withdrawn)
+id, user_id, pt_token_address, pt_market_name,
+pt_amount, purchase_price_usdc, face_value_usdc,
+implied_yield_pct, purchase_date, maturity_date,
+status (active/matured/redeemed/sold_early),
+redeem_tx_hash (nullable)
 ```
 
 ---
@@ -483,18 +506,18 @@ lock_period_days, unlock_date, status (locked/unlocked/withdrawn)
 
 | Concern | Approach |
 |---|---|
-| **Money Transmitter** | Partner with licensed provider (Bridge, Zero Hash). We never hold user funds directly. |
-| **Securities** | Funds are user-directed "savings," not investment products. User chooses allocation. We're a software platform, not an investment advisor. |
-| **Apple App Store** | App is a "habit tracker with financial accountability." Deposits via Stripe, not on-chain. No crypto terminology in UI or listing. |
-| **Gambling** | NOT gambling — users always get money back (time-locked, not forfeited). No element of chance. Outcome is entirely user-controlled. |
-| **KYC/AML** | KYC via on-ramp partner for deposits >$200. Phone verification for all users. |
-| **Age restriction** | 18+ only. Age verification during onboarding. |
+| **Money Transmitter** | Coinbase is the merchant of record and licensed money transmitter. We never hold user fiat directly. |
+| **Securities** | PTs function like fixed-yield savings bonds — predictable return, no speculation. Framed as "fixed-yield savings," not "crypto investing." Stronger position than volatile crypto portfolios. |
+| **Apple App Store** | App is a "habit tracker with fixed-yield savings." No volatile crypto. No BTC/ETH. "Savings" framing with guaranteed maturity value. Coinbase Onramp is Apple-approved payment method. |
+| **Gambling** | NOT gambling — users always get money back (PT matures to full value, not forfeited). No element of chance. Outcome is entirely user-controlled. |
+| **KYC/AML** | Coinbase handles all KYC/AML as merchant of record. Users authenticate via Coinbase account or identity verification during onramp. |
+| **Age restriction** | 18+ only. Age verification during onboarding + Coinbase KYC. |
 
 ### 9.2 Terms of Service Key Points
-- User funds are held by licensed custodial partner
+- User USDC held in audited smart contract on Arbitrum (PledgeVault.sol)
 - Platform is not a financial advisor
-- Crypto investments carry risk; value may decrease
-- Early withdrawal subject to fees
+- PT positions carry smart contract risk; underlying stablecoin could depeg
+- Early withdrawal means selling PT at market price (may be slightly below face value)
 - Maximum daily/weekly stake limits to prevent problem behavior
 - Self-exclusion option available
 
@@ -584,10 +607,12 @@ lock_period_days, unlock_date, status (locked/unlocked/withdrawn)
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Apple rejects app (crypto/gambling concern) | Medium | Critical | No crypto in UI/listing. Financial accountability framing. Appeal process ready. |
+| Apple rejects app | Low-Medium | Critical | No volatile crypto. "Fixed-yield savings" framing. No BTC/ETH. Coinbase is Apple-approved. Appeal process ready. |
 | Users game the system | High | Medium | Multi-signal verification, anti-cheat ML, server-side time validation |
-| Crypto market crash tanks portfolios | Medium | High | Default 30% stablecoins. Clear risk disclosure. Users choose strategy. |
-| Regulatory action | Low | Critical | Licensed partners, legal counsel, terms of service, no investment advice |
+| Pendle smart contract exploit | Low | Critical | Pendle is audited, $5B+ TVL. Monitor for incidents. Emergency pause on PledgeVault. Diversify across PT markets. |
+| Stablecoin depeg (USDC) | Low | High | USDC is Circle-backed, most regulated stablecoin. Monitor in real-time. Auto-pause deposits if depeg >1%. |
+| Pendle market liquidity | Low-Medium | Medium | Only use PT markets with >$10M liquidity. Monitor depth before large trades. Batch small penalty amounts. |
+| Regulatory action | Low | Critical | Coinbase handles KYC/AML. Legal counsel. No investment advice. "Savings" framing. |
 | Low penalty rates (users too disciplined) | Medium | Medium | Good problem. Pivot revenue to subscriptions. Add harder habits. |
 | High penalty rates (users quit) | Medium | High | Smart stake recommendations. Cooldown system. Celebrate investment growth. |
 
@@ -595,24 +620,27 @@ lock_period_days, unlock_date, status (locked/unlocked/withdrawn)
 
 ## 13. Milestones & Timeline
 
-### MVP (Weeks 1-3)
+### MVP (Weeks 1-3) — Real Money From Day One
 - [ ] Core app shell: onboarding, home dashboard, settings
 - [ ] 3 auto-verified habits: wake up, steps, workout
-- [ ] Stripe deposits + vault balance
+- [ ] Coinbase Onramp integration (fiat → USDC on Arbitrum)
+- [ ] PledgeVault.sol deployed on Arbitrum One
+- [ ] Pendle PT integration: penalty USDC → PT-aUSDC via Router V4
 - [ ] Penalty engine (cron job, midnight local time)
-- [ ] Basic investment pool UI (USDC only, no actual crypto yet — simulated)
+- [ ] PT position tracking UI (maturity date, fixed yield, projected value)
 - [ ] Push notifications
 - [ ] Home screen widget
 
-### V1.0 (Weeks 4-6)
-- [ ] Crypto backend live: on-ramp, Arbitrum smart contracts, auto-buy
-- [ ] Real portfolio tracking with live prices
+### V1.0 (Weeks 4-6) — Polish & Premium
+- [ ] Chainlink Keepers: auto-redeem matured PTs
+- [ ] Coinbase Offramp: USDC → fiat withdrawal
+- [ ] PT maturity history + unlock flow
 - [ ] Screen Time API integration (DeviceActivity)
-- [ ] Vault unlock + withdrawal flow
-- [ ] Premium subscription (StoreKit 2)
+- [ ] Premium subscription (StoreKit 2 + Apple IAP)
 - [ ] TestFlight beta
+- [ ] Push notification polish
 
-### V1.1 (Weeks 7-10)
+### V1.1 (Weeks 7-10) — Social & Verification
 - [ ] Photo verification habits (cold shower, meals, reading)
 - [ ] Social features: accountability partners, friend penalties feed
 - [ ] Shareable streak cards
@@ -620,12 +648,11 @@ lock_period_days, unlock_date, status (locked/unlocked/withdrawn)
 - [ ] Lock screen widgets + Live Activities
 - [ ] App Store launch
 
-### V1.2 (Weeks 11-16)
+### V1.2+ (Weeks 11-16) — Growth
 - [ ] Location-verified habits (gym, outdoor time)
 - [ ] Group challenges
 - [ ] Leaderboards
-- [ ] DeFi yield on vault funds
-- [ ] Custom portfolio strategies (Premium)
+- [ ] Multi-market PT selection (premium: choose maturity)
 - [ ] Android development begins
 
 ---
@@ -648,12 +675,15 @@ lock_period_days, unlock_date, status (locked/unlocked/withdrawn)
 ## 15. Decisions Made
 
 1. **Minimum iOS version:** iOS 26 — latest APIs, Liquid Glass, newest WidgetKit
-2. **MVP approach:** Simulated portfolio first — validate demand before wiring real crypto
-3. **App name:** Pledge — Discipline With Teeth
-4. **Apple Watch:** V1.1 (not MVP)
-5. **Android:** After iOS PMF
-6. **Challenges:** Generic discipline challenges — not tied to any specific program. Any habit trackable by phone is fair game.
+2. **Real money MVP:** Coinbase Onramp + Pendle PTs integrated from launch. No simulated portfolio phase.
+3. **Pendle PTs over generic crypto portfolio:** Stablecoin-only, fixed-yield, zero-coupon instruments. Time-lock built into the asset. No BTC/ETH volatility.
+4. **Stablecoin-only strategy:** No volatile crypto exposure. Predictable returns. Stronger regulatory and App Store position.
+5. **Coinbase Onramp over Stripe/Bridge/MoonPay:** Direct Arbitrum + USDC support. Coinbase handles KYC/AML as merchant of record. Apple-approved.
+6. **App name:** Pledge — Discipline With Teeth
+7. **Apple Watch:** V1.1 (not MVP)
+8. **Android:** After iOS PMF
+9. **Challenges:** Generic discipline challenges — not tied to any specific program. Any habit trackable by phone is fair game.
 
 ---
 
-*"You're either building discipline or building wealth. Vault makes sure you're always building something."*
+*"You're either building discipline or building wealth. Pledge makes sure you're always building something."*

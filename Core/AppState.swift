@@ -1,13 +1,13 @@
 import SwiftUI
+import Combine
 
 @MainActor
 class AppState: ObservableObject {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
     @AppStorage("hasCompletedSetup") var hasCompletedSetup = false
     @AppStorage("backgroundTheme") var backgroundTheme: BackgroundTheme = .aqua
-    @AppStorage("userName") var userName = "Nav"
-    @Published var isAuthenticated = true
-    @Published var userPhone = "+1 (555) 123-4567"
+    @AppStorage("userName") var userName = ""
+    @Published var isAuthenticated = false
     @Published var habits: [Habit] = []
     @Published var vaultBalance: Double = 247.00
     @Published var streakCount: Int = 0
@@ -16,6 +16,11 @@ class AppState: ObservableObject {
     @Published var todayHabits: [TodayHabit] = []
     @Published var recentActivity: [ActivityItem] = []
     @Published var isVerifying = false
+
+    // MARK: - Auth
+
+    let authService = AuthService()
+    private var authCancellable: AnyCancellable?
 
     // MARK: - Yield
 
@@ -51,6 +56,12 @@ class AppState: ObservableObject {
         setupGeofenceMonitoring()
         observeGeofenceNotifications()
         startYieldTimer()
+
+        authCancellable = authService.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                self?.isAuthenticated = value
+            }
     }
 
     // MARK: - Yield Timer
@@ -112,24 +123,6 @@ class AppState: ObservableObject {
         habits.remove(atOffsets: offsets)
         saveHabits()
         updateStreakCount()
-    }
-
-    // MARK: - Health Permissions
-
-    func requestHealthPermissions() async {
-        // Only request if any habits use HealthKit verification
-        let hasHealthKitHabits = habits.contains { habit in
-            habit.verificationType == .healthKit ||
-            habit.type == .steps || habit.type == .sleep || habit.type == .workout || habit.type == .gym
-        }
-        guard hasHealthKitHabits else { return }
-
-        do {
-            try await HealthKitManager.shared.requestAuthorization()
-        } catch {
-            // Permission denied or unavailable — verification will gracefully handle this
-            print("HealthKit authorization failed: \(error.localizedDescription)")
-        }
     }
 
     // MARK: - Geofence Monitoring
@@ -421,7 +414,8 @@ class AppState: ObservableObject {
 
     // MARK: - Auth
 
-    func signOut() {
+    func signOut() async {
+        await authService.signOut()
         // Clear persisted data
         UserDefaults.standard.removeObject(forKey: Self.savedHabitsKey)
         // Reset runtime state
@@ -432,11 +426,10 @@ class AppState: ObservableObject {
         investmentPoolValue = 0
         investmentGrowth = 0
         streakCount = 0
-        userName = "Nav"
-        // Reset flow state (triggers navigation back to onboarding)
+        userName = ""
+        // Reset flow state (triggers navigation back to sign-in)
         hasCompletedOnboarding = false
         hasCompletedSetup = false
-        isAuthenticated = false
     }
 }
 

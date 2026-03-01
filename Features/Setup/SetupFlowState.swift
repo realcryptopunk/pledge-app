@@ -7,6 +7,7 @@ enum SetupStep: Int, CaseIterable {
     case configureHabits
     case setStakes
     case deposit
+    case permissions
     case success
 }
 

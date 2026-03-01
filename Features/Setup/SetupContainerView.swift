@@ -19,6 +19,8 @@ struct SetupContainerView: View {
                     SetStakesView(flowState: flowState)
                 case .deposit:
                     SetupDepositView(flowState: flowState)
+                case .permissions:
+                    PermissionsView(flowState: flowState)
                 case .success:
                     SetupSuccessView(flowState: flowState) {
                         commitSetup()

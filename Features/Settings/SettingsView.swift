@@ -189,8 +189,8 @@ struct SettingsView: View {
             ) {
                 Button("Sign Out", role: .destructive) {
                     PPHaptic.medium()
-                    withAnimation(.springBounce) {
-                        appState.signOut()
+                    Task {
+                        await appState.signOut()
                     }
                 }
                 Button("Cancel", role: .cancel) { }
@@ -204,8 +204,8 @@ struct SettingsView: View {
             ) {
                 Button("Delete Account", role: .destructive) {
                     PPHaptic.heavy()
-                    withAnimation(.springBounce) {
-                        appState.signOut()
+                    Task {
+                        await appState.signOut()
                     }
                 }
                 Button("Cancel", role: .cancel) { }
