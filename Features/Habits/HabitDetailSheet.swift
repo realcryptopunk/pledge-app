@@ -2,12 +2,19 @@ import SwiftUI
 
 struct HabitDetailSheet: View {
     let todayHabit: TodayHabit
+    @EnvironmentObject var appState: AppState
     @Environment(\.themeColors) var theme
     @Environment(\.dismiss) private var dismiss
 
+    @State private var showEditHabit = false
+    @State private var showDeleteConfirmation = false
+
     // MARK: - Derived Data
 
-    private var habit: Habit { todayHabit.habit }
+    private var habit: Habit {
+        // Always use the latest version from appState
+        appState.habits.first(where: { $0.id == todayHabit.habit.id }) ?? todayHabit.habit
+    }
 
     private var scheduleLabel: String {
         if habit.schedule.sorted() == [1, 2, 3, 4, 5, 6, 7] {
@@ -47,12 +54,9 @@ struct HabitDetailSheet: View {
 
     // MARK: - Week Strip
 
-    /// Returns (dayLetter, status) for each day Mon–Sun.
-    /// Mock: Mon–Wed completed, Thu is today, Fri–Sun future.
     private var weekDays: [(letter: String, status: DayStatus)] {
         let letters = ["M", "T", "W", "T", "F", "S", "S"]
         let todayWeekday = Calendar.current.component(.weekday, from: Date())
-        // Convert Sunday=1...Saturday=7 to Monday=1...Sunday=7
         let todayIndex = todayWeekday == 1 ? 6 : todayWeekday - 2
 
         return letters.enumerated().map { index, letter in
@@ -81,13 +85,33 @@ struct HabitDetailSheet: View {
                 habitIcon
                     .padding(.top, 8)
 
-                // MARK: - Habit Name
-                Text(habit.name)
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(.primary)
+                // MARK: - Habit Name + Paused Badge
+                VStack(spacing: 6) {
+                    Text(habit.name)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.primary)
+
+                    if habit.isPaused {
+                        HStack(spacing: 4) {
+                            Image(systemName: "pause.circle.fill")
+                                .font(.system(size: 12))
+                            Text("PAUSED")
+                                .font(.system(size: 11, weight: .bold))
+                        }
+                        .foregroundColor(.pledgeOrange)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(Color.pledgeOrange.opacity(0.15))
+                        )
+                    }
+                }
 
                 // MARK: - Week Strip
-                weekStrip
+                if !habit.isPaused {
+                    weekStrip
+                }
 
                 // MARK: - Stat Rows
                 statRows
@@ -102,6 +126,26 @@ struct HabitDetailSheet: View {
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
         .presentationContentInteraction(.scrolls)
+        .sheet(isPresented: $showEditHabit) {
+            EditHabitView(habit: habit)
+                .environmentObject(appState)
+        }
+        .confirmationDialog(
+            "Delete Habit",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                PPHaptic.heavy()
+                withAnimation(.quickSnap) {
+                    appState.deleteHabit(habit)
+                }
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Are you sure you want to delete \"\(habit.name)\"? This cannot be undone.")
+        }
     }
 
     // MARK: - Habit Icon
@@ -112,12 +156,13 @@ struct HabitDetailSheet: View {
             .frame(width: 56, height: 56)
             .background(
                 Circle()
-                    .fill(theme.light.opacity(0.2))
+                    .fill(habit.isPaused ? Color.secondary.opacity(0.1) : theme.light.opacity(0.2))
             )
             .overlay(
                 Circle()
-                    .stroke(theme.light.opacity(0.3), lineWidth: 1)
+                    .stroke(habit.isPaused ? Color.secondary.opacity(0.2) : theme.light.opacity(0.3), lineWidth: 1)
             )
+            .opacity(habit.isPaused ? 0.6 : 1.0)
     }
 
     // MARK: - Week Strip
@@ -200,7 +245,10 @@ struct HabitDetailSheet: View {
 
     private var actionButtons: some View {
         VStack(spacing: 0) {
-            Button { } label: {
+            Button {
+                PPHaptic.light()
+                showEditHabit = true
+            } label: {
                 Text("Edit Habit")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.pledgeBlue)
@@ -210,17 +258,25 @@ struct HabitDetailSheet: View {
 
             StatRowDivider()
 
-            Button { } label: {
-                Text("Pause Habit")
+            Button {
+                PPHaptic.medium()
+                withAnimation(.quickSnap) {
+                    appState.togglePauseHabit(habit)
+                }
+            } label: {
+                Text(habit.isPaused ? "Resume Habit" : "Pause Habit")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.pledgeOrange)
+                    .foregroundColor(habit.isPaused ? .pledgeGreen : .pledgeOrange)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
             }
 
             StatRowDivider()
 
-            Button { } label: {
+            Button {
+                PPHaptic.warning()
+                showDeleteConfirmation = true
+            } label: {
                 Text("Delete Habit")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.pledgeRed)

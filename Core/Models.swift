@@ -12,6 +12,7 @@ struct Habit: Identifiable, Codable {
     var targetValue: Double
     var verificationType: VerificationType
     var isActive: Bool
+    var isPaused: Bool
     var currentStreak: Int
     var successRate: Double
 
@@ -32,7 +33,7 @@ struct Habit: Identifiable, Codable {
         "habit-\(id.uuidString)"
     }
 
-    init(id: UUID = UUID(), name: String, icon: String, type: HabitType, stakeAmount: Double = 10, schedule: [Int] = [1,2,3,4,5,6,7], targetValue: Double = 0, verificationType: VerificationType = .auto, isActive: Bool = true, currentStreak: Int = 0, successRate: Double = 0, locationLatitude: Double? = nil, locationLongitude: Double? = nil, locationRadius: Double? = nil, locationName: String? = nil) {
+    init(id: UUID = UUID(), name: String, icon: String, type: HabitType, stakeAmount: Double = 10, schedule: [Int] = [1,2,3,4,5,6,7], targetValue: Double = 0, verificationType: VerificationType = .auto, isActive: Bool = true, isPaused: Bool = false, currentStreak: Int = 0, successRate: Double = 0, locationLatitude: Double? = nil, locationLongitude: Double? = nil, locationRadius: Double? = nil, locationName: String? = nil) {
         self.id = id
         self.name = name
         self.icon = icon
@@ -42,12 +43,41 @@ struct Habit: Identifiable, Codable {
         self.targetValue = targetValue
         self.verificationType = verificationType
         self.isActive = isActive
+        self.isPaused = isPaused
         self.currentStreak = currentStreak
         self.successRate = successRate
         self.locationLatitude = locationLatitude
         self.locationLongitude = locationLongitude
         self.locationRadius = locationRadius
         self.locationName = locationName
+    }
+
+    // MARK: - Backward-compatible Codable
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, icon, type, stakeAmount, schedule, targetValue
+        case verificationType, isActive, isPaused, currentStreak, successRate
+        case locationLatitude, locationLongitude, locationRadius, locationName
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        icon = try container.decode(String.self, forKey: .icon)
+        type = try container.decode(HabitType.self, forKey: .type)
+        stakeAmount = try container.decode(Double.self, forKey: .stakeAmount)
+        schedule = try container.decode([Int].self, forKey: .schedule)
+        targetValue = try container.decode(Double.self, forKey: .targetValue)
+        verificationType = try container.decode(VerificationType.self, forKey: .verificationType)
+        isActive = try container.decode(Bool.self, forKey: .isActive)
+        isPaused = try container.decodeIfPresent(Bool.self, forKey: .isPaused) ?? false
+        currentStreak = try container.decode(Int.self, forKey: .currentStreak)
+        successRate = try container.decode(Double.self, forKey: .successRate)
+        locationLatitude = try container.decodeIfPresent(Double.self, forKey: .locationLatitude)
+        locationLongitude = try container.decodeIfPresent(Double.self, forKey: .locationLongitude)
+        locationRadius = try container.decodeIfPresent(Double.self, forKey: .locationRadius)
+        locationName = try container.decodeIfPresent(String.self, forKey: .locationName)
     }
 }
 

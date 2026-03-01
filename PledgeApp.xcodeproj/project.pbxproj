@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -40,6 +40,7 @@
 		690727D8DDDA58C403D37CE0 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */; };
 		6C12ED84926FDE95F2B7589D /* RollingCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AE16CCB1A575FB480FD9C9 /* RollingCounter.swift */; };
 		6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B142E203612DBFEE96E71FB /* ConfigureHabitsView.swift */; };
+		70A7746FD8214BD8A459E0D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA62336B1D05F5E2E4502485 /* Assets.xcassets */; };
 		7B9F1586F7013EDE4E26ACD1 /* HabitActivityGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = C73B080C71D34437D2B420E0 /* HabitActivityGrid.swift */; };
 		826146575315FE85B0C76628 /* PledgeStreakStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8021AE389456CF118680E361 /* PledgeStreakStartView.swift */; };
 		89E5E47AEB99B094AFFCA792 /* PledgeCelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F65311B09BEFD24A3CD2602 /* PledgeCelebrationView.swift */; };
@@ -55,6 +56,7 @@
 		E99B7B6BF90E737C9028E111 /* OnboardingPage2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 087EB6E8BE7B3360F8B1C4F6 /* OnboardingPage2.swift */; };
 		F00E76FB854E201C734C24AD /* HabitDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB58423F408CFE8100F0F66B /* HabitDetailSheet.swift */; };
 		F2166B8F2108410540658772 /* LocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D03F8D12D74554C800FB1114 /* LocationPickerView.swift */; };
+		F6449EAB552487CA51C7D658 /* EditHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562AFD3DD572CD83CA659FFD /* EditHabitView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -74,6 +76,7 @@
 		517A347A9B0345FA9A58EB78 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		51AE16CCB1A575FB480FD9C9 /* RollingCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingCounter.swift; sourceTree = "<group>"; };
 		543165F4AAA64710E8571E76 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
+		562AFD3DD572CD83CA659FFD /* EditHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHabitView.swift; sourceTree = "<group>"; };
 		568C76CE688E0322BC13127C /* OnboardingPage1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPage1.swift; sourceTree = "<group>"; };
 		58804F5578B3CF9EA06B192F /* PushupCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushupCounterView.swift; sourceTree = "<group>"; };
 		5B142E203612DBFEE96E71FB /* ConfigureHabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigureHabitsView.swift; sourceTree = "<group>"; };
@@ -100,6 +103,7 @@
 		E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitsView.swift; sourceTree = "<group>"; };
 		E5A6CE9566B67549CC9D674E /* AquaTextures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaTextures.swift; sourceTree = "<group>"; };
 		E816F07B42664E00A0614018 /* AddHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHabitView.swift; sourceTree = "<group>"; };
+		EA62336B1D05F5E2E4502485 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EB58423F408CFE8100F0F66B /* HabitDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitDetailSheet.swift; sourceTree = "<group>"; };
 		EBE06B51B9FF761CB1CA4860 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F3603D641055EF684271BE52 /* PledgeColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeColors.swift; sourceTree = "<group>"; };
@@ -123,6 +127,7 @@
 		0209CFF5B16F1911DEA30034 = {
 			isa = PBXGroup;
 			children = (
+				EA62336B1D05F5E2E4502485 /* Assets.xcassets */,
 				49A01AB3752386F6E773267F /* PledgeApp.swift */,
 				50DED0B13A2C9F4A4B64928A /* Core */,
 				81C8A179ECB5DCA5DCAF3265 /* Features */,
@@ -283,6 +288,7 @@
 			isa = PBXGroup;
 			children = (
 				E816F07B42664E00A0614018 /* AddHabitView.swift */,
+				562AFD3DD572CD83CA659FFD /* EditHabitView.swift */,
 				C73B080C71D34437D2B420E0 /* HabitActivityGrid.swift */,
 				EB58423F408CFE8100F0F66B /* HabitDetailSheet.swift */,
 				E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */,
@@ -302,6 +308,7 @@
 			buildConfigurationList = 63A08181FD6D1F589D731B5A /* Build configuration list for PBXNativeTarget "PledgeApp" */;
 			buildPhases = (
 				963E32550606341405367C2D /* Sources */,
+				F362437827CA4846AC7C1406 /* Resources */,
 				B29CFEF34B06663DF1C0B283 /* Frameworks */,
 			);
 			buildRules = (
@@ -339,9 +346,11 @@
 				en,
 			);
 			mainGroup = 0209CFF5B16F1911DEA30034;
+			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				A279F73A8637152C8D577B10 /* XCRemoteSwiftPackageReference "Vortex" */,
 			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -349,6 +358,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F362437827CA4846AC7C1406 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				70A7746FD8214BD8A459E0D0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		963E32550606341405367C2D /* Sources */ = {
@@ -365,6 +385,7 @@
 				D3C4BB43675033C5B4E52EDB /* ChooseHabitsView.swift in Sources */,
 				6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */,
 				20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */,
+				F6449EAB552487CA51C7D658 /* EditHabitView.swift in Sources */,
 				35348CC84A4F6578A23814B4 /* FloatingOrbs.swift in Sources */,
 				7B9F1586F7013EDE4E26ACD1 /* HabitActivityGrid.swift in Sources */,
 				F00E76FB854E201C734C24AD /* HabitDetailSheet.swift in Sources */,

@@ -5,8 +5,8 @@ class AppState: ObservableObject {
     @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
     @AppStorage("hasCompletedSetup") var hasCompletedSetup = false
     @AppStorage("backgroundTheme") var backgroundTheme: BackgroundTheme = .aqua
+    @AppStorage("userName") var userName = "Nav"
     @Published var isAuthenticated = true
-    @Published var userName = "Nav"
     @Published var userPhone = "+1 (555) 123-4567"
     @Published var habits: [Habit] = []
     @Published var vaultBalance: Double = 247.00
@@ -79,6 +79,22 @@ class AppState: ObservableObject {
         if habit.verificationType == .location && habit.hasLocation {
             startGeofenceForHabit(habit)
         }
+    }
+
+    func updateHabit(_ updated: Habit) {
+        guard let index = habits.firstIndex(where: { $0.id == updated.id }) else { return }
+        habits[index] = updated
+        saveHabits()
+        generateTodayHabits()
+        updateStreakCount()
+    }
+
+    func togglePauseHabit(_ habit: Habit) {
+        guard let index = habits.firstIndex(where: { $0.id == habit.id }) else { return }
+        habits[index].isPaused.toggle()
+        saveHabits()
+        generateTodayHabits()
+        updateStreakCount()
     }
 
     func deleteHabit(_ habit: Habit) {
@@ -309,7 +325,7 @@ class AppState: ObservableObject {
 
     func generateTodayHabits() {
         let todayWeekday = currentWeekday()
-        let activeHabits = habits.filter { $0.isActive && $0.schedule.contains(todayWeekday) }
+        let activeHabits = habits.filter { $0.isActive && !$0.isPaused && $0.schedule.contains(todayWeekday) }
 
         // Preserve existing verified/failed states for habits already in todayHabits
         var updatedTodayHabits: [TodayHabit] = []
@@ -406,6 +422,18 @@ class AppState: ObservableObject {
     // MARK: - Auth
 
     func signOut() {
+        // Clear persisted data
+        UserDefaults.standard.removeObject(forKey: Self.savedHabitsKey)
+        // Reset runtime state
+        habits = []
+        todayHabits = []
+        recentActivity = []
+        vaultBalance = 0
+        investmentPoolValue = 0
+        investmentGrowth = 0
+        streakCount = 0
+        userName = "Nav"
+        // Reset flow state (triggers navigation back to onboarding)
         hasCompletedOnboarding = false
         hasCompletedSetup = false
         isAuthenticated = false

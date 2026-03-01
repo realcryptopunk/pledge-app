@@ -20,6 +20,7 @@ targets:
       - path: PledgeApp.swift
       - path: Core
       - path: Features
+      - path: Assets.xcassets
     dependencies:
       - package: Vortex
     entitlements:

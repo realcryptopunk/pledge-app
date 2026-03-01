@@ -3,7 +3,10 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
     @State private var faceIDEnabled = true
-    @State private var appearance = 0
+    @State private var showEditProfile = false
+    @State private var editingName = ""
+    @State private var showSignOutConfirmation = false
+    @State private var showDeleteConfirmation = false
     @Environment(\.themeColors) var theme
 
     var body: some View {
@@ -13,6 +16,7 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
+                        // MARK: - Profile Header
                         HStack(spacing: 16) {
                             ZStack {
                                 Circle()
@@ -28,7 +32,7 @@ struct SettingsView: View {
                                         Circle()
                                             .stroke(Color.primary.opacity(0.15), lineWidth: 1)
                                     )
-                                Text("N")
+                                Text(String(appState.userName.prefix(1)).uppercased())
                                     .font(.system(size: 24, weight: .bold, design: .rounded))
                                     .foregroundColor(.white)
                             }
@@ -37,22 +41,27 @@ struct SettingsView: View {
                                 Text(appState.userName)
                                     .pledgeHeadline()
                                     .foregroundColor(.primary)
-                                Text("@nav · Joined Feb 2026")
+                                Text("@\(appState.userName.lowercased()) · Joined Feb 2026")
                                     .pledgeCaption()
                                     .foregroundColor(.secondary)
                             }
 
                             Spacer()
 
-                            Button("Edit") { }
-                                .buttonStyle(GhostButtonStyle(color: theme.surface))
+                            Button("Edit") {
+                                editingName = appState.userName
+                                showEditProfile = true
+                            }
+                            .buttonStyle(GhostButtonStyle(color: theme.surface))
                         }
                         .cleanCard()
 
+                        // MARK: - Background Theme
                         settingsSection("BACKGROUND") {
                             ThemePickerView()
                         }
 
+                        // MARK: - Account
                         settingsSection("ACCOUNT") {
                             settingsRow(icon: "💳", label: "Payment Methods")
                             StatRowDivider()
@@ -61,6 +70,7 @@ struct SettingsView: View {
                             settingsRow(icon: "📊", label: "Pledge History")
                         }
 
+                        // MARK: - Preferences
                         settingsSection("PREFERENCES") {
                             settingsRow(icon: "🔔", label: "Notifications")
                             StatRowDivider()
@@ -80,6 +90,7 @@ struct SettingsView: View {
                             settingsRow(icon: "🛡️", label: "Weekly Cap", value: "$200")
                         }
 
+                        // MARK: - Premium
                         settingsSection("PREMIUM") {
                             HStack(spacing: 12) {
                                 Text("⭐")
@@ -99,6 +110,7 @@ struct SettingsView: View {
                             .padding(.vertical, 10)
                         }
 
+                        // MARK: - Safety
                         settingsSection("SAFETY") {
                             settingsRow(icon: "⏸️", label: "Pause All Pledges")
                             StatRowDivider()
@@ -107,6 +119,7 @@ struct SettingsView: View {
                             settingsRow(icon: "📉", label: "Reduce My Stakes")
                         }
 
+                        // MARK: - About
                         settingsSection("ABOUT") {
                             settingsRow(icon: "❓", label: "Help & Support")
                             StatRowDivider()
@@ -124,8 +137,12 @@ struct SettingsView: View {
                             .padding(.vertical, 10)
                         }
 
+                        // MARK: - Sign Out / Delete
                         VStack(spacing: 0) {
-                            Button { appState.signOut() } label: {
+                            Button {
+                                PPHaptic.warning()
+                                showSignOutConfirmation = true
+                            } label: {
                                 Text("Sign Out")
                                     .pledgeHeadline()
                                     .foregroundColor(.secondary)
@@ -133,7 +150,10 @@ struct SettingsView: View {
                                     .padding(.vertical, 14)
                             }
                             StatRowDivider()
-                            Button { } label: {
+                            Button {
+                                PPHaptic.warning()
+                                showDeleteConfirmation = true
+                            } label: {
                                 Text("Delete Account")
                                     .pledgeHeadline()
                                     .foregroundColor(.pledgeRed)
@@ -150,6 +170,48 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .toolbarColorScheme(theme.isLight ? .light : .dark, for: .navigationBar)
+            .alert("Edit Name", isPresented: $showEditProfile) {
+                TextField("Name", text: $editingName)
+                Button("Save") {
+                    let trimmed = editingName.trimmingCharacters(in: .whitespaces)
+                    if !trimmed.isEmpty {
+                        appState.userName = trimmed
+                    }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Enter your display name")
+            }
+            .confirmationDialog(
+                "Sign Out",
+                isPresented: $showSignOutConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Sign Out", role: .destructive) {
+                    PPHaptic.medium()
+                    withAnimation(.springBounce) {
+                        appState.signOut()
+                    }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Are you sure you want to sign out? Your habits and data will be cleared from this device.")
+            }
+            .confirmationDialog(
+                "Delete Account",
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Delete Account", role: .destructive) {
+                    PPHaptic.heavy()
+                    withAnimation(.springBounce) {
+                        appState.signOut()
+                    }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This action cannot be undone. All your data, habits, and investment history will be permanently deleted.")
+            }
         }
     }
 

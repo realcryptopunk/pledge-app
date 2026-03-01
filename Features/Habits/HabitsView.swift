@@ -114,11 +114,25 @@ struct HabitsView: View {
                                         HStack(spacing: 12) {
                                             Text(habit.icon)
                                                 .font(.system(size: 20))
+                                                .opacity(habit.isPaused ? 0.5 : 1.0)
 
                                             VStack(alignment: .leading, spacing: 2) {
-                                                Text(habit.name)
-                                                    .pledgeHeadline()
-                                                    .foregroundColor(.primary)
+                                                HStack(spacing: 6) {
+                                                    Text(habit.name)
+                                                        .pledgeHeadline()
+                                                        .foregroundColor(habit.isPaused ? .secondary : .primary)
+                                                    if habit.isPaused {
+                                                        Text("PAUSED")
+                                                            .font(.system(size: 9, weight: .bold))
+                                                            .foregroundColor(.pledgeOrange)
+                                                            .padding(.horizontal, 6)
+                                                            .padding(.vertical, 2)
+                                                            .background(
+                                                                Capsule()
+                                                                    .fill(Color.pledgeOrange.opacity(0.15))
+                                                            )
+                                                    }
+                                                }
                                                 HStack(spacing: 8) {
                                                     Text("🔥 \(habit.currentStreak) days")
                                                     Text("·")
