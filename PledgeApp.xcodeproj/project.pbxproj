@@ -40,6 +40,7 @@
 		690727D8DDDA58C403D37CE0 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */; };
 		6C12ED84926FDE95F2B7589D /* RollingCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AE16CCB1A575FB480FD9C9 /* RollingCounter.swift */; };
 		6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B142E203612DBFEE96E71FB /* ConfigureHabitsView.swift */; };
+		7B9F1586F7013EDE4E26ACD1 /* HabitActivityGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = C73B080C71D34437D2B420E0 /* HabitActivityGrid.swift */; };
 		826146575315FE85B0C76628 /* PledgeStreakStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8021AE389456CF118680E361 /* PledgeStreakStartView.swift */; };
 		89E5E47AEB99B094AFFCA792 /* PledgeCelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F65311B09BEFD24A3CD2602 /* PledgeCelebrationView.swift */; };
 		9B35B0AF2088CF71E4BDDA7C /* PledgeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D8376BCD890EE15E97BF80 /* PledgeCards.swift */; };
@@ -91,6 +92,7 @@
 		A4AB7F258E58E8BE02C3CB08 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		B5E5D6102C9AC89775547155 /* PledgeTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeTypography.swift; sourceTree = "<group>"; };
 		B8C338151783FE4C3B8FF523 /* PledgeApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PledgeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C73B080C71D34437D2B420E0 /* HabitActivityGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitActivityGrid.swift; sourceTree = "<group>"; };
 		C7657D7B3133359058ABB5E8 /* PledgeHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeHaptics.swift; sourceTree = "<group>"; };
 		D01DDB6F0EF3836344A536ED /* CustomNumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNumberPad.swift; sourceTree = "<group>"; };
 		D03F8D12D74554C800FB1114 /* LocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
@@ -281,6 +283,7 @@
 			isa = PBXGroup;
 			children = (
 				E816F07B42664E00A0614018 /* AddHabitView.swift */,
+				C73B080C71D34437D2B420E0 /* HabitActivityGrid.swift */,
 				EB58423F408CFE8100F0F66B /* HabitDetailSheet.swift */,
 				E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */,
 				D03F8D12D74554C800FB1114 /* LocationPickerView.swift */,
@@ -363,6 +366,7 @@
 				6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */,
 				20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */,
 				35348CC84A4F6578A23814B4 /* FloatingOrbs.swift in Sources */,
+				7B9F1586F7013EDE4E26ACD1 /* HabitActivityGrid.swift in Sources */,
 				F00E76FB854E201C734C24AD /* HabitDetailSheet.swift in Sources */,
 				D8678D84509A0CE43C43805D /* HabitVerificationService.swift in Sources */,
 				264AEA5A0F0BEDA751994396 /* HabitsView.swift in Sources */,

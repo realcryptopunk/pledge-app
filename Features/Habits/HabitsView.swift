@@ -5,6 +5,7 @@ struct HabitsView: View {
     @Environment(\.themeColors) var theme
     @State private var showAddHabit = false
     @State private var selectedHabit: TodayHabit?
+    @State private var selectedActivityHabit: Habit?
 
     var body: some View {
         NavigationStack {
@@ -13,59 +14,61 @@ struct HabitsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // MARK: - Calendar Section
-                        VStack(spacing: 12) {
-                            HStack {
-                                Button { } label: {
-                                    Image(systemName: "chevron.left")
-                                        .foregroundColor(.primary.opacity(0.7))
-                                }
-                                Spacer()
-                                Text("February 2026")
-                                    .pledgeHeadline()
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                Button { } label: {
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.primary.opacity(0.7))
-                                }
-                            }
-
-                            HStack {
-                                ForEach(["M","T","W","T","F","S","S"], id: \.self) { day in
-                                    Text(day)
-                                        .pledgeCaption()
-                                        .foregroundColor(.secondary.opacity(0.6))
-                                        .frame(maxWidth: .infinity)
-                                }
-                            }
-
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
-                                ForEach(1..<29, id: \.self) { day in
-                                    VStack(spacing: 4) {
-                                        Text("\(day)")
-                                            .pledgeCaption()
-                                            .foregroundColor(day == 25 ? theme.surface : .primary)
-
-                                        Circle()
-                                            .fill(day < 25 ? (day % 3 == 0 ? Color.pledgeRed : Color.pledgeGreen) : Color.primary.opacity(0.1))
-                                            .frame(width: 6, height: 6)
-                                    }
-                                    .frame(height: 36)
-                                    .background(
-                                        day == 25
-                                            ? RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                                .fill(theme.buttonTop.opacity(0.2))
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                                        .stroke(theme.surface.opacity(0.4), lineWidth: 0.5)
+                        // MARK: - Activity Grid Section
+                        if !appState.habits.isEmpty {
+                            VStack(spacing: 14) {
+                                // Habit selector pills
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(appState.habits) { habit in
+                                            let isSelected = (selectedActivityHabit?.id ?? appState.habits.first?.id) == habit.id
+                                            Button {
+                                                PPHaptic.light()
+                                                withAnimation(.quickSnap) {
+                                                    selectedActivityHabit = habit
+                                                }
+                                            } label: {
+                                                HStack(spacing: 6) {
+                                                    Text(habit.icon)
+                                                        .font(.system(size: 14))
+                                                    Text(habit.name)
+                                                        .font(.system(size: 12, weight: .semibold))
+                                                        .lineLimit(1)
+                                                }
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 8)
+                                                .background(
+                                                    Capsule(style: .continuous)
+                                                        .fill(isSelected ? theme.surface.opacity(0.25) : Color.primary.opacity(0.06))
                                                 )
-                                            : nil
-                                    )
+                                                .overlay(
+                                                    Capsule(style: .continuous)
+                                                        .stroke(isSelected ? theme.surface.opacity(0.5) : Color.clear, lineWidth: 1)
+                                                )
+                                                .foregroundColor(isSelected ? .primary : .secondary)
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                }
+
+                                // Stats row for selected habit
+                                if let habit = selectedActivityHabit ?? appState.habits.first {
+                                    HStack(spacing: 16) {
+                                        activityStat(value: "\(habit.currentStreak)", label: "streak")
+                                        activityStat(value: "\(Int(habit.successRate * 100))%", label: "success")
+                                        activityStat(value: "$\(Int(habit.stakeAmount))", label: "daily")
+                                    }
+                                    .padding(.horizontal, 4)
+
+                                    // Activity grid
+                                    HabitActivityGrid(habit: habit)
+                                        .id(habit.id)
+                                        .transition(.opacity)
                                 }
                             }
+                            .cleanCard()
                         }
-                        .cleanCard()
 
                         // MARK: - Active Habits Section
                         VStack(alignment: .leading, spacing: 12) {
@@ -188,6 +191,21 @@ struct HabitsView: View {
                 HabitDetailSheet(todayHabit: todayHabit)
             }
         }
+    }
+
+    // MARK: - Activity Stat
+
+    private func activityStat(value: String, label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.system(size: 18, weight: .bold, design: .monospaced))
+                .foregroundColor(.primary)
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.secondary.opacity(0.6))
+                .textCase(.uppercase)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 
