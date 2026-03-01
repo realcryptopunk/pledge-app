@@ -15,6 +15,7 @@ struct AllocationItem: Identifiable {
     let name: String
     let icon: String
     let percentage: Double
+    let fixedAPY: Double
     let color: Color
 }
 
@@ -35,19 +36,21 @@ struct PortfolioView: View {
     @State private var selectedRange = 1
     @State private var showAllocation = false
     @State private var showTransactions = false
-    @State private var selectedDataPoint: PortfolioDataPoint?
+    @State private var chartData: [PortfolioDataPoint] = []
+    @State private var cachedTransactions: [TransactionItem] = []
+    @State private var appeared = false
     @Environment(\.themeColors) var theme
 
-    private let allocations: [AllocationItem] = [
-        AllocationItem(symbol: "PT-sUSDai", name: "Pendle sUSDai (9.0% APY)", icon: "🔒", percentage: 0.35, color: .pledgeBlue),
-        AllocationItem(symbol: "PT-USDai", name: "Pendle USDai (5.5% APY)", icon: "🏦", percentage: 0.25, color: .pledgeViolet),
-        AllocationItem(symbol: "PT-thBILL", name: "Pendle T-Bills (5.7% APY)", icon: "📜", percentage: 0.20, color: .pledgeGreen),
-        AllocationItem(symbol: "PT-weETH", name: "Pendle weETH (2.7% APY)", icon: "⟠", percentage: 0.12, color: .pledgeOrange),
-        AllocationItem(symbol: "PT-gUSDC", name: "Pendle gUSDC (6.6% APY)", icon: "💵", percentage: 0.08, color: .cyan),
+    static let allocations: [AllocationItem] = [
+        AllocationItem(symbol: "PT-sUSDai", name: "Pendle sUSDai", icon: "🔒", percentage: 0.35, fixedAPY: 9.0, color: .pledgeBlue),
+        AllocationItem(symbol: "PT-USDai", name: "Pendle USDai", icon: "🏦", percentage: 0.25, fixedAPY: 5.5, color: .pledgeViolet),
+        AllocationItem(symbol: "PT-thBILL", name: "Pendle T-Bills", icon: "📜", percentage: 0.20, fixedAPY: 5.7, color: .pledgeGreen),
+        AllocationItem(symbol: "PT-weETH", name: "Pendle weETH", icon: "⟠", percentage: 0.12, fixedAPY: 2.7, color: .pledgeOrange),
+        AllocationItem(symbol: "PT-gUSDC", name: "Pendle gUSDC", icon: "💵", percentage: 0.08, fixedAPY: 6.6, color: .cyan),
     ]
 
-    private var chartData: [PortfolioDataPoint] {
-        generateChartData(days: daysForRange, baseValue: appState.investmentPoolValue)
+    private var weightedAPY: Double {
+        Self.allocations.reduce(0) { $0 + $1.percentage * $1.fixedAPY }
     }
 
     private var daysForRange: Int {
@@ -60,38 +63,6 @@ struct PortfolioView: View {
         }
     }
 
-    private var transactions: [TransactionItem] {
-        var items: [TransactionItem] = []
-        let cal = Calendar.current
-        // Generate simulated transactions from recent activity
-        for (i, activity) in appState.recentActivity.prefix(10).enumerated() {
-            items.append(TransactionItem(
-                icon: activity.icon,
-                title: activity.title,
-                detail: activity.detail,
-                amount: activity.isFailure ? "+$\(Int.random(in: 5...25))" : "-$0",
-                isPositive: activity.isFailure,
-                date: cal.date(byAdding: .hour, value: -(i * 3), to: Date()) ?? Date()
-            ))
-        }
-        // Add some baseline transactions if few exist
-        if items.count < 3 {
-            let baseTx: [(String, String, String, String)] = [
-                ("📈", "Portfolio rebalance", "Auto-rebalanced allocation", "+$0"),
-                ("🔒", "Vault deposit", "Initial stake deposit", "+$50"),
-                ("💰", "Yield earned", "Daily DeFi yield", "+$0.12"),
-            ]
-            for (i, tx) in baseTx.enumerated() {
-                items.append(TransactionItem(
-                    icon: tx.0, title: tx.1, detail: tx.2,
-                    amount: tx.3, isPositive: true,
-                    date: cal.date(byAdding: .day, value: -(i + 1), to: Date()) ?? Date()
-                ))
-            }
-        }
-        return items
-    }
-
     private var hasPortfolioData: Bool {
         appState.investmentPoolValue > 0 || !appState.habits.isEmpty
     }
@@ -102,11 +73,12 @@ struct PortfolioView: View {
                 WaterBackgroundView()
 
                 ScrollView {
-                    VStack(spacing: 24) {
+                    VStack(spacing: 20) {
                         if hasPortfolioData {
                             portfolioHeader
                             chartSection
                             rangeToggle
+                            allocationPreview
                             statsSection
                             ctaButtons
                         } else {
@@ -123,12 +95,22 @@ struct PortfolioView: View {
             .toolbarColorScheme(theme.isLight ? .light : .dark, for: .navigationBar)
             .sheet(isPresented: $showAllocation) {
                 AllocationDetailView(
-                    allocations: allocations,
+                    allocations: Self.allocations,
                     totalValue: appState.investmentPoolValue
                 )
             }
             .sheet(isPresented: $showTransactions) {
-                TransactionHistoryView(transactions: transactions)
+                TransactionHistoryView(transactions: cachedTransactions)
+            }
+            .onAppear {
+                if !appeared {
+                    appeared = true
+                    rebuildChartData()
+                    buildTransactions()
+                }
+            }
+            .onChange(of: selectedRange) { _, _ in
+                rebuildChartData()
             }
         }
     }
@@ -136,43 +118,45 @@ struct PortfolioView: View {
     // MARK: - Portfolio Header
 
     private var portfolioHeader: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    RollingCounterView(
-                        value: appState.investmentPoolValue,
-                        decimalPlaces: 2,
-                        mainSize: 42,
-                        decimalSize: 24,
-                        trailingSize: 20
-                    )
-                    .embossed(.raised)
+        VStack(spacing: 16) {
+            VStack(spacing: 6) {
+                Text("INVESTMENT POOL")
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundColor(.secondary)
+                    .tracking(1.5)
 
-                    Text("↑$14.38 (+\(appState.investmentGrowth, specifier: "%.1f")%)")
-                        .pledgeCaption()
-                        .foregroundColor(.pledgeGreen)
+                Text("$\(appState.investmentPoolValue, specifier: "%.2f")")
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .foregroundColor(.primary)
 
-                    Text("past month")
-                        .pledgeCaption()
-                        .foregroundColor(.secondary)
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.up.right")
+                        .font(.system(size: 11, weight: .bold))
+                    Text("+$14.38 (\(appState.investmentGrowth, specifier: "%.1f")%)")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
                 }
+                .foregroundColor(.pledgeGreen)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(Color.pledgeGreen.opacity(0.12))
+                .clipShape(Capsule())
+            }
 
-                Spacer()
-
-                ZStack {
-                    Circle()
-                        .fill(Color.pledgeOrange)
-                        .frame(width: 36, height: 36)
-                        .overlay(Text("₿").font(.system(size: 18, weight: .bold)).foregroundColor(.white))
-
-                    Circle()
-                        .fill(theme.buttonTop)
-                        .frame(width: 36, height: 36)
-                        .overlay(Text("Ξ").font(.system(size: 18, weight: .bold)).foregroundColor(.white))
-                        .offset(x: 20)
+            // Allocation pill row
+            HStack(spacing: 6) {
+                ForEach(Self.allocations) { alloc in
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(alloc.color)
+                            .frame(width: 6, height: 6)
+                        Text("\(Int(alloc.percentage * 100))%")
+                            .font(.system(size: 10, weight: .medium, design: .monospaced))
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
         }
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, 20)
     }
 
@@ -180,51 +164,61 @@ struct PortfolioView: View {
 
     private var chartSection: some View {
         VStack(spacing: 0) {
-            Chart(chartData) { point in
-                LineMark(
-                    x: .value("Day", point.day),
-                    y: .value("Value", point.value)
-                )
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [theme.surface, theme.light],
-                        startPoint: .leading,
-                        endPoint: .trailing
+            if chartData.isEmpty {
+                ProgressView()
+                    .frame(height: 180)
+            } else {
+                Chart(chartData) { point in
+                    LineMark(
+                        x: .value("Day", point.day),
+                        y: .value("Value", point.value)
                     )
-                )
-                .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                .interpolationMethod(.catmullRom)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.pledgeBlue, .pledgeViolet],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                    .interpolationMethod(.catmullRom)
 
-                AreaMark(
-                    x: .value("Day", point.day),
-                    y: .value("Value", point.value)
-                )
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [theme.surface.opacity(0.25), theme.surface.opacity(0.0)],
-                        startPoint: .top,
-                        endPoint: .bottom
+                    AreaMark(
+                        x: .value("Day", point.day),
+                        y: .value("Value", point.value)
                     )
-                )
-                .interpolationMethod(.catmullRom)
-            }
-            .chartXAxis(.hidden)
-            .chartYAxis {
-                AxisMarks(position: .trailing, values: .automatic(desiredCount: 4)) { value in
-                    AxisValueLabel {
-                        if let v = value.as(Double.self) {
-                            Text("$\(Int(v))")
-                                .font(.system(size: 10, weight: .medium, design: .monospaced))
-                                .foregroundColor(.secondary.opacity(0.6))
-                        }
-                    }
-                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [4]))
-                        .foregroundStyle(Color.primary.opacity(0.08))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.pledgeBlue.opacity(0.2), Color.pledgeBlue.opacity(0.0)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .interpolationMethod(.catmullRom)
                 }
+                .chartXAxis(.hidden)
+                .chartYAxis {
+                    AxisMarks(position: .trailing, values: .automatic(desiredCount: 3)) { value in
+                        AxisValueLabel {
+                            if let v = value.as(Double.self) {
+                                Text("$\(Int(v))")
+                                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                                    .foregroundColor(.secondary.opacity(0.5))
+                            }
+                        }
+                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [4]))
+                            .foregroundStyle(Color.primary.opacity(0.06))
+                    }
+                }
+                .frame(height: 180)
             }
-            .frame(height: 180)
         }
-        .flatCard()
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground).opacity(0.6))
+                .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+        )
         .padding(.horizontal, 20)
     }
 
@@ -237,52 +231,87 @@ struct PortfolioView: View {
         )
     }
 
+    // MARK: - Allocation Preview
+
+    private var allocationPreview: some View {
+        Button {
+            PPHaptic.light()
+            showAllocation = true
+        } label: {
+            VStack(spacing: 12) {
+                HStack {
+                    Text("Yield Allocation")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.primary)
+                    Spacer()
+                    HStack(spacing: 4) {
+                        Text("\(weightedAPY, specifier: "%.1f")% avg APY")
+                            .font(.system(size: 12, weight: .medium, design: .monospaced))
+                            .foregroundColor(.pledgeGreen)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(.secondary.opacity(0.4))
+                    }
+                }
+
+                // Stacked bar
+                GeometryReader { geo in
+                    HStack(spacing: 2) {
+                        ForEach(Self.allocations) { alloc in
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(alloc.color)
+                                .frame(width: max(8, (geo.size.width - CGFloat(Self.allocations.count - 1) * 2) * alloc.percentage))
+                        }
+                    }
+                }
+                .frame(height: 8)
+
+                // Labels
+                HStack(spacing: 0) {
+                    ForEach(Self.allocations) { alloc in
+                        VStack(spacing: 2) {
+                            Text(alloc.icon)
+                                .font(.system(size: 16))
+                            Text(alloc.symbol.replacingOccurrences(of: "PT-", with: ""))
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundColor(.secondary)
+                            Text("\(alloc.fixedAPY, specifier: "%.1f")%")
+                                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                .foregroundColor(alloc.color)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground).opacity(0.6))
+                    .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+            )
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
+    }
+
     // MARK: - Stats Section
 
     private var statsSection: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Stats")
-                    .pledgeHeadline()
-                    .foregroundColor(.primary)
-                    .embossed(.raised)
-                Spacer()
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(theme.surface)
-                        .frame(width: 6, height: 6)
-                    Text("Live")
-                        .pledgeCaption()
-                        .foregroundColor(theme.surface)
-                }
-            }
-            .padding(.bottom, 8)
-
-            StatRowDivider()
-            StatRow(icon: "📊", label: "24h change", value: "+$3.21 +1.2%", valueColor: .pledgeGreen)
-            StatRowDivider()
             StatRow(icon: "📈", label: "Total invested", value: "$\(Int(appState.investmentPoolValue))")
             StatRowDivider()
-
-            Button {
-                PPHaptic.light()
-                showAllocation = true
-            } label: {
-                StatRow(icon: "🏦", label: "Allocation", value: "40 / 30 / 20 / 10", showChevron: true)
-            }
-            .buttonStyle(.plain)
-
+            StatRow(icon: "💰", label: "Weighted APY", value: "\(String(format: "%.1f", weightedAPY))%", valueColor: .pledgeGreen)
             StatRowDivider()
             StatRow(icon: "🔒", label: "Vault unlock", value: "47 days")
             StatRowDivider()
-            StatRow(icon: "💸", label: "Platform fees", value: "$\(String(format: "%.2f", appState.investmentPoolValue * 0.02))")
+            StatRow(icon: "💸", label: "Platform fee (2%)", value: "$\(String(format: "%.2f", appState.investmentPoolValue * 0.02))")
             StatRowDivider()
 
             Button {
                 PPHaptic.light()
                 showTransactions = true
             } label: {
-                StatRow(icon: "🔄", label: "Transactions", value: "\(transactions.count)", showChevron: true)
+                StatRow(icon: "🔄", label: "Transactions", value: "\(cachedTransactions.count)", showChevron: true)
             }
             .buttonStyle(.plain)
         }
@@ -305,75 +334,108 @@ struct PortfolioView: View {
 
     private var emptyState: some View {
         VStack(spacing: 20) {
-            Spacer().frame(height: 40)
+            Spacer().frame(height: 60)
 
-            Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: 52))
-                .foregroundColor(.secondary.opacity(0.3))
+            ZStack {
+                Circle()
+                    .fill(Color.pledgeBlue.opacity(0.08))
+                    .frame(width: 100, height: 100)
+
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .font(.system(size: 40, weight: .light))
+                    .foregroundColor(.pledgeBlue.opacity(0.5))
+            }
 
             Text("No investments yet")
-                .pledgeTitle()
+                .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
 
-            Text("When you miss a habit pledge, your stake gets invested into a diversified crypto portfolio. Start by creating habits!")
-                .pledgeBody()
+            Text("When you miss a habit pledge, your stake gets invested into yield-generating Pendle PTs on Arbitrum.")
+                .font(.system(size: 15))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 32)
 
+            // Show what they'd earn
             VStack(spacing: 8) {
-                HStack(spacing: 8) {
-                    ForEach(allocations) { alloc in
-                        VStack(spacing: 4) {
-                            Text(alloc.icon)
-                                .font(.system(size: 24))
-                            Text(alloc.symbol)
-                                .pledgeCaption()
-                                .foregroundColor(.secondary)
-                            Text("\(Int(alloc.percentage * 100))%")
-                                .pledgeMonoSmall()
-                                .foregroundColor(alloc.color)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                }
-                .padding(.vertical, 16)
-                .cleanCard()
+                Text("Avg fixed yield")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.secondary)
+                Text("\(weightedAPY, specifier: "%.1f")% APY")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundColor(.pledgeGreen)
             }
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.pledgeGreen.opacity(0.08))
+            )
             .padding(.horizontal, 20)
 
             Spacer()
         }
     }
 
-    // MARK: - Chart Data Generation
+    // MARK: - Data Generation (called once)
 
-    private func generateChartData(days: Int, baseValue: Double) -> [PortfolioDataPoint] {
+    private func rebuildChartData() {
+        let days = daysForRange
+        let baseValue = appState.investmentPoolValue
         guard baseValue > 0 else {
-            return (0..<days).map { PortfolioDataPoint(day: $0, value: 0) }
+            chartData = (0..<days).map { PortfolioDataPoint(day: $0, value: 0) }
+            return
         }
 
         var points: [PortfolioDataPoint] = []
-        // Start from a lower value and grow to current value
         let startValue = baseValue * 0.75
         let growthPerDay = (baseValue - startValue) / Double(days)
-
-        // Use seeded randomness for consistent chart
         var value = startValue
+
         for day in 0..<days {
-            let trend = growthPerDay
-            // Deterministic "noise" based on day index
             let noise = sin(Double(day) * 0.8) * (baseValue * 0.02) +
                         cos(Double(day) * 1.3) * (baseValue * 0.015)
-            value += trend + noise
-            value = max(startValue * 0.9, value) // floor
+            value += growthPerDay + noise
+            value = max(startValue * 0.9, value)
             points.append(PortfolioDataPoint(day: day, value: value))
         }
-        // Ensure last point matches current value
         if let last = points.indices.last {
             points[last] = PortfolioDataPoint(day: days - 1, value: baseValue)
         }
-        return points
+        chartData = points
+    }
+
+    private func buildTransactions() {
+        var items: [TransactionItem] = []
+        let cal = Calendar.current
+
+        for (i, activity) in appState.recentActivity.prefix(10).enumerated() {
+            let amt = activity.isFailure ? "+$\(5 + (i * 3) % 20)" : "$0"
+            items.append(TransactionItem(
+                icon: activity.icon,
+                title: activity.title,
+                detail: activity.detail,
+                amount: amt,
+                isPositive: activity.isFailure,
+                date: cal.date(byAdding: .hour, value: -(i * 3), to: Date()) ?? Date()
+            ))
+        }
+
+        if items.count < 3 {
+            let baseTx: [(String, String, String, String)] = [
+                ("📈", "Portfolio rebalance", "Auto-rebalanced allocation", "$0"),
+                ("🔒", "Vault deposit", "Initial stake deposit", "+$50"),
+                ("💰", "Yield earned", "Daily PT yield", "+$0.47"),
+            ]
+            for (i, tx) in baseTx.enumerated() {
+                items.append(TransactionItem(
+                    icon: tx.0, title: tx.1, detail: tx.2,
+                    amount: tx.3, isPositive: true,
+                    date: cal.date(byAdding: .day, value: -(i + 1), to: Date()) ?? Date()
+                ))
+            }
+        }
+        cachedTransactions = items
     }
 }
 
@@ -385,6 +447,10 @@ struct AllocationDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.themeColors) var theme
 
+    private var weightedAPY: Double {
+        allocations.reduce(0) { $0 + $1.percentage * $1.fixedAPY }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -393,9 +459,22 @@ struct AllocationDetailView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Donut-style visual
                         allocationRing
                             .padding(.top, 8)
+
+                        // Weighted APY banner
+                        HStack(spacing: 8) {
+                            Image(systemName: "percent")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.pledgeGreen)
+                            Text("Weighted avg: \(weightedAPY, specifier: "%.1f")% fixed APY")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.pledgeGreen)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(Color.pledgeGreen.opacity(0.1))
+                        .clipShape(Capsule())
 
                         // Allocation breakdown
                         VStack(spacing: 0) {
@@ -412,41 +491,55 @@ struct AllocationDetailView: View {
 
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(alloc.name)
-                                            .pledgeHeadline()
+                                            .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(.primary)
-                                        Text(alloc.symbol)
-                                            .pledgeCaption()
-                                            .foregroundColor(.secondary)
+                                        Text("\(alloc.fixedAPY, specifier: "%.1f")% fixed APY")
+                                            .font(.system(size: 12, weight: .medium))
+                                            .foregroundColor(.pledgeGreen)
                                     }
 
                                     Spacer()
 
                                     VStack(alignment: .trailing, spacing: 2) {
                                         Text("$\(String(format: "%.2f", totalValue * alloc.percentage))")
-                                            .pledgeMono()
+                                            .font(.system(size: 15, weight: .semibold, design: .monospaced))
                                             .foregroundColor(.primary)
                                         Text("\(Int(alloc.percentage * 100))%")
-                                            .pledgeCaption()
+                                            .font(.system(size: 12, weight: .medium))
                                             .foregroundColor(alloc.color)
                                     }
                                 }
                                 .padding(.vertical, 14)
-                                .staggerIn(index: index)
                             }
                         }
-                        .cleanCard()
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color(.systemBackground).opacity(0.6))
+                                .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+                        )
                         .padding(.horizontal, 20)
 
-                        // Info note
-                        HStack(spacing: 8) {
-                            Image(systemName: "info.circle")
-                                .foregroundColor(.secondary.opacity(0.5))
-                            Text("Yield-bearing PTs on Arbitrum via Pendle. Auto-rebalances weekly..")
-                                .pledgeCaption()
-                                .foregroundColor(.secondary)
+                        // Info
+                        VStack(spacing: 8) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "info.circle")
+                                    .foregroundColor(.secondary.opacity(0.5))
+                                Text("All yields are fixed-rate via Pendle Principal Tokens on Arbitrum. Auto-rebalances weekly.")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
+                            HStack(spacing: 6) {
+                                Image(systemName: "shield.checkered")
+                                    .foregroundColor(.secondary.opacity(0.5))
+                                Text("Principal protected — PTs mature at full face value regardless of market conditions.")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         .padding(.horizontal, 24)
                     }
+                    .padding(.bottom, 20)
                 }
             }
             .navigationTitle("Allocation")
@@ -454,9 +547,7 @@ struct AllocationDetailView: View {
             .toolbarColorScheme(theme.isLight ? .light : .dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
+                    Button { dismiss() } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 24))
                             .foregroundColor(.secondary.opacity(0.6))
@@ -483,7 +574,7 @@ struct AllocationDetailView: View {
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
                 Text("total")
-                    .pledgeCaption()
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.secondary)
             }
         }
@@ -513,12 +604,8 @@ struct TransactionHistoryView: View {
                                     .font(.system(size: 40))
                                     .foregroundColor(.secondary.opacity(0.3))
                                 Text("No transactions yet")
-                                    .pledgeHeadline()
+                                    .font(.system(size: 17, weight: .semibold))
                                     .foregroundColor(.secondary)
-                                Text("Transactions will appear when stakes are invested")
-                                    .pledgeCaption()
-                                    .foregroundColor(.secondary.opacity(0.7))
-                                    .multilineTextAlignment(.center)
                             }
                         } else {
                             ForEach(Array(transactions.enumerated()), id: \.element.id) { index, tx in
@@ -530,25 +617,29 @@ struct TransactionHistoryView: View {
 
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(tx.title)
-                                            .pledgeCallout()
+                                            .font(.system(size: 14, weight: .medium))
                                             .foregroundColor(.primary)
                                         Text(tx.detail)
-                                            .pledgeCaption()
+                                            .font(.system(size: 12))
                                             .foregroundColor(.secondary)
                                     }
 
                                     Spacer()
 
                                     Text(tx.amount)
-                                        .pledgeMono()
+                                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
                                         .foregroundColor(tx.isPositive ? .pledgeGreen : .secondary)
                                 }
                                 .padding(.vertical, 12)
-                                .staggerIn(index: index)
                             }
                         }
                     }
-                    .cleanCard()
+                    .padding(16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.systemBackground).opacity(0.6))
+                            .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+                    )
                     .padding(.horizontal, 20)
                 }
             }
@@ -557,9 +648,7 @@ struct TransactionHistoryView: View {
             .toolbarColorScheme(theme.isLight ? .light : .dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
+                    Button { dismiss() } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 24))
                             .foregroundColor(.secondary.opacity(0.6))
