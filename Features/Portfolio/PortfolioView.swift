@@ -39,10 +39,11 @@ struct PortfolioView: View {
     @Environment(\.themeColors) var theme
 
     private let allocations: [AllocationItem] = [
-        AllocationItem(symbol: "BTC", name: "Bitcoin", icon: "₿", percentage: 0.40, color: .pledgeOrange),
-        AllocationItem(symbol: "ETH", name: "Ethereum", icon: "Ξ", percentage: 0.30, color: .pledgeViolet),
-        AllocationItem(symbol: "SOL", name: "Solana", icon: "◎", percentage: 0.20, color: .pledgeGreen),
-        AllocationItem(symbol: "Other", name: "Mixed Index", icon: "◆", percentage: 0.10, color: .pledgeBlue),
+        AllocationItem(symbol: "PT-sUSDai", name: "Pendle sUSDai (9.0% APY)", icon: "🔒", percentage: 0.35, color: .pledgeBlue),
+        AllocationItem(symbol: "PT-USDai", name: "Pendle USDai (5.5% APY)", icon: "🏦", percentage: 0.25, color: .pledgeViolet),
+        AllocationItem(symbol: "PT-thBILL", name: "Pendle T-Bills (5.7% APY)", icon: "📜", percentage: 0.20, color: .pledgeGreen),
+        AllocationItem(symbol: "PT-weETH", name: "Pendle weETH (2.7% APY)", icon: "⟠", percentage: 0.12, color: .pledgeOrange),
+        AllocationItem(symbol: "PT-gUSDC", name: "Pendle gUSDC (6.6% APY)", icon: "💵", percentage: 0.08, color: .cyan),
     ]
 
     private var chartData: [PortfolioDataPoint] {
@@ -440,7 +441,7 @@ struct AllocationDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "info.circle")
                                 .foregroundColor(.secondary.opacity(0.5))
-                            Text("Allocation auto-rebalances weekly to maintain target weights.")
+                            Text("Yield-bearing PTs on Arbitrum via Pendle. Auto-rebalances weekly..")
                                 .pledgeCaption()
                                 .foregroundColor(.secondary)
                         }

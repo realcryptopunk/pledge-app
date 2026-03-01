@@ -39,7 +39,7 @@ struct ChooseHabitsView: View {
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 120)
+                .padding(.bottom, 160)
             }
 
             // MARK: - Bottom Bar
