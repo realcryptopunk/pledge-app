@@ -53,6 +53,7 @@
 		A9B9E0E3E636430C55A46547 /* SetupContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A80A7CCD0CE6FEBB8AA3036 /* SetupContainerView.swift */; };
 		AD74C7EA99482EAB10FCFCFC /* AquaBevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F537B7F56B97FC7B1F35D4 /* AquaBevel.swift */; };
 		BA53DDA3B96D35FB526CF302 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */; };
+		BAE41183129DA66E4A04991A /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DEDED6FBE7157EDD72CD30 /* NotificationSettingsView.swift */; };
 		D3C4BB43675033C5B4E52EDB /* ChooseHabitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718A352A42414E5955FA4C23 /* ChooseHabitsView.swift */; };
 		D8678D84509A0CE43C43805D /* HabitVerificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D48D6DD71A8C9D93755239D /* HabitVerificationService.swift */; };
 		D89840663A6473CCCF905B47 /* AddHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E816F07B42664E00A0614018 /* AddHabitView.swift */; };
@@ -113,6 +114,7 @@
 		E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitsView.swift; sourceTree = "<group>"; };
 		E5A6CE9566B67549CC9D674E /* AquaTextures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaTextures.swift; sourceTree = "<group>"; };
+		E5DEDED6FBE7157EDD72CD30 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 		E816F07B42664E00A0614018 /* AddHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHabitView.swift; sourceTree = "<group>"; };
 		EA62336B1D05F5E2E4502485 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EB58423F408CFE8100F0F66B /* HabitDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitDetailSheet.swift; sourceTree = "<group>"; };
@@ -265,6 +267,7 @@
 		B5B01DBC4AA02924601B33FA /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				E5DEDED6FBE7157EDD72CD30 /* NotificationSettingsView.swift */,
 				EBE06B51B9FF761CB1CA4860 /* SettingsView.swift */,
 			);
 			path = Settings;
@@ -416,6 +419,7 @@
 				57D4690B106472E554E6F86B /* MainTabView.swift in Sources */,
 				46E1F19F4DB181D841692C2E /* Models.swift in Sources */,
 				BA53DDA3B96D35FB526CF302 /* NotificationManager.swift in Sources */,
+				BAE41183129DA66E4A04991A /* NotificationSettingsView.swift in Sources */,
 				38E678827F41CD55A520C8DF /* OnboardingContainerView.swift in Sources */,
 				44118F76DB19099644F32234 /* OnboardingPage1.swift in Sources */,
 				E99B7B6BF90E737C9028E111 /* OnboardingPage2.swift in Sources */,

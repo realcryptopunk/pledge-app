@@ -59,7 +59,7 @@ struct PermissionsView: View {
             id: "notifications",
             icon: "bell.fill",
             title: "Notifications",
-            description: "Get reminders before your habits expire",
+            description: "Get reminders before your habits are due so you never miss a pledge",
             isGranted: notifications.isAuthorized,
             action: {
                 await NotificationManager.shared.requestAuthorization()
