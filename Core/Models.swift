@@ -96,6 +96,16 @@ enum HabitType: String, Codable, CaseIterable {
     case journal = "Journal"
     case water = "Drink Water"
     case noJunkFood = "No Junk Food"
+
+    /// Habits that don't have auto-verification yet — shown as "Upcoming"
+    var isUpcoming: Bool {
+        switch self {
+        case .coldShower, .meditate, .journal, .read, .water, .noJunkFood:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 enum VerificationType: String, Codable {

@@ -86,11 +86,11 @@ struct ChooseHabitsView: View {
 
     private func habitCard(type: HabitType, index: Int) -> some View {
         let isSelected = flowState.isSelected(type)
+        let upcoming = type.isUpcoming
 
         return Button {
-            if false /* unlimited habits */ {
-                PPHaptic.error()
-                shakeCounter = true
+            if upcoming {
+                PPHaptic.light()
                 return
             }
             PPHaptic.selection()
@@ -106,11 +106,12 @@ struct ChooseHabitsView: View {
                         .frame(width: 52, height: 52)
                         .background(
                             Circle()
-                                .fill(type.accentColor.opacity(0.25))
+                                .fill(type.accentColor.opacity(upcoming ? 0.10 : 0.25))
                         )
+                        .opacity(upcoming ? 0.5 : 1.0)
 
                     // Checkmark badge
-                    if isSelected {
+                    if isSelected && !upcoming {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 20))
                             .foregroundStyle(
@@ -129,24 +130,40 @@ struct ChooseHabitsView: View {
                 // Name
                 Text(type.rawValue)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(upcoming ? .secondary : .primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
-                // Verification badge
-                HStack(spacing: 4) {
-                    Image(systemName: type.verificationIcon)
-                        .font(.system(size: 9))
-                    Text(type.verificationLabel)
-                        .font(.system(size: 10, weight: .medium))
+                // Verification badge or Upcoming badge
+                if upcoming {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock.badge")
+                            .font(.system(size: 9))
+                        Text("Upcoming")
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundColor(.pledgeOrange)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color.pledgeOrange.opacity(0.12))
+                    )
+                } else {
+                    HStack(spacing: 4) {
+                        Image(systemName: type.verificationIcon)
+                            .font(.system(size: 9))
+                        Text(type.verificationLabel)
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule()
+                            .fill(Color.primary.opacity(0.06))
+                    )
                 }
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(
-                    Capsule()
-                        .fill(Color.primary.opacity(0.06))
-                )
             }
             .padding(.vertical, 16)
             .padding(.horizontal, 8)
