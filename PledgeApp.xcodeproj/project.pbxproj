@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -49,6 +49,7 @@
 		9B35B0AF2088CF71E4BDDA7C /* PledgeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D8376BCD890EE15E97BF80 /* PledgeCards.swift */; };
 		9C5E20CDC94DD8903B1C47CE /* SetStakesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EB4E1730AF827ED92F5817 /* SetStakesView.swift */; };
 		9E3249FA8972FFEA2B31870A /* Vortex in Frameworks */ = {isa = PBXBuildFile; productRef = 6F4550AC64675E0303E4FF39 /* Vortex */; };
+		A276444A0034DB6D4F84EF74 /* ExerciseCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F35BF85EEEA0CE3A5604E9 /* ExerciseCounterView.swift */; };
 		A9B9E0E3E636430C55A46547 /* SetupContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A80A7CCD0CE6FEBB8AA3036 /* SetupContainerView.swift */; };
 		AD74C7EA99482EAB10FCFCFC /* AquaBevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F537B7F56B97FC7B1F35D4 /* AquaBevel.swift */; };
 		BA53DDA3B96D35FB526CF302 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */; };
@@ -78,6 +79,7 @@
 		45D64C5317E01BAAA55673FC /* PledgeAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeAnimations.swift; sourceTree = "<group>"; };
 		49A01AB3752386F6E773267F /* PledgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeApp.swift; sourceTree = "<group>"; };
 		4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowState.swift; sourceTree = "<group>"; };
+		50F35BF85EEEA0CE3A5604E9 /* ExerciseCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseCounterView.swift; sourceTree = "<group>"; };
 		517A347A9B0345FA9A58EB78 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		51AE16CCB1A575FB480FD9C9 /* RollingCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RollingCounter.swift; sourceTree = "<group>"; };
 		543165F4AAA64710E8571E76 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
@@ -300,6 +302,7 @@
 			children = (
 				E816F07B42664E00A0614018 /* AddHabitView.swift */,
 				562AFD3DD572CD83CA659FFD /* EditHabitView.swift */,
+				50F35BF85EEEA0CE3A5604E9 /* ExerciseCounterView.swift */,
 				C73B080C71D34437D2B420E0 /* HabitActivityGrid.swift */,
 				EB58423F408CFE8100F0F66B /* HabitDetailSheet.swift */,
 				E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */,
@@ -358,10 +361,12 @@
 				en,
 			);
 			mainGroup = 0209CFF5B16F1911DEA30034;
+			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				7D4B475265E8A62207C35E14 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				A279F73A8637152C8D577B10 /* XCRemoteSwiftPackageReference "Vortex" */,
 			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -398,6 +403,7 @@
 				6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */,
 				20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */,
 				F6449EAB552487CA51C7D658 /* EditHabitView.swift in Sources */,
+				A276444A0034DB6D4F84EF74 /* ExerciseCounterView.swift in Sources */,
 				35348CC84A4F6578A23814B4 /* FloatingOrbs.swift in Sources */,
 				7B9F1586F7013EDE4E26ACD1 /* HabitActivityGrid.swift in Sources */,
 				F00E76FB854E201C734C24AD /* HabitDetailSheet.swift in Sources */,

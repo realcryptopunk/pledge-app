@@ -387,7 +387,7 @@ class AppState: ObservableObject {
             return "Wake by \(hour):\(String(format: "%02d", minute)) AM"
         case .workout, .gym:
             return "\(Int(habit.targetValue)) min goal"
-        case .pushups:
+        case .pushups, .pullUps, .jumpingJacks:
             return "\(Int(habit.targetValue)) rep goal"
         case .steps:
             return "\(Int(habit.targetValue)) step goal"

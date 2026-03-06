@@ -86,6 +86,8 @@ enum HabitType: String, Codable, CaseIterable {
     case workout = "Daily Workout"
     case gym = "Go to Gym"
     case pushups = "Pushups"
+    case pullUps = "Pull-Ups"
+    case jumpingJacks = "Jumping Jacks"
     case steps = "Step Goal"
     case screenTime = "Screen Time"
     case sleep = "Sleep On Time"
