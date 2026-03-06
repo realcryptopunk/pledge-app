@@ -86,13 +86,9 @@ struct ChooseHabitsView: View {
 
     private func habitCard(type: HabitType, index: Int) -> some View {
         let isSelected = flowState.isSelected(type)
-        let upcoming = type.isUpcoming
+        let isPhoto = type.defaultVerification == .photo
 
         return Button {
-            if upcoming {
-                PPHaptic.light()
-                return
-            }
             PPHaptic.selection()
             withAnimation(.quickSnap) {
                 flowState.toggleHabit(type)
@@ -106,12 +102,11 @@ struct ChooseHabitsView: View {
                         .frame(width: 52, height: 52)
                         .background(
                             Circle()
-                                .fill(type.accentColor.opacity(upcoming ? 0.10 : 0.25))
+                                .fill(type.accentColor.opacity(0.25))
                         )
-                        .opacity(upcoming ? 0.5 : 1.0)
 
                     // Checkmark badge
-                    if isSelected && !upcoming {
+                    if isSelected {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 20))
                             .foregroundStyle(
@@ -130,24 +125,24 @@ struct ChooseHabitsView: View {
                 // Name
                 Text(type.rawValue)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(upcoming ? .secondary : .primary)
+                    .foregroundColor(.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
-                // Verification badge or Upcoming badge
-                if upcoming {
+                // Verification badge
+                if isPhoto {
                     HStack(spacing: 4) {
-                        Image(systemName: "clock.badge")
+                        Image(systemName: "camera.fill")
                             .font(.system(size: 9))
-                        Text("Upcoming")
+                        Text("Photo Verify")
                             .font(.system(size: 10, weight: .medium))
                     }
-                    .foregroundColor(.pledgeOrange)
+                    .foregroundColor(.pledgeViolet)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(
                         Capsule()
-                            .fill(Color.pledgeOrange.opacity(0.12))
+                            .fill(Color.pledgeViolet.opacity(0.12))
                     )
                 } else {
                     HStack(spacing: 4) {

@@ -101,12 +101,7 @@ enum HabitType: String, Codable, CaseIterable {
 
     /// Habits that don't have auto-verification yet — shown as "Upcoming"
     var isUpcoming: Bool {
-        switch self {
-        case .coldShower, .meditate, .journal, .read, .water, .noJunkFood:
-            return true
-        default:
-            return false
-        }
+        return false
     }
 }
 
@@ -181,6 +176,14 @@ struct ActivityItem: Identifiable, Codable {
         self.isFailure = isFailure
         self.date = date
     }
+}
+
+// MARK: - Photo Verification Result
+
+struct PhotoVerificationResult {
+    let isVerified: Bool
+    let confidence: Double  // 0-1
+    let reason: String
 }
 
 // MARK: - Mock Data

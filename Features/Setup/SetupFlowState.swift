@@ -146,6 +146,7 @@ extension HabitType {
         case .steps, .sleep, .workout, .gym: return .healthKit
         case .pushups, .pullUps, .jumpingJacks: return .vision
         case .screenTime, .wakeUp: return .manual
+        case .coldShower, .meditate, .journal, .read, .water, .noJunkFood: return .photo
         default: return .manual
         }
     }

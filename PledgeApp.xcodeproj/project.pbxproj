@@ -49,7 +49,9 @@
 		9B35B0AF2088CF71E4BDDA7C /* PledgeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D8376BCD890EE15E97BF80 /* PledgeCards.swift */; };
 		9C5E20CDC94DD8903B1C47CE /* SetStakesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EB4E1730AF827ED92F5817 /* SetStakesView.swift */; };
 		9E3249FA8972FFEA2B31870A /* Vortex in Frameworks */ = {isa = PBXBuildFile; productRef = 6F4550AC64675E0303E4FF39 /* Vortex */; };
+		A05DE1ABD03236251B074977 /* BeRealVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D686B86BCDCAC8E89F6C79 /* BeRealVerificationView.swift */; };
 		A276444A0034DB6D4F84EF74 /* ExerciseCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50F35BF85EEEA0CE3A5604E9 /* ExerciseCounterView.swift */; };
+		A8A7B39D3D4F0AD8D70AA986 /* PhotoVerificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D8E42DF7DAE008F2F55720 /* PhotoVerificationService.swift */; };
 		A9B9E0E3E636430C55A46547 /* SetupContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A80A7CCD0CE6FEBB8AA3036 /* SetupContainerView.swift */; };
 		AD74C7EA99482EAB10FCFCFC /* AquaBevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F537B7F56B97FC7B1F35D4 /* AquaBevel.swift */; };
 		BA53DDA3B96D35FB526CF302 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */; };
@@ -68,6 +70,7 @@
 		0287D00457685B4E1A541B5C /* FloatingOrbs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingOrbs.swift; sourceTree = "<group>"; };
 		087EB6E8BE7B3360F8B1C4F6 /* OnboardingPage2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPage2.swift; sourceTree = "<group>"; };
 		128E92EA1C63BDC919AC5A21 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		16D686B86BCDCAC8E89F6C79 /* BeRealVerificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeRealVerificationView.swift; sourceTree = "<group>"; };
 		193BC0361253F9527274DE7E /* BackgroundTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTheme.swift; sourceTree = "<group>"; };
 		1A80A7CCD0CE6FEBB8AA3036 /* SetupContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupContainerView.swift; sourceTree = "<group>"; };
 		1B7BEDFB20FA262572543418 /* PortfolioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioView.swift; sourceTree = "<group>"; };
@@ -97,6 +100,7 @@
 		7C52DDE25BB46980AD48293B /* OnboardingPage3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPage3.swift; sourceTree = "<group>"; };
 		7DDC77336647A692AF44789B /* SetupSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupSuccessView.swift; sourceTree = "<group>"; };
 		8021AE389456CF118680E361 /* PledgeStreakStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeStreakStartView.swift; sourceTree = "<group>"; };
+		82D8E42DF7DAE008F2F55720 /* PhotoVerificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoVerificationService.swift; sourceTree = "<group>"; };
 		8BC231027668FF614F7560CA /* PledgeButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeButtons.swift; sourceTree = "<group>"; };
 		93BE91C85702554B2F2DAC79 /* AquaGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaGlass.swift; sourceTree = "<group>"; };
 		94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
@@ -153,6 +157,7 @@
 				128E92EA1C63BDC919AC5A21 /* HealthKitManager.swift */,
 				E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */,
 				94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */,
+				82D8E42DF7DAE008F2F55720 /* PhotoVerificationService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -301,6 +306,7 @@
 			isa = PBXGroup;
 			children = (
 				E816F07B42664E00A0614018 /* AddHabitView.swift */,
+				16D686B86BCDCAC8E89F6C79 /* BeRealVerificationView.swift */,
 				562AFD3DD572CD83CA659FFD /* EditHabitView.swift */,
 				50F35BF85EEEA0CE3A5604E9 /* ExerciseCounterView.swift */,
 				C73B080C71D34437D2B420E0 /* HabitActivityGrid.swift */,
@@ -399,6 +405,7 @@
 				1FCE8DE6571B33EC34F35849 /* AquaTypography.swift in Sources */,
 				36BFCAE66573C6324060CC10 /* AuthService.swift in Sources */,
 				638B78F401097CAE9F7CA750 /* BackgroundTheme.swift in Sources */,
+				A05DE1ABD03236251B074977 /* BeRealVerificationView.swift in Sources */,
 				D3C4BB43675033C5B4E52EDB /* ChooseHabitsView.swift in Sources */,
 				6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */,
 				20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */,
@@ -421,6 +428,7 @@
 				E99B7B6BF90E737C9028E111 /* OnboardingPage2.swift in Sources */,
 				229422FECE24CAD71401142C /* OnboardingPage3.swift in Sources */,
 				E59AA738510CD77B7DB2AC92 /* PermissionsView.swift in Sources */,
+				A8A7B39D3D4F0AD8D70AA986 /* PhotoVerificationService.swift in Sources */,
 				10C8E3BA883765DED6AC2ACB /* PledgeAnimations.swift in Sources */,
 				61159CB611DF082EF7A98B55 /* PledgeApp.swift in Sources */,
 				E3AAD82C42C7174CBC551300 /* PledgeButtons.swift in Sources */,

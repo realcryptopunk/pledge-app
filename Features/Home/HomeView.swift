@@ -6,6 +6,7 @@ struct HomeView: View {
     @State private var showAddHabit = false
     @State private var addFundsAmount = ""
     @State private var exerciseHabit: TodayHabit?
+    @State private var photoHabit: TodayHabit?
     @State private var showHabitDetail: TodayHabit?
     @State private var scrollProxy: ScrollViewProxy?
     @Environment(\.themeColors) var theme
@@ -42,6 +43,14 @@ struct HomeView: View {
         }
         .sheet(item: $showHabitDetail) { todayHabit in
             HabitDetailSheet(todayHabit: todayHabit)
+        }
+        .fullScreenCover(item: $photoHabit) { todayHabit in
+            BeRealVerificationView(todayHabit: todayHabit) {
+                PPHaptic.success()
+                withAnimation(.springBounce) {
+                    appState.manuallyVerifyHabit(todayHabit.id)
+                }
+            }
         }
         .fullScreenCover(item: $exerciseHabit) { todayHabit in
             if let exerciseType = ExerciseType(habitType: todayHabit.habit.type) {
@@ -230,6 +239,7 @@ struct HomeView: View {
                             todayHabit: todayHabit,
                             isHealthKit: isHealthKitType(todayHabit.habit.type),
                             isVision: todayHabit.habit.verificationType == .vision,
+                            isPhoto: todayHabit.habit.verificationType == .photo,
                             isVerifying: appState.isVerifying,
                             onVerify: {
                                 PPHaptic.success()
@@ -245,7 +255,11 @@ struct HomeView: View {
                             },
                             onOpenCamera: {
                                 PPHaptic.medium()
-                                exerciseHabit = todayHabit
+                                if todayHabit.habit.verificationType == .photo {
+                                    photoHabit = todayHabit
+                                } else {
+                                    exerciseHabit = todayHabit
+                                }
                             }
                         )
                         .contentShape(Rectangle())
@@ -513,6 +527,7 @@ struct HabitRowView: View {
     let todayHabit: TodayHabit
     var isHealthKit: Bool = false
     var isVision: Bool = false
+    var isPhoto: Bool = false
     var isVerifying: Bool = false
     var onVerify: (() -> Void)? = nil
     var onRefresh: (() -> Void)? = nil
@@ -588,7 +603,19 @@ struct HabitRowView: View {
             if todayHabit.status == .pending {
                 HStack {
                     Spacer()
-                    if isVision {
+                    if isPhoto {
+                        // Photo habits open BeReal-style camera
+                        Button {
+                            onOpenCamera?()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 11, weight: .semibold))
+                                Text("Photo Verify")
+                            }
+                        }
+                        .buttonStyle(SmallCapsuleStyle())
+                    } else if isVision {
                         // Vision habits open the camera for rep counting
                         Button {
                             onOpenCamera?()

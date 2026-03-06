@@ -42,6 +42,16 @@ class HabitVerificationService {
             )
         }
 
+        // Photo-verified habits use BeReal-style camera capture
+        if habit.verificationType == .photo {
+            return VerificationResult(
+                status: .pending,
+                actualValue: nil,
+                targetValue: habit.targetValue,
+                detail: "Take a photo to verify"
+            )
+        }
+
         switch habit.type {
         case .steps:
             return await verifySteps(habit, for: date)
