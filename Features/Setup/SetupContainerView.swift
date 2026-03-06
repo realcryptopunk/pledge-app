@@ -62,5 +62,9 @@ struct SetupContainerView: View {
 
         appState.vaultBalance = flowState.depositAmount
         appState.hasCompletedSetup = true
+
+        // Schedule notifications for the newly created habits
+        NotificationManager.shared.scheduleHabitReminders(habits: appState.habits)
+        NotificationManager.shared.scheduleStreakReminder(streakCount: 0)
     }
 }

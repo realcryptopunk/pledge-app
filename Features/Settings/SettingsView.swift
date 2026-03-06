@@ -72,7 +72,21 @@ struct SettingsView: View {
 
                         // MARK: - Preferences
                         settingsSection("PREFERENCES") {
-                            settingsRow(icon: "🔔", label: "Notifications")
+                            NavigationLink {
+                                NotificationSettingsView()
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Text("\u{1F514}")
+                                    Text("Notifications")
+                                        .pledgeHeadline()
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(.secondary.opacity(0.5))
+                                }
+                                .padding(.vertical, 10)
+                            }
                             StatRowDivider()
                             HStack {
                                 Text("🔒")
