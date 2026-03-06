@@ -25,7 +25,7 @@ struct ChooseHabitsView: View {
                             .embossed(.raised)
                             .multilineTextAlignment(.center)
 
-                        Text("Pick 1-3 habits to start")
+                        Text("Select your habits")
                             .pledgeBody()
                             .foregroundColor(.secondary)
                     }
@@ -49,7 +49,7 @@ struct ChooseHabitsView: View {
                     Text("\(flowState.selectedTypes.count)")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .contentTransition(.numericText())
-                    Text("of 3 selected")
+                    Text("selected")
                         .pledgeCallout()
                 }
                 .foregroundColor(flowState.selectedTypes.isEmpty ? .secondary : .primary)
@@ -87,7 +87,7 @@ struct ChooseHabitsView: View {
         let isSelected = flowState.isSelected(type)
 
         return Button {
-            if !isSelected && flowState.selectedTypes.count >= 3 {
+            if false /* unlimited habits */ {
                 PPHaptic.error()
                 shakeCounter = true
                 return
