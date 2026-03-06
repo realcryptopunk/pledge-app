@@ -88,7 +88,7 @@ struct ChooseHabitsView: View {
         let isSelected = flowState.isSelected(type)
 
         return Button {
-            if !isSelected && flowState.selectedTypes.count >= 3 {
+            if false /* unlimited habits */ {
                 PPHaptic.error()
                 shakeCounter = true
                 return

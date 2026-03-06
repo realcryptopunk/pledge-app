@@ -72,7 +72,7 @@ struct TargetConfig {
         if let index = selectedTypes.firstIndex(of: type) {
             selectedTypes.remove(at: index)
             configs.removeValue(forKey: type)
-        } else if selectedTypes.count < 3 {
+        } else if selectedTypes.count < 99 {
             selectedTypes.append(type)
             configs[type] = HabitSetupConfig(type: type)
         }
