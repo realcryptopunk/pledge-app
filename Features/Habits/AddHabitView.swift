@@ -641,7 +641,7 @@ struct AddHabitView: View {
         switch type {
         case .steps, .sleep, .workout, .gym:
             return .healthKit
-        case .pushups:
+        case .pushups, .pullUps, .jumpingJacks:
             return .vision
         case .screenTime:
             return .manual
@@ -658,7 +658,7 @@ struct AddHabitView: View {
             return [.healthKit, .manual]
         case .workout, .gym:
             return [.healthKit, .location, .manual]
-        case .pushups:
+        case .pushups, .pullUps, .jumpingJacks:
             return [.vision, .manual]
         case .screenTime:
             return [.manual]
@@ -734,6 +734,10 @@ struct AddHabitView: View {
             return TargetConfig(label: "Workout duration", unit: "minutes", min: 10, max: 120, step: 5)
         case .pushups:
             return TargetConfig(label: "Pushup count", unit: "reps", min: 5, max: 200, step: 5)
+        case .pullUps:
+            return TargetConfig(label: "Pull-up count", unit: "reps", min: 1, max: 50, step: 1)
+        case .jumpingJacks:
+            return TargetConfig(label: "Jumping jack count", unit: "reps", min: 5, max: 200, step: 5)
         case .screenTime:
             return TargetConfig(label: "Max screen time", unit: "hours", min: 1, max: 12, step: 1)
         case .water:
@@ -753,6 +757,8 @@ struct AddHabitView: View {
         case .sleep: return 7
         case .workout, .gym: return 30
         case .pushups: return 20
+        case .pullUps: return 10
+        case .jumpingJacks: return 20
         case .screenTime: return 2
         case .water: return 8
         case .meditate: return 10

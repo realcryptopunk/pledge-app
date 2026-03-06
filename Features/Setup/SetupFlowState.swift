@@ -109,6 +109,8 @@ extension HabitType {
         case .workout: return "🏋️"
         case .gym: return "🏋️"
         case .pushups: return "💪"
+        case .pullUps: return "🏋️‍♂️"
+        case .jumpingJacks: return "⭐"
         case .steps: return "👟"
         case .noSocial: return "📵"
         case .sleep: return "😴"
@@ -128,6 +130,8 @@ extension HabitType {
         case .sleep: return 7
         case .workout, .gym: return 30
         case .pushups: return 20
+        case .pullUps: return 10
+        case .jumpingJacks: return 20
         case .screenTime: return 2
         case .water: return 8
         case .meditate: return 10
@@ -140,7 +144,7 @@ extension HabitType {
     var defaultVerification: VerificationType {
         switch self {
         case .steps, .sleep, .workout, .gym: return .healthKit
-        case .pushups: return .vision
+        case .pushups, .pullUps, .jumpingJacks: return .vision
         case .screenTime, .wakeUp: return .manual
         default: return .manual
         }
@@ -186,6 +190,8 @@ extension HabitType {
         case .workout: return Color(hex: "EF4444")
         case .gym: return Color(hex: "EF4444")
         case .pushups: return Color(hex: "F43F5E")
+        case .pullUps: return Color(hex: "8B5CF6")
+        case .jumpingJacks: return Color(hex: "F59E0B")
         case .steps: return Color(hex: "22C55E")
         case .noSocial: return Color(hex: "8B5CF6")
         case .sleep: return Color(hex: "6366F1")
@@ -209,6 +215,10 @@ extension HabitType {
             return TargetConfig(label: "Workout duration", unit: "minutes", min: 10, max: 120, step: 5)
         case .pushups:
             return TargetConfig(label: "Pushup count", unit: "reps", min: 5, max: 200, step: 5)
+        case .pullUps:
+            return TargetConfig(label: "Pull-up count", unit: "reps", min: 1, max: 50, step: 1)
+        case .jumpingJacks:
+            return TargetConfig(label: "Jumping jack count", unit: "reps", min: 5, max: 200, step: 5)
         case .screenTime:
             return TargetConfig(label: "Max screen time", unit: "hours", min: 1, max: 12, step: 1)
         case .water:

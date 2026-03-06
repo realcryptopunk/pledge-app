@@ -49,8 +49,8 @@ class HabitVerificationService {
             return await verifySleep(habit, for: date)
         case .workout, .gym:
             return await verifyWorkout(habit, for: date)
-        case .pushups:
-            // Pushups use vision/camera verification — manual fallback
+        case .pushups, .pullUps, .jumpingJacks:
+            // Exercise types use vision/camera verification — manual fallback
             return VerificationResult(
                 status: .pending,
                 actualValue: nil,

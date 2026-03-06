@@ -5,7 +5,7 @@ struct HomeView: View {
     @State private var showAddFunds = false
     @State private var showAddHabit = false
     @State private var addFundsAmount = ""
-    @State private var pushupHabit: TodayHabit?
+    @State private var exerciseHabit: TodayHabit?
     @State private var showHabitDetail: TodayHabit?
     @State private var scrollProxy: ScrollViewProxy?
     @Environment(\.themeColors) var theme
@@ -43,15 +43,18 @@ struct HomeView: View {
         .sheet(item: $showHabitDetail) { todayHabit in
             HabitDetailSheet(todayHabit: todayHabit)
         }
-        .fullScreenCover(item: $pushupHabit) { todayHabit in
-            PushupCounterView(
-                targetReps: Int(todayHabit.habit.targetValue)
-            ) { count in
-                PPHaptic.success()
-                withAnimation(.springBounce) {
-                    appState.manuallyVerifyHabit(todayHabit.id)
+        .fullScreenCover(item: $exerciseHabit) { todayHabit in
+            if let exerciseType = ExerciseType(habitType: todayHabit.habit.type) {
+                ExerciseCounterView(
+                    exerciseType: exerciseType,
+                    targetReps: Int(todayHabit.habit.targetValue)
+                ) { count in
+                    PPHaptic.success()
+                    withAnimation(.springBounce) {
+                        appState.manuallyVerifyHabit(todayHabit.id)
+                    }
+                    exerciseHabit = nil
                 }
-                pushupHabit = nil
             }
         }
     }
@@ -242,7 +245,7 @@ struct HomeView: View {
                             },
                             onOpenCamera: {
                                 PPHaptic.medium()
-                                pushupHabit = todayHabit
+                                exerciseHabit = todayHabit
                             }
                         )
                         .contentShape(Rectangle())
