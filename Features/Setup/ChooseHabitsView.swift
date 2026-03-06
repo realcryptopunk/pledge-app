@@ -14,8 +14,8 @@ struct ChooseHabitsView: View {
     ]
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView(.vertical, showsIndicators: false) {
+        ZStack(alignment: .bottom) {
+            ScrollView(.vertical, showsIndicators: true) {
                 VStack(spacing: 24) {
                     // MARK: - Header
                     VStack(spacing: 8) {
@@ -25,7 +25,7 @@ struct ChooseHabitsView: View {
                             .embossed(.raised)
                             .multilineTextAlignment(.center)
 
-                        Text("Pick 1-3 habits to start")
+                        Text("Select your habits")
                             .pledgeBody()
                             .foregroundColor(.secondary)
                     }
@@ -39,17 +39,17 @@ struct ChooseHabitsView: View {
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 160)
+                .padding(.bottom, 180)
             }
 
-            // MARK: - Bottom Bar
+            // MARK: - Bottom Bar (overlaid)
             VStack(spacing: 12) {
                 // Counter pill
                 HStack(spacing: 6) {
                     Text("\(flowState.selectedTypes.count)")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .contentTransition(.numericText())
-                    Text("of 3 selected")
+                    Text("selected")
                         .pledgeCallout()
                 }
                 .foregroundColor(flowState.selectedTypes.isEmpty ? .secondary : .primary)
@@ -70,9 +70,10 @@ struct ChooseHabitsView: View {
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 16)
+            .padding(.top, 12)
             .background(
                 LinearGradient(
-                    colors: [.clear, Color(.systemBackground).opacity(0.8), Color(.systemBackground)],
+                    colors: [Color(.systemBackground).opacity(0), Color(.systemBackground).opacity(0.95), Color(.systemBackground)],
                     startPoint: .top,
                     endPoint: .bottom
                 )
