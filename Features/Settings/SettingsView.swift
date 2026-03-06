@@ -196,10 +196,9 @@ struct SettingsView: View {
             } message: {
                 Text("Enter your display name")
             }
-            .confirmationDialog(
+            .alert(
                 "Sign Out",
-                isPresented: $showSignOutConfirmation,
-                titleVisibility: .visible
+                isPresented: $showSignOutConfirmation
             ) {
                 Button("Sign Out", role: .destructive) {
                     PPHaptic.medium()

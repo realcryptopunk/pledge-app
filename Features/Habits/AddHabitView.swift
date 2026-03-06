@@ -668,12 +668,6 @@ struct AddHabitView: View {
             return [.manual]
         case .coldShower:
             return [.manual, .photo]
-        case .noJunkFood:
-            return [.location, .manual]
-        case .noSocial:
-            return [.manual]
-        case .water:
-            return [.manual]
         }
     }
 
@@ -740,8 +734,6 @@ struct AddHabitView: View {
             return TargetConfig(label: "Jumping jack count", unit: "reps", min: 5, max: 200, step: 5)
         case .screenTime:
             return TargetConfig(label: "Max screen time", unit: "hours", min: 1, max: 12, step: 1)
-        case .water:
-            return TargetConfig(label: "Glasses of water", unit: "glasses", min: 1, max: 20, step: 1)
         case .meditate:
             return TargetConfig(label: "Meditation duration", unit: "minutes", min: 5, max: 60, step: 5)
         case .read:
@@ -760,7 +752,6 @@ struct AddHabitView: View {
         case .pullUps: return 10
         case .jumpingJacks: return 20
         case .screenTime: return 2
-        case .water: return 8
         case .meditate: return 10
         case .read: return 30
         default: return 0

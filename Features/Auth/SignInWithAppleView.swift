@@ -2,6 +2,79 @@ import SwiftUI
 import AuthenticationServices
 import CryptoKit
 
+// MARK: - Fluid Purple Gradient Overlay
+
+struct FluidPurpleGlow: View {
+    @State private var animate = false
+    @Environment(\.themeColors) var theme
+    
+    var body: some View {
+        ZStack {
+            // Blob 1 - deep pool blue
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [theme.deep.opacity(0.6), Color.clear],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 280
+                    )
+                )
+                .frame(width: 550, height: 550)
+                .offset(x: animate ? -60 : 60, y: animate ? -80 : -20)
+                .blur(radius: 80)
+            
+            // Blob 2 - pool light / sky blue
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [theme.light.opacity(0.45), Color.clear],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 220
+                    )
+                )
+                .frame(width: 450, height: 450)
+                .offset(x: animate ? 80 : -100, y: animate ? -30 : -100)
+                .blur(radius: 70)
+            
+            // Blob 3 - pool surface / foam
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [theme.surface.opacity(0.3), Color.clear],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 180
+                    )
+                )
+                .frame(width: 400, height: 400)
+                .offset(x: animate ? -80 : 80, y: animate ? 40 : -60)
+                .blur(radius: 60)
+            
+            // Blob 4 - deep accent
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [theme.mid.opacity(0.35), Color.clear],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 200
+                    )
+                )
+                .frame(width: 350, height: 350)
+                .offset(x: animate ? 40 : -40, y: animate ? -120 : -40)
+                .blur(radius: 60)
+        }
+        .frame(maxWidth: .infinity, maxHeight: 500, alignment: .top)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 6).repeatForever(autoreverses: true)) {
+                animate.toggle()
+            }
+        }
+    }
+}
+
 struct SignInWithAppleView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.themeColors) var theme
@@ -12,17 +85,42 @@ struct SignInWithAppleView: View {
     var body: some View {
         ZStack {
             WaterBackgroundView()
+            
+            // Fluid purple glow at top
+            VStack {
+                FluidPurpleGlow()
+                Spacer()
+            }
+            .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer()
 
-                // MARK: - Header
+                // MARK: - Logo
+                Image(systemName: "checkmark.shield.fill")
+                    .font(.system(size: 64))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [theme.surface, theme.light],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .shadow(color: theme.surface.opacity(0.4), radius: 20, y: 10)
+                    .staggerIn(index: 0)
 
-                Text("Welcome to\nPledge")
-                    .pledgeHero(42)
+                Spacer().frame(height: 24)
+
+                // MARK: - Header
+                Text("Welcome to")
+                    .font(.system(size: 18, weight: .medium, design: .rounded))
+                    .foregroundColor(.secondary)
+                    .staggerIn(index: 0)
+
+                Text("Pledge")
+                    .pledgeHero(48)
                     .foregroundColor(.primary)
                     .embossed(.raised)
-                    .multilineTextAlignment(.center)
                     .staggerIn(index: 0)
 
                 Spacer().frame(height: 12)
@@ -36,11 +134,10 @@ struct SignInWithAppleView: View {
                 Spacer()
 
                 // MARK: - Sign In Card
-
                 VStack(spacing: 20) {
                     SignInWithAppleButton(.signIn, onRequest: configureRequest, onCompletion: handleResult)
                         .signInWithAppleButtonStyle(.white)
-                        .frame(height: 52)
+                        .frame(maxWidth: 310, maxHeight: 52)
                         .clipShape(Capsule())
                         .staggerIn(index: 2)
                         .disabled(isSigningIn)
@@ -54,9 +151,15 @@ struct SignInWithAppleView: View {
                             .transition(.move(edge: .top).combined(with: .opacity))
                     }
 
-                    Text("By continuing, you agree to our [Terms](https://pledge.app/terms) & [Privacy Policy](https://pledge.app/privacy)")
+                    Button { appState.authService.signInAsGuest() } label: {
+                        Text("Skip for now \u{2192}")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary.opacity(0.6))
+                    }
+
+                    Text("By continuing, you agree to our Terms & Privacy Policy")
                         .pledgeCaption()
-                        .foregroundColor(.secondary.opacity(0.6))
+                        .foregroundColor(.secondary.opacity(0.4))
                         .multilineTextAlignment(.center)
                         .staggerIn(index: 3)
                 }
@@ -86,7 +189,6 @@ struct SignInWithAppleView: View {
                 return
             }
 
-            // Save name from Apple (only provided on first sign-in)
             if let fullName = credential.fullName {
                 let name = [fullName.givenName, fullName.familyName]
                     .compactMap { $0 }
@@ -108,7 +210,6 @@ struct SignInWithAppleView: View {
             }
 
         case .failure(let error):
-            // Don't show error for user cancellation
             if (error as? ASAuthorizationError)?.code == .canceled { return }
             errorMessage = error.localizedDescription
         }

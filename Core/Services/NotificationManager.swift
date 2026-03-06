@@ -103,7 +103,7 @@ class NotificationManager: ObservableObject {
             }
             return (reminderHour, reminderMinute)
 
-        case .screenTime, .noSocial:
+        case .screenTime:
             return (20, 0) // 8 PM wind down
 
         case .workout, .gym, .pushups, .pullUps, .jumpingJacks:

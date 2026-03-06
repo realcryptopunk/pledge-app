@@ -83,7 +83,7 @@ class HabitVerificationService {
                 targetValue: habit.targetValue,
                 detail: "Tap to verify"
             )
-        case .meditate, .read, .journal, .coldShower, .water, .noJunkFood, .noSocial:
+        case .meditate, .read, .journal, .coldShower:
             // Manual types require user self-report
             return VerificationResult(
                 status: .pending,
@@ -230,25 +230,14 @@ class HabitVerificationService {
 
         // Only process entry events for location verification
         if entered {
-            if habit.type == .noJunkFood {
-                // Entering a forbidden zone = FAILURE
-                let locationLabel = habit.locationName ?? "restricted area"
-                return (habitId, VerificationResult(
-                    status: .failed,
-                    actualValue: nil,
-                    targetValue: habit.targetValue,
-                    detail: "Entered \(locationLabel)"
-                ))
-            } else {
-                // Entering target zone (gym, etc.) = SUCCESS
-                let locationLabel = habit.locationName ?? "location"
-                return (habitId, VerificationResult(
-                    status: .verified,
-                    actualValue: nil,
-                    targetValue: habit.targetValue,
-                    detail: "Arrived at \(locationLabel)"
-                ))
-            }
+            // Entering target zone (gym, etc.) = SUCCESS
+            let locationLabel = habit.locationName ?? "location"
+            return (habitId, VerificationResult(
+                status: .verified,
+                actualValue: nil,
+                targetValue: habit.targetValue,
+                detail: "Arrived at \(locationLabel)"
+            ))
         }
 
         // Exit events: no action for now (outdoor time tracking deferred)

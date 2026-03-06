@@ -94,12 +94,12 @@ struct ChooseHabitsView: View {
                 flowState.toggleHabit(type)
             }
         } label: {
-            VStack(spacing: 10) {
+            VStack(spacing: 6) {
                 ZStack(alignment: .topTrailing) {
                     // Emoji circle
                     Text(type.defaultIcon)
                         .font(.system(size: 26))
-                        .frame(width: 52, height: 52)
+                        .frame(width: 40, height: 40)
                         .background(
                             Circle()
                                 .fill(type.accentColor.opacity(0.25))
@@ -160,7 +160,7 @@ struct ChooseHabitsView: View {
                     )
                 }
             }
-            .padding(.vertical, 16)
+            .padding(.vertical, 10)
             .padding(.horizontal, 8)
             .frame(maxWidth: .infinity)
             .background(

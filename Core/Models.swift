@@ -92,12 +92,9 @@ enum HabitType: String, Codable, CaseIterable {
     case screenTime = "Screen Time"
     case sleep = "Sleep On Time"
     case meditate = "Meditate"
-    case noSocial = "No Social Media"
     case read = "Read"
     case coldShower = "Cold Shower"
     case journal = "Journal"
-    case water = "Drink Water"
-    case noJunkFood = "No Junk Food"
 
     /// Habits that don't have auto-verification yet — shown as "Upcoming"
     var isUpcoming: Bool {

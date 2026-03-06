@@ -395,8 +395,6 @@ class AppState: ObservableObject {
             return "Max \(Int(habit.targetValue))h screen time"
         case .sleep:
             return "\(Int(habit.targetValue))h sleep goal"
-        case .water:
-            return "\(Int(habit.targetValue)) glasses"
         case .meditate:
             return "\(Int(habit.targetValue)) min meditation"
         case .read:

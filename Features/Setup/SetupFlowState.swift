@@ -112,15 +112,12 @@ extension HabitType {
         case .pullUps: return "🏋️‍♂️"
         case .jumpingJacks: return "⭐"
         case .steps: return "👟"
-        case .noSocial: return "📵"
         case .sleep: return "😴"
         case .meditate: return "🧘"
         case .screenTime: return "📱"
         case .read: return "📚"
         case .coldShower: return "🧊"
         case .journal: return "📝"
-        case .water: return "💧"
-        case .noJunkFood: return "🥗"
         }
     }
 
@@ -133,7 +130,6 @@ extension HabitType {
         case .pullUps: return 10
         case .jumpingJacks: return 20
         case .screenTime: return 2
-        case .water: return 8
         case .meditate: return 10
         case .read: return 30
         case .wakeUp: return 6
@@ -146,7 +142,7 @@ extension HabitType {
         case .steps, .sleep, .workout, .gym: return .healthKit
         case .pushups, .pullUps, .jumpingJacks: return .vision
         case .screenTime, .wakeUp: return .manual
-        case .coldShower, .meditate, .journal, .read, .water, .noJunkFood: return .photo
+        case .coldShower, .meditate, .journal, .read: return .photo
         default: return .manual
         }
     }
@@ -194,15 +190,12 @@ extension HabitType {
         case .pullUps: return Color(hex: "8B5CF6")
         case .jumpingJacks: return Color(hex: "F59E0B")
         case .steps: return Color(hex: "22C55E")
-        case .noSocial: return Color(hex: "8B5CF6")
         case .sleep: return Color(hex: "6366F1")
         case .meditate: return Color(hex: "14B8A6")
         case .screenTime: return Color(hex: "F97316")
         case .read: return Color(hex: "3B82F6")
         case .coldShower: return Color(hex: "06B6D4")
         case .journal: return Color(hex: "A855F7")
-        case .water: return Color(hex: "0EA5E9")
-        case .noJunkFood: return Color(hex: "10B981")
         }
     }
 
@@ -222,8 +215,6 @@ extension HabitType {
             return TargetConfig(label: "Jumping jack count", unit: "reps", min: 5, max: 200, step: 5)
         case .screenTime:
             return TargetConfig(label: "Max screen time", unit: "hours", min: 1, max: 12, step: 1)
-        case .water:
-            return TargetConfig(label: "Glasses of water", unit: "glasses", min: 1, max: 20, step: 1)
         case .meditate:
             return TargetConfig(label: "Meditation duration", unit: "minutes", min: 5, max: 60, step: 5)
         case .read:
@@ -239,7 +230,7 @@ extension HabitType {
 
     var isManualOnly: Bool {
         switch self {
-        case .coldShower, .journal, .noSocial, .noJunkFood:
+        case .coldShower, .journal:
             return true
         default:
             return false

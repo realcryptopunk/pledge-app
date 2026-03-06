@@ -1,59 +1,184 @@
 import UIKit
 
-// MARK: - PhotoVerificationService
+// MARK: - Gemini Vision Photo Verification
 
 class PhotoVerificationService {
-
-    // TODO: Wire Gemini Vision API for real verification
-    //
-    // Prompt template for Gemini:
-    // """
-    // Analyze this photo. The user claims they are doing [habit].
-    // Does the photo show evidence of this activity?
-    //
-    // Look for these specific clues:
-    // - Cold Shower: wet hair, shower stall, water droplets, fogged mirror, towel
-    // - Meditate: seated position, calm environment, closed eyes, yoga mat
-    // - Journal: open notebook, pen in hand, handwriting visible
-    // - Read: book or e-reader visible, reading posture
-    // - Drink Water: glass/bottle of water, drinking gesture
-    // - No Junk Food: healthy meal visible, clean kitchen, salad/fruit
-    //
-    // Respond with:
-    // - verified / not_verified
-    // - confidence: 0.0 to 1.0
-    // - reason: brief explanation
-    // """
-
-    /// Mock verification that returns success after a 2-second delay.
+    
+    // Gemini 2.0 Flash REST API
+    private let apiKey = "REDACTED_KEY"
+    private let endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+    
     func verifyPhoto(image: UIImage, habitType: HabitType) async -> PhotoVerificationResult {
-        // Simulate network + AI processing time
-        try? await Task.sleep(for: .seconds(2))
-
-        let message = mockMessage(for: habitType)
-        return PhotoVerificationResult(
-            isVerified: true,
-            confidence: Double.random(in: 0.85...0.98),
-            reason: message
-        )
+        guard let imageData = image.jpegData(compressionQuality: 0.7) else {
+            return PhotoVerificationResult(isVerified: false, confidence: 0, reason: "Failed to process image")
+        }
+        
+        let base64Image = imageData.base64EncodedString()
+        let prompt = buildPrompt(for: habitType)
+        
+        let requestBody: [String: Any] = [
+            "contents": [
+                [
+                    "parts": [
+                        ["text": prompt],
+                        [
+                            "inlineData": [
+                                "mimeType": "image/jpeg",
+                                "data": base64Image
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            "generationConfig": [
+                "temperature": 0.1,
+                "maxOutputTokens": 256
+            ]
+        ]
+        
+        guard let url = URL(string: "\(endpoint)?key=\(apiKey)"),
+              let jsonData = try? JSONSerialization.data(withJSONObject: requestBody) else {
+            return PhotoVerificationResult(isVerified: false, confidence: 0, reason: "Failed to build request")
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = jsonData
+        request.timeoutInterval = 15
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                return fallbackResult(for: habitType)
+            }
+            
+            return parseGeminiResponse(data: data, habitType: habitType)
+        } catch {
+            return fallbackResult(for: habitType)
+        }
     }
-
-    private func mockMessage(for type: HabitType) -> String {
+    
+    // MARK: - Prompt Builder
+    
+    private func buildPrompt(for type: HabitType) -> String {
+        let habitClues: String
         switch type {
         case .coldShower:
-            return ["Ice warrior confirmed!", "Brrr! That's dedication!", "Cold shower hero detected!"].randomElement()!
+            habitClues = """
+            The user claims they just took a COLD SHOWER. Look for:
+            - Person near/in a shower or bathroom
+            - Wet hair, water droplets on skin
+            - Fogged mirror, towel, shower stall visible
+            - Post-shower appearance (damp skin, wet clothing/towel)
+            """
         case .meditate:
-            return ["Inner peace achieved!", "Zen master mode activated!", "Calm mind verified!"].randomElement()!
+            habitClues = """
+            The user claims they are MEDITATING. Look for:
+            - Person sitting in calm/cross-legged position
+            - Meditation cushion, yoga mat, quiet space
+            - Eyes closed, relaxed posture
+            - Meditation app on screen, candles, incense
+            """
         case .journal:
-            return ["Thoughts captured!", "Journaling champion!", "Words on paper confirmed!"].randomElement()!
+            habitClues = """
+            The user claims they are JOURNALING. Look for:
+            - Open notebook, journal, or diary
+            - Pen/pencil in hand or nearby
+            - Handwriting visible on page
+            - Writing desk setup
+            """
         case .read:
-            return ["Bookworm verified!", "Knowledge seeker confirmed!", "Reading habit locked in!"].randomElement()!
-        case .water:
-            return ["Hydration station!", "Water warrior confirmed!", "Stay hydrated champion!"].randomElement()!
-        case .noJunkFood:
-            return ["Clean eating verified!", "Healthy choice confirmed!", "No junk detected!"].randomElement()!
+            habitClues = """
+            The user claims they are READING. Look for:
+            - Book, e-reader (Kindle), or tablet with text
+            - Person holding/looking at reading material
+            - Reading posture (sitting, lying down with book)
+            - Visible text on pages
+            """
         default:
-            return "Habit verified! Great work!"
+            habitClues = "The user claims they completed a habit. Look for any evidence of the activity."
         }
+        
+        return """
+        You are a habit verification AI for the Pledge app. Analyze this photo to verify if the user is actually doing their habit.
+
+        \(habitClues)
+
+        RULES:
+        - Be reasonably lenient — this isn't a court of law. If it looks plausible, verify it.
+        - The photo is taken in-the-moment (like BeReal), so it may be slightly blurry or poorly framed.
+        - Look for contextual clues, not perfection.
+        - If the photo is completely unrelated (e.g., a screenshot, random object, black screen), reject it.
+
+        Respond in EXACTLY this JSON format, nothing else:
+        {"verified": true/false, "confidence": 0.0-1.0, "reason": "one short sentence"}
+        """
+    }
+    
+    // MARK: - Response Parser
+    
+    private func parseGeminiResponse(data: Data, habitType: HabitType) -> PhotoVerificationResult {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let candidates = json["candidates"] as? [[String: Any]],
+              let firstCandidate = candidates.first,
+              let content = firstCandidate["content"] as? [String: Any],
+              let parts = content["parts"] as? [[String: Any]],
+              let text = parts.first?["text"] as? String else {
+            return fallbackResult(for: habitType)
+        }
+        
+        let cleaned = text
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard let responseData = cleaned.data(using: .utf8),
+              let result = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any] else {
+            if text.lowercased().contains("\"verified\": true") || text.lowercased().contains("\"verified\":true") {
+                return PhotoVerificationResult(isVerified: true, confidence: 0.85, reason: celebrationMessage(for: habitType))
+            }
+            return PhotoVerificationResult(isVerified: false, confidence: 0.3, reason: "Couldn't verify from photo. Try again with a clearer shot.")
+        }
+        
+        let verified = result["verified"] as? Bool ?? false
+        let confidence = result["confidence"] as? Double ?? 0.5
+        let reason = result["reason"] as? String ?? (verified ? celebrationMessage(for: habitType) : "Photo doesn't match the habit. Try again!")
+        
+        let displayReason = verified ? celebrationMessage(for: habitType) : reason
+        
+        return PhotoVerificationResult(
+            isVerified: verified,
+            confidence: confidence,
+            reason: displayReason
+        )
+    }
+    
+    // MARK: - Celebration Messages
+    
+    private func celebrationMessage(for type: HabitType) -> String {
+        switch type {
+        case .coldShower:
+            return ["🧊 Ice warrior confirmed!", "🚿 Cold shower hero!", "❄️ That takes guts! Verified!"].randomElement()!
+        case .meditate:
+            return ["🧘 Inner peace achieved!", "✨ Zen mode activated!", "🕊️ Calm mind verified!"].randomElement()!
+        case .journal:
+            return ["📝 Thoughts captured!", "✍️ Journaling champ!", "📓 Words on paper — verified!"].randomElement()!
+        case .read:
+            return ["📚 Bookworm verified!", "📖 Knowledge seeker!", "🔖 Reading habit locked in!"].randomElement()!
+        default:
+            return "✅ Habit verified! Great work!"
+        }
+    }
+    
+    // MARK: - Fallback (API failure)
+    
+    private func fallbackResult(for type: HabitType) -> PhotoVerificationResult {
+        return PhotoVerificationResult(
+            isVerified: true,
+            confidence: 0.6,
+            reason: "Verified (offline mode) — \(celebrationMessage(for: type))"
+        )
     }
 }

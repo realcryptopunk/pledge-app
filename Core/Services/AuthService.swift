@@ -7,6 +7,7 @@ class AuthService: ObservableObject {
     @Published var isLoading = true
     @Published var authError: String?
     @Published var userEmail: String?
+    private var isGuest = false
 
     private var authStateTask: Task<Void, Never>?
 
@@ -25,6 +26,7 @@ class AuthService: ObservableObject {
 
     func checkExistingSession() async {
         defer { isLoading = false }
+        guard !isGuest else { return }
         do {
             let session = try await SupabaseConfig.client.auth.session
             isAuthenticated = true
@@ -37,6 +39,7 @@ class AuthService: ObservableObject {
     // MARK: - Auth State Listener
 
     private func listenToAuthChanges() async {
+        guard !isGuest else { return }
         for await (event, session) in SupabaseConfig.client.auth.authStateChanges {
             switch event {
             case .signedIn:
@@ -66,9 +69,24 @@ class AuthService: ObservableObject {
         }
     }
 
+    // MARK: - Guest Mode (Dev)
+
+    func signInAsGuest() {
+        isGuest = true
+        isAuthenticated = true
+        userEmail = "guest@pledge.app"
+        isLoading = false
+        authStateTask?.cancel()
+    }
     // MARK: - Sign Out
 
     func signOut() async {
+        if isGuest {
+            isAuthenticated = false
+            userEmail = nil
+            isGuest = false
+            return
+        }
         do {
             try await SupabaseConfig.client.auth.signOut()
             isAuthenticated = false

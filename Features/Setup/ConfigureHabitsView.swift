@@ -192,6 +192,7 @@ struct ConfigureHabitsView: View {
                 .clipped()
 
                 Text(currentType == .sleep ? "PM" : "AM")
+                    .fixedSize()
                     .pledgeHeadline()
                     .foregroundColor(.secondary)
                     .padding(.leading, 8)
@@ -292,7 +293,7 @@ struct ConfigureHabitsView: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: - Manual Confirm (coldShower, journal, noSocial, noJunkFood)
+    // MARK: - Manual Confirm (coldShower, journal, noJunkFood)
 
     private var manualConfirmSection: some View {
         VStack(spacing: 12) {

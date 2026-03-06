@@ -139,7 +139,7 @@ struct NotificationSettingsView: View {
             let m = Int((habit.targetValue - Double(h)) * 60) - 30
             components.hour = m < 0 ? h - 1 : h
             components.minute = m < 0 ? m + 60 : m
-        case .screenTime, .noSocial:
+        case .screenTime:
             components.hour = 20; components.minute = 0
         case .workout, .gym, .pushups, .pullUps, .jumpingJacks:
             components.hour = 8; components.minute = 0
