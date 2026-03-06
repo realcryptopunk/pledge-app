@@ -425,27 +425,31 @@ private final class PushupRepCounter: @unchecked Sendable {
 
     // Timing
     private var lastRepTime: Date = .distantPast
-    private let minRepInterval: TimeInterval = 0.4
+    private let minRepInterval: TimeInterval = 0.8
 
     // Smoothing factor (0-1, lower = smoother)
-    private let alpha: CGFloat = 0.35
+    private let alpha: CGFloat = 0.25
 
     func shouldProcessFrame() -> Bool {
         frameSkipCounter += 1
-        return frameSkipCounter % 3 == 0
+        return frameSkipCounter % 4 == 0
     }
 
     func process(_ observation: VNHumanBodyPoseObservation) -> Int {
         // Get nose position as primary signal
         guard let nose = try? observation.recognizedPoint(.nose),
-              nose.confidence > 0.3 else {
+              nose.confidence > 0.5 else {
             return repCount
         }
 
         // Also check shoulders are visible (confirms pushup position)
         let leftShoulder = try? observation.recognizedPoint(.leftShoulder)
         let rightShoulder = try? observation.recognizedPoint(.rightShoulder)
-        guard (leftShoulder?.confidence ?? 0) > 0.2 || (rightShoulder?.confidence ?? 0) > 0.2 else {
+        let leftHipCheck = try? observation.recognizedPoint(.leftHip)
+        let rightHipCheck = try? observation.recognizedPoint(.rightHip)
+        let hasShoulders = (leftShoulder?.confidence ?? 0) > 0.4 && (rightShoulder?.confidence ?? 0) > 0.4
+        let hasHip = (leftHipCheck?.confidence ?? 0) > 0.3 || (rightHipCheck?.confidence ?? 0) > 0.3
+        guard hasShoulders && hasHip else {
             return repCount
         }
 
@@ -462,7 +466,7 @@ private final class PushupRepCounter: @unchecked Sendable {
 
         // Adaptive threshold based on visible body height
         let bodyHeight = calculateBodyHeight(observation)
-        let threshold = max(bodyHeight * 0.06, 0.015)
+        let threshold = max(bodyHeight * 0.10, 0.025)
 
         switch phase {
         case .waiting:
