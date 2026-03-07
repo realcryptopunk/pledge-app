@@ -21,3 +21,14 @@ Add geofence-based habit verification using CoreLocation. Supports gym attendanc
 | 02-01 | CoreLocation Service + Project Config | Pending |
 | 02-02 | Model Extensions + Verification Wiring | Pending |
 | 02-03 | Location Picker UI + AddHabitView | Pending |
+
+### Phase 3: wallet-onramp — Not started
+
+Integrate Privy for embedded wallet creation and Coinbase Onramp for fiat funding. Add 3-tier risk profile system (conservative T-bills, moderate Pendle PTs, aggressive tokenized ventures via Robinhood).
+
+| Plan | Name | Status |
+|------|------|--------|
+| 03-01 | Privy SDK + Wallet Service | Pending |
+| 03-02 | Auth Migration + Wallet Creation | Pending |
+| 03-03 | Risk Profile System | Pending |
+| 03-04 | Coinbase Onramp + Deposit Flow | Pending |
