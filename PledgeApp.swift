@@ -8,14 +8,14 @@ struct PledgeApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if showSplash || appState.authService.isLoading {
+                if showSplash || appState.privyManager.isLoading {
                     SplashView()
                         .transition(.opacity)
                 } else if !appState.hasCompletedOnboarding {
                     OnboardingContainerView()
                         .transition(.opacity)
                 } else if !appState.isAuthenticated {
-                    SignInWithAppleView()
+                    PrivyAuthView()
                         .transition(.slideIn)
                 } else if !appState.hasCompletedSetup {
                     SetupContainerView()
@@ -29,7 +29,7 @@ struct PledgeApp: App {
             .environment(\.themeColors, appState.backgroundTheme.colors)
             .preferredColorScheme(appState.backgroundTheme.isLight ? .light : .dark)
             .animation(.easeInOut(duration: 0.4), value: showSplash)
-            .animation(.easeInOut(duration: 0.4), value: appState.authService.isLoading)
+            .animation(.easeInOut(duration: 0.4), value: appState.privyManager.isLoading)
             .animation(.springBounce, value: appState.hasCompletedOnboarding)
             .animation(.springBounce, value: appState.isAuthenticated)
             .animation(.springBounce, value: appState.hasCompletedSetup)

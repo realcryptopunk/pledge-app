@@ -176,6 +176,17 @@ class PrivyManager: ObservableObject {
         }
     }
 
+    // MARK: - Guest Mode (Dev)
+
+    /// Signs in as a guest for development. Sets isAuthenticated=true with no wallet.
+    func signInAsGuest() {
+        isAuthenticated = true
+        walletAddress = nil
+        userPhone = nil
+        authError = nil
+        isLoading = false
+    }
+
     // MARK: - Sign Out
 
     /// Signs the user out and clears all published state.

@@ -1,6 +1,15 @@
 {
-  "originHash" : "a45418e0c9661d4223fcd0f691ed40c37a3306652f1b25b3dc42cba8ec252e11",
+  "originHash" : "6c175ecca21a355a89bcf20defa099b37038776bd8d161cf261771d3f6cceaec",
   "pins" : [
+    {
+      "identity" : "privy-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/privy-io/privy-ios",
+      "state" : {
+        "revision" : "5bac0c102f608989f2b117606bfd3aa35d9feb74",
+        "version" : "2.9.2"
+      }
+    },
     {
       "identity" : "supabase-swift",
       "kind" : "remoteSourceControl",

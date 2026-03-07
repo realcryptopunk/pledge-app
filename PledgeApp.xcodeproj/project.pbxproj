@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -46,6 +46,7 @@
 		826146575315FE85B0C76628 /* PledgeStreakStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8021AE389456CF118680E361 /* PledgeStreakStartView.swift */; };
 		85BB3A66BCD2295FA6BC6B08 /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D38970CE026E2A1CF932C0 /* SupabaseConfig.swift */; };
 		89E5E47AEB99B094AFFCA792 /* PledgeCelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F65311B09BEFD24A3CD2602 /* PledgeCelebrationView.swift */; };
+		950412C9BD7B801824E1B58C /* PrivyAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EE36EEC2A60149E783CC9E /* PrivyAuthView.swift */; };
 		9B35B0AF2088CF71E4BDDA7C /* PledgeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D8376BCD890EE15E97BF80 /* PledgeCards.swift */; };
 		9C5E20CDC94DD8903B1C47CE /* SetStakesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EB4E1730AF827ED92F5817 /* SetStakesView.swift */; };
 		9E3249FA8972FFEA2B31870A /* Vortex in Frameworks */ = {isa = PBXBuildFile; productRef = 6F4550AC64675E0303E4FF39 /* Vortex */; };
@@ -56,6 +57,8 @@
 		AD74C7EA99482EAB10FCFCFC /* AquaBevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23F537B7F56B97FC7B1F35D4 /* AquaBevel.swift */; };
 		BA53DDA3B96D35FB526CF302 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */; };
 		BAE41183129DA66E4A04991A /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DEDED6FBE7157EDD72CD30 /* NotificationSettingsView.swift */; };
+		CEC6921BADF53AF95F710504 /* Privy in Frameworks */ = {isa = PBXBuildFile; productRef = 032AF9947AEC0B8F09B3E329 /* Privy */; };
+		D27751DCB76392AA53BA1F0A /* PrivyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B11935BE63B65139157506 /* PrivyManager.swift */; };
 		D3C4BB43675033C5B4E52EDB /* ChooseHabitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718A352A42414E5955FA4C23 /* ChooseHabitsView.swift */; };
 		D8678D84509A0CE43C43805D /* HabitVerificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D48D6DD71A8C9D93755239D /* HabitVerificationService.swift */; };
 		D89840663A6473CCCF905B47 /* AddHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E816F07B42664E00A0614018 /* AddHabitView.swift */; };
@@ -78,6 +81,7 @@
 		208911E19F8F90C9A88BD75C /* SetupDepositView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupDepositView.swift; sourceTree = "<group>"; };
 		226031696306ADAA024AC893 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		23F537B7F56B97FC7B1F35D4 /* AquaBevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaBevel.swift; sourceTree = "<group>"; };
+		36B11935BE63B65139157506 /* PrivyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivyManager.swift; sourceTree = "<group>"; };
 		38D8376BCD890EE15E97BF80 /* PledgeCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeCards.swift; sourceTree = "<group>"; };
 		3AD91D2AB87F830628472335 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
 		45D64C5317E01BAAA55673FC /* PledgeAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeAnimations.swift; sourceTree = "<group>"; };
@@ -110,6 +114,7 @@
 		A4AB7F258E58E8BE02C3CB08 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		B5E5D6102C9AC89775547155 /* PledgeTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeTypography.swift; sourceTree = "<group>"; };
 		B8C338151783FE4C3B8FF523 /* PledgeApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PledgeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B9EE36EEC2A60149E783CC9E /* PrivyAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivyAuthView.swift; sourceTree = "<group>"; };
 		C73B080C71D34437D2B420E0 /* HabitActivityGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitActivityGrid.swift; sourceTree = "<group>"; };
 		C7657D7B3133359058ABB5E8 /* PledgeHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeHaptics.swift; sourceTree = "<group>"; };
 		D01DDB6F0EF3836344A536ED /* CustomNumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNumberPad.swift; sourceTree = "<group>"; };
@@ -134,6 +139,7 @@
 			files = (
 				9E3249FA8972FFEA2B31870A /* Vortex in Frameworks */,
 				76109210ED5DB9EE13E95BB9 /* Supabase in Frameworks */,
+				CEC6921BADF53AF95F710504 /* Privy in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -160,6 +166,7 @@
 				E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */,
 				94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */,
 				82D8E42DF7DAE008F2F55720 /* PhotoVerificationService.swift */,
+				36B11935BE63B65139157506 /* PrivyManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -167,6 +174,7 @@
 		282F94196AC4189A01013F0E /* Auth */ = {
 			isa = PBXGroup;
 			children = (
+				B9EE36EEC2A60149E783CC9E /* PrivyAuthView.swift */,
 				79160ACE5732BC2449E1F285 /* SignInWithAppleView.swift */,
 			);
 			path = Auth;
@@ -342,6 +350,7 @@
 			packageProductDependencies = (
 				6F4550AC64675E0303E4FF39 /* Vortex */,
 				5AE6D03744CC6BC77704E994 /* Supabase */,
+				032AF9947AEC0B8F09B3E329 /* Privy */,
 			);
 			productName = PledgeApp;
 			productReference = B8C338151783FE4C3B8FF523 /* PledgeApp.app */;
@@ -370,12 +379,11 @@
 				en,
 			);
 			mainGroup = 0209CFF5B16F1911DEA30034;
-			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				57034E4944B98037B08FF984 /* XCRemoteSwiftPackageReference "privy-ios" */,
 				7D4B475265E8A62207C35E14 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				A279F73A8637152C8D577B10 /* XCRemoteSwiftPackageReference "Vortex" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -443,6 +451,8 @@
 				826146575315FE85B0C76628 /* PledgeStreakStartView.swift in Sources */,
 				4933E492BC27A5D57DC89379 /* PledgeTypography.swift in Sources */,
 				0AA72C7828051137A15E352E /* PortfolioView.swift in Sources */,
+				950412C9BD7B801824E1B58C /* PrivyAuthView.swift in Sources */,
+				D27751DCB76392AA53BA1F0A /* PrivyManager.swift in Sources */,
 				1BCF3C7F5DFF196E87FDCB18 /* PushupCounterView.swift in Sources */,
 				6C12ED84926FDE95F2B7589D /* RollingCounter.swift in Sources */,
 				9C5E20CDC94DD8903B1C47CE /* SetStakesView.swift in Sources */,
@@ -672,6 +682,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		57034E4944B98037B08FF984 /* XCRemoteSwiftPackageReference "privy-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/privy-io/privy-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		7D4B475265E8A62207C35E14 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase/supabase-swift";
@@ -691,6 +709,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		032AF9947AEC0B8F09B3E329 /* Privy */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 57034E4944B98037B08FF984 /* XCRemoteSwiftPackageReference "privy-ios" */;
+			productName = Privy;
+		};
 		5AE6D03744CC6BC77704E994 /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 7D4B475265E8A62207C35E14 /* XCRemoteSwiftPackageReference "supabase-swift" */;

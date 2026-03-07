@@ -7,7 +7,9 @@ class AppState: ObservableObject {
     @AppStorage("hasCompletedSetup") var hasCompletedSetup = false
     @AppStorage("backgroundTheme") var backgroundTheme: BackgroundTheme = .aqua
     @AppStorage("userName") var userName = ""
+    @AppStorage("walletAddress") var walletAddress: String = ""
     @Published var isAuthenticated = false
+    @Published var userPhone: String = ""
     @Published var habits: [Habit] = []
     @Published var vaultBalance: Double = 247.00
     @Published var streakCount: Int = 0
@@ -20,7 +22,10 @@ class AppState: ObservableObject {
     // MARK: - Auth
 
     let authService = AuthService()
+    let privyManager = PrivyManager.shared
     private var authCancellable: AnyCancellable?
+    private var privyAuthCancellable: AnyCancellable?
+    private var privyWalletCancellable: AnyCancellable?
 
     // MARK: - Yield
 
@@ -57,11 +62,27 @@ class AppState: ObservableObject {
         observeGeofenceNotifications()
         startYieldTimer()
 
-        authCancellable = authService.$isAuthenticated
+        // Initialize Privy SDK
+        privyManager.initialize()
+
+        // Drive isAuthenticated from PrivyManager (replacing authService)
+        privyAuthCancellable = privyManager.$isAuthenticated
             .receive(on: DispatchQueue.main)
             .sink { [weak self] value in
                 self?.isAuthenticated = value
             }
+
+        // Sync wallet address from PrivyManager to persisted @AppStorage
+        privyWalletCancellable = privyManager.$walletAddress
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                self?.walletAddress = value ?? ""
+            }
+
+        // Keep authService subscription for backward compatibility (not driving routing)
+        authCancellable = authService.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .sink { _ in }
     }
 
     // MARK: - Yield Timer
@@ -413,6 +434,7 @@ class AppState: ObservableObject {
     // MARK: - Auth
 
     func signOut() async {
+        await privyManager.signOut()
         await authService.signOut()
         // Clear persisted data
         UserDefaults.standard.removeObject(forKey: Self.savedHabitsKey)
@@ -425,6 +447,8 @@ class AppState: ObservableObject {
         investmentGrowth = 0
         streakCount = 0
         userName = ""
+        walletAddress = ""
+        userPhone = ""
         // Reset flow state (triggers navigation back to sign-in)
         hasCompletedOnboarding = false
         hasCompletedSetup = false
