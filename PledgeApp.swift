@@ -42,6 +42,9 @@ struct PledgeApp: App {
                 }
             }
             .task {
+                // Restore Privy session from keychain on relaunch
+                await appState.privyManager.checkAuthState()
+
                 // Run initial verification after auth (permissions are handled in setup flow)
                 guard appState.isAuthenticated else { return }
                 await appState.verifyTodayHabits()
