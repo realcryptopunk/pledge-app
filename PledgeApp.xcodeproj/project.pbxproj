@@ -19,7 +19,6 @@
 		18F054B1D6BA1C438C3970AE /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226031696306ADAA024AC893 /* SplashView.swift */; };
 		1BCF3C7F5DFF196E87FDCB18 /* PushupCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58804F5578B3CF9EA06B192F /* PushupCounterView.swift */; };
 		1FCE8DE6571B33EC34F35849 /* AquaTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9798D8F8A6AEF76AA1D917F6 /* AquaTypography.swift */; };
-		20E533B63AEDF7646E2A9E52 /* UsernameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C07125FCE3D04C0C524B9B1 /* UsernameView.swift */; };
 		20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01DDB6F0EF3836344A536ED /* CustomNumberPad.swift */; };
 		229422FECE24CAD71401142C /* OnboardingPage3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C52DDE25BB46980AD48293B /* OnboardingPage3.swift */; };
 		22AB9AF5C33E17075CF65E12 /* SetupFlowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */; };
@@ -94,7 +93,6 @@
 		3AD91D2AB87F830628472335 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
 		45D64C5317E01BAAA55673FC /* PledgeAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeAnimations.swift; sourceTree = "<group>"; };
 		49A01AB3752386F6E773267F /* PledgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeApp.swift; sourceTree = "<group>"; };
-		4C07125FCE3D04C0C524B9B1 /* UsernameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameView.swift; sourceTree = "<group>"; };
 		4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowState.swift; sourceTree = "<group>"; };
 		50F35BF85EEEA0CE3A5604E9 /* ExerciseCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseCounterView.swift; sourceTree = "<group>"; };
 		517A347A9B0345FA9A58EB78 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -221,7 +219,6 @@
 				4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */,
 				7DDC77336647A692AF44789B /* SetupSuccessView.swift */,
 				A3C844D6478A1AB689046F39 /* UsernameSetupView.swift */,
-				4C07125FCE3D04C0C524B9B1 /* UsernameView.swift */,
 			);
 			path = Setup;
 			sourceTree = "<group>";
@@ -500,7 +497,6 @@
 				85BB3A66BCD2295FA6BC6B08 /* SupabaseConfig.swift in Sources */,
 				9B6142C21E3D155F9B183307 /* SupabaseService.swift in Sources */,
 				9A55E6A19F67BBE39241CFF4 /* UsernameSetupView.swift in Sources */,
-				20E533B63AEDF7646E2A9E52 /* UsernameView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
