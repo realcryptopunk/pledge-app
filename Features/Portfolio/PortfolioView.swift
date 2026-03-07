@@ -9,16 +9,6 @@ struct PortfolioDataPoint: Identifiable {
     let value: Double
 }
 
-struct AllocationItem: Identifiable {
-    let id = UUID()
-    let symbol: String
-    let name: String
-    let icon: String
-    let percentage: Double
-    let fixedAPY: Double
-    let color: Color
-}
-
 struct TransactionItem: Identifiable {
     let id = UUID()
     let icon: String
@@ -41,16 +31,23 @@ struct PortfolioView: View {
     @State private var appeared = false
     @Environment(\.themeColors) var theme
 
-    static let allocations: [AllocationItem] = [
-        AllocationItem(symbol: "PT-sUSDai", name: "Pendle sUSDai", icon: "🔒", percentage: 0.35, fixedAPY: 9.0, color: .pledgeBlue),
-        AllocationItem(symbol: "PT-USDai", name: "Pendle USDai", icon: "🏦", percentage: 0.25, fixedAPY: 5.5, color: .pledgeViolet),
-        AllocationItem(symbol: "PT-thBILL", name: "Pendle T-Bills", icon: "📜", percentage: 0.20, fixedAPY: 5.7, color: .pledgeGreen),
-        AllocationItem(symbol: "PT-weETH", name: "Pendle weETH", icon: "⟠", percentage: 0.12, fixedAPY: 2.7, color: .pledgeOrange),
-        AllocationItem(symbol: "PT-gUSDC", name: "Pendle gUSDC", icon: "💵", percentage: 0.08, fixedAPY: 6.6, color: .cyan),
-    ]
+    private var allocations: [AllocationItem] {
+        appState.riskProfile.allocations
+    }
+
+    private var isAggressiveProfile: Bool {
+        appState.riskProfile == .aggressive
+    }
 
     private var weightedAPY: Double {
-        Self.allocations.reduce(0) { $0 + $1.percentage * $1.fixedAPY }
+        allocations.reduce(0) { $0 + $1.percentage * $1.fixedAPY }
+    }
+
+    private var apyDisplayString: String {
+        if isAggressiveProfile {
+            return "Variable"
+        }
+        return String(format: "%.1f%%", weightedAPY)
     }
 
     private var daysForRange: Int {
@@ -95,7 +92,8 @@ struct PortfolioView: View {
             .toolbarColorScheme(theme.isLight ? .light : .dark, for: .navigationBar)
             .sheet(isPresented: $showAllocation) {
                 AllocationDetailView(
-                    allocations: Self.allocations,
+                    allocations: allocations,
+                    riskProfile: appState.riskProfile,
                     totalValue: appState.investmentPoolValue
                 )
             }
@@ -140,11 +138,24 @@ struct PortfolioView: View {
                 .padding(.vertical, 4)
                 .background(Color.pledgeGreen.opacity(0.12))
                 .clipShape(Capsule())
+
+                // Risk tier badge
+                HStack(spacing: 5) {
+                    Image(systemName: appState.riskProfile.icon)
+                        .font(.system(size: 10, weight: .bold))
+                    Text("\(appState.riskProfile.title) Risk")
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                .foregroundColor(appState.riskProfile.color)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(appState.riskProfile.color.opacity(0.12))
+                .clipShape(Capsule())
             }
 
             // Allocation pill row
             HStack(spacing: 6) {
-                ForEach(Self.allocations) { alloc in
+                ForEach(allocations) { alloc in
                     HStack(spacing: 4) {
                         Circle()
                             .fill(alloc.color)
@@ -245,7 +256,7 @@ struct PortfolioView: View {
                         .foregroundColor(.primary)
                     Spacer()
                     HStack(spacing: 4) {
-                        Text("\(weightedAPY, specifier: "%.1f")% avg APY")
+                        Text(isAggressiveProfile ? "Variable APY" : "\(weightedAPY, specifier: "%.1f")% avg APY")
                             .font(.system(size: 12, weight: .medium, design: .monospaced))
                             .foregroundColor(.pledgeGreen)
                         Image(systemName: "chevron.right")
@@ -257,10 +268,10 @@ struct PortfolioView: View {
                 // Stacked bar
                 GeometryReader { geo in
                     HStack(spacing: 2) {
-                        ForEach(Self.allocations) { alloc in
+                        ForEach(allocations) { alloc in
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(alloc.color)
-                                .frame(width: max(8, (geo.size.width - CGFloat(Self.allocations.count - 1) * 2) * alloc.percentage))
+                                .frame(width: max(8, (geo.size.width - CGFloat(allocations.count - 1) * 2) * alloc.percentage))
                         }
                     }
                 }
@@ -268,14 +279,14 @@ struct PortfolioView: View {
 
                 // Labels
                 HStack(spacing: 0) {
-                    ForEach(Self.allocations) { alloc in
+                    ForEach(allocations) { alloc in
                         VStack(spacing: 2) {
                             Text(alloc.icon)
                                 .font(.system(size: 16))
-                            Text(alloc.symbol.replacingOccurrences(of: "PT-", with: ""))
+                            Text(alloc.symbol.replacingOccurrences(of: "PT-", with: "").replacingOccurrences(of: "RH-", with: ""))
                                 .font(.system(size: 9, weight: .medium))
                                 .foregroundColor(.secondary)
-                            Text("\(alloc.fixedAPY, specifier: "%.1f")%")
+                            Text(alloc.fixedAPY > 0 ? "\(alloc.fixedAPY, specifier: "%.1f")%" : "Var")
                                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                                 .foregroundColor(alloc.color)
                         }
@@ -300,7 +311,7 @@ struct PortfolioView: View {
         VStack(spacing: 0) {
             StatRow(icon: "📈", label: "Total invested", value: "$\(Int(appState.investmentPoolValue))")
             StatRowDivider()
-            StatRow(icon: "💰", label: "Weighted APY", value: "\(String(format: "%.1f", weightedAPY))%", valueColor: .pledgeGreen)
+            StatRow(icon: "💰", label: "Weighted APY", value: apyDisplayString, valueColor: .pledgeGreen)
             StatRowDivider()
             StatRow(icon: "🔒", label: "Vault unlock", value: "47 days")
             StatRowDivider()
@@ -350,7 +361,7 @@ struct PortfolioView: View {
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
 
-            Text("When you miss a habit pledge, your stake gets invested into yield-generating Pendle PTs on Arbitrum.")
+            Text("When you miss a habit pledge, your stake gets invested based on your \(appState.riskProfile.title.lowercased()) risk profile.")
                 .font(.system(size: 15))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -358,10 +369,10 @@ struct PortfolioView: View {
 
             // Show what they'd earn
             VStack(spacing: 8) {
-                Text("Avg fixed yield")
+                Text(isAggressiveProfile ? "Target return" : "Avg fixed yield")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.secondary)
-                Text("\(weightedAPY, specifier: "%.1f")% APY")
+                Text(isAggressiveProfile ? "15-50%+" : "\(weightedAPY, specifier: "%.1f")% APY")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(.pledgeGreen)
             }
@@ -443,9 +454,12 @@ struct PortfolioView: View {
 
 struct AllocationDetailView: View {
     let allocations: [AllocationItem]
+    let riskProfile: RiskProfile
     let totalValue: Double
     @Environment(\.dismiss) private var dismiss
     @Environment(\.themeColors) var theme
+
+    private var isAggressive: Bool { riskProfile == .aggressive }
 
     private var weightedAPY: Double {
         allocations.reduce(0) { $0 + $1.percentage * $1.fixedAPY }
@@ -467,7 +481,7 @@ struct AllocationDetailView: View {
                             Image(systemName: "percent")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.pledgeGreen)
-                            Text("Weighted avg: \(weightedAPY, specifier: "%.1f")% fixed APY")
+                            Text(isAggressive ? "Variable equity returns" : "Weighted avg: \(weightedAPY, specifier: "%.1f")% fixed APY")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.pledgeGreen)
                         }
@@ -493,7 +507,7 @@ struct AllocationDetailView: View {
                                         Text(alloc.name)
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(.primary)
-                                        Text("\(alloc.fixedAPY, specifier: "%.1f")% fixed APY")
+                                        Text(alloc.fixedAPY > 0 ? "\(alloc.fixedAPY, specifier: "%.1f")% fixed APY" : "Variable return")
                                             .font(.system(size: 12, weight: .medium))
                                             .foregroundColor(.pledgeGreen)
                                     }
@@ -522,19 +536,38 @@ struct AllocationDetailView: View {
 
                         // Info
                         VStack(spacing: 8) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "info.circle")
-                                    .foregroundColor(.secondary.opacity(0.5))
-                                Text("All yields are fixed-rate via Pendle Principal Tokens on Arbitrum. Auto-rebalances weekly.")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
-                            }
-                            HStack(spacing: 6) {
-                                Image(systemName: "shield.checkered")
-                                    .foregroundColor(.secondary.opacity(0.5))
-                                Text("Principal protected — PTs mature at full face value regardless of market conditions.")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
+                            if isAggressive {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "info.circle")
+                                        .foregroundColor(.secondary.opacity(0.5))
+                                    Text("Equity positions in private companies tokenized via Robinhood. Returns are variable and equity-based.")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                HStack(spacing: 6) {
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .foregroundColor(.pledgeOrange.opacity(0.6))
+                                    Text("Higher risk/reward profile. Positions may be illiquid with 12-36 month lock periods.")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                            } else {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "info.circle")
+                                        .foregroundColor(.secondary.opacity(0.5))
+                                    Text(riskProfile == .conservative
+                                        ? "US Treasury Bills backed by the full faith and credit of the US government. Auto-rolls at maturity."
+                                        : "All yields are fixed-rate via Pendle Principal Tokens on Arbitrum. Auto-rebalances weekly.")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
+                                HStack(spacing: 6) {
+                                    Image(systemName: "shield.checkered")
+                                        .foregroundColor(.secondary.opacity(0.5))
+                                    Text("Principal protected — \(riskProfile == .conservative ? "government-backed securities" : "PTs mature at full face value regardless of market conditions").")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                         .padding(.horizontal, 24)
