@@ -45,3 +45,30 @@ Supabase backend with full data persistence, real-time subscriptions, Coinbase O
 | 04-04 | Data Persistence (Habits + Logs) | Complete |
 | 04-05 | Gemini Proxy + Real-time | Complete |
 | 04-06 | Username + Social Leaderboards | Complete |
+
+## Milestone 2: Investment Infrastructure
+
+### Phase 5: investment-contracts
+
+PledgeVault smart contract on Arbitrum. Non-custodial vault that pulls pre-approved USDC from user wallets and swaps to Pendle Principal Tokens via Pendle Router. Relayer-operated with emergency withdraw for users. Research: Complete (DISCOVERY.md).
+
+| Plan | Name | Status |
+|------|------|--------|
+| 05-01 | Foundry Setup + PledgeVault Contract | Pending |
+| 05-02 | Contract Tests | Pending |
+
+### Phase 6: investment-backend
+
+Backend service for automated investment execution. Pendle API integration (market discovery, optimal PT selection), relayer wallet management (Privy Server Wallet or EOA), Supabase edge function trigger on habit failure, portfolio value sync.
+
+| Plan | Name | Status |
+|------|------|--------|
+| — | Not yet planned | — |
+
+### Phase 7: portfolio-integration
+
+iOS app integration with real on-chain data. USDC approval flow during onboarding, real portfolio values from contract state, maturity tracking, withdrawal UI.
+
+| Plan | Name | Status |
+|------|------|--------|
+| — | Not yet planned | — |
