@@ -2,8 +2,10 @@ import SwiftUI
 
 struct SetupDepositView: View {
     @Bindable var flowState: SetupFlowState
+    @EnvironmentObject var appState: AppState
     @Environment(\.themeColors) var theme
     @State private var depositString = ""
+    @State private var showOnramp = false
 
     private let quickAmounts = ["50", "100", "200", "500"]
 
@@ -100,16 +102,21 @@ struct SetupDepositView: View {
 
             Spacer().frame(height: 20)
 
-            // MARK: - Apple Pay Button
+            // MARK: - Fund with Coinbase Button
             Button {
                 PPHaptic.heavy()
-                flowState.depositAmount = depositValue
-                flowState.goForward()
+                if appState.walletAddress.isEmpty {
+                    // Guest mode: skip real onramp, just advance flow
+                    flowState.depositAmount = depositValue
+                    flowState.goForward()
+                } else {
+                    showOnramp = true
+                }
             } label: {
                 HStack(spacing: 8) {
-                    Image(systemName: "apple.logo")
+                    Image(systemName: "dollarsign.circle.fill")
                         .font(.system(size: 18))
-                    Text("Pay")
+                    Text("Fund with Coinbase")
                         .font(.system(size: 17, weight: .semibold))
                 }
                 .foregroundColor(.white)
@@ -117,21 +124,30 @@ struct SetupDepositView: View {
                 .frame(height: 52)
                 .background(
                     Capsule()
-                        .fill(Color.black)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color(red: 0.0, green: 0.32, blue: 1.0), Color(red: 0.0, green: 0.25, blue: 0.85)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                 )
                 .clipShape(Capsule())
-                .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                .shadow(color: Color(red: 0.0, green: 0.32, blue: 1.0).opacity(0.3), radius: 8, y: 4)
             }
             .disabled(!canDeposit)
             .opacity(canDeposit ? 1.0 : 0.35)
             .padding(.horizontal, 20)
 
-            // Or pay with card
+            // Or pay with card (also opens Coinbase — supports card payments)
             Button {
-                // Visual only
                 PPHaptic.light()
-                flowState.depositAmount = depositValue
-                flowState.goForward()
+                if appState.walletAddress.isEmpty {
+                    flowState.depositAmount = depositValue
+                    flowState.goForward()
+                } else {
+                    showOnramp = true
+                }
             } label: {
                 Text("Or pay with card")
             }
@@ -144,12 +160,23 @@ struct SetupDepositView: View {
             HStack(spacing: 6) {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 10))
-                Text("Funds held securely. Withdraw anytime.")
+                Text("Powered by Coinbase. Funds sent as USDC to your wallet.")
                     .font(.system(size: 11, weight: .medium))
             }
             .foregroundColor(.secondary.opacity(0.6))
             .padding(.top, 8)
             .padding(.bottom, 16)
+        }
+        .sheet(isPresented: $showOnramp) {
+            CoinbaseOnrampView(
+                walletAddress: appState.walletAddress,
+                amount: depositValue,
+                onDismiss: {
+                    showOnramp = false
+                    flowState.depositAmount = depositValue
+                    flowState.goForward()
+                }
+            )
         }
     }
 }
