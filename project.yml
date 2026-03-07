@@ -15,6 +15,9 @@ packages:
   Supabase:
     url: https://github.com/supabase/supabase-swift
     from: "2.0.0"
+  PrivySDK:
+    url: https://github.com/privy-io/privy-ios
+    from: "2.0.0"
 targets:
   PledgeApp:
     type: application
@@ -28,6 +31,8 @@ targets:
       - package: Vortex
       - package: Supabase
         product: Supabase
+      - package: PrivySDK
+        product: Privy
     entitlements:
       path: PledgeApp.entitlements
       properties:
