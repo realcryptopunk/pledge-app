@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01BAA8F59D9400F4E2308A1E /* CoinbaseOnrampView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0737B0801FC046D7BBDA948 /* CoinbaseOnrampView.swift */; };
 		064DB25B56D57C68022954E4 /* SetupSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDC77336647A692AF44789B /* SetupSuccessView.swift */; };
 		098867D06C181213AA675461 /* AquaGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93BE91C85702554B2F2DAC79 /* AquaGlass.swift */; };
 		0AA72C7828051137A15E352E /* PortfolioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B7BEDFB20FA262572543418 /* PortfolioView.swift */; };
@@ -34,6 +35,7 @@
 		50E0CA1A3BC652160F86A410 /* SetupDepositView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 208911E19F8F90C9A88BD75C /* SetupDepositView.swift */; };
 		52A19F180109CC802B7ADFB3 /* AquaTextures.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A6CE9566B67549CC9D674E /* AquaTextures.swift */; };
 		57D4690B106472E554E6F86B /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4AB7F258E58E8BE02C3CB08 /* MainTabView.swift */; };
+		59A4BE1068030DB9BA73DBAC /* RiskProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CAC1C611A06368669497022 /* RiskProfileView.swift */; };
 		6110514850C8A923BB53E886 /* SignInWithAppleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79160ACE5732BC2449E1F285 /* SignInWithAppleView.swift */; };
 		61159CB611DF082EF7A98B55 /* PledgeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A01AB3752386F6E773267F /* PledgeApp.swift */; };
 		638B78F401097CAE9F7CA750 /* BackgroundTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 193BC0361253F9527274DE7E /* BackgroundTheme.swift */; };
@@ -41,6 +43,7 @@
 		6C12ED84926FDE95F2B7589D /* RollingCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AE16CCB1A575FB480FD9C9 /* RollingCounter.swift */; };
 		6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B142E203612DBFEE96E71FB /* ConfigureHabitsView.swift */; };
 		70A7746FD8214BD8A459E0D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EA62336B1D05F5E2E4502485 /* Assets.xcassets */; };
+		712085E923AC624D7299A399 /* EnvConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296CA2AD6371685134178657 /* EnvConfig.swift */; };
 		76109210ED5DB9EE13E95BB9 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 5AE6D03744CC6BC77704E994 /* Supabase */; };
 		7B9F1586F7013EDE4E26ACD1 /* HabitActivityGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = C73B080C71D34437D2B420E0 /* HabitActivityGrid.swift */; };
 		826146575315FE85B0C76628 /* PledgeStreakStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8021AE389456CF118680E361 /* PledgeStreakStartView.swift */; };
@@ -81,6 +84,7 @@
 		208911E19F8F90C9A88BD75C /* SetupDepositView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupDepositView.swift; sourceTree = "<group>"; };
 		226031696306ADAA024AC893 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		23F537B7F56B97FC7B1F35D4 /* AquaBevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaBevel.swift; sourceTree = "<group>"; };
+		296CA2AD6371685134178657 /* EnvConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvConfig.swift; sourceTree = "<group>"; };
 		36B11935BE63B65139157506 /* PrivyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivyManager.swift; sourceTree = "<group>"; };
 		38D8376BCD890EE15E97BF80 /* PledgeCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeCards.swift; sourceTree = "<group>"; };
 		3AD91D2AB87F830628472335 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
@@ -99,6 +103,7 @@
 		5D48D6DD71A8C9D93755239D /* HabitVerificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitVerificationService.swift; sourceTree = "<group>"; };
 		610F2A5B8B1B27FD1B711639 /* SocialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialView.swift; sourceTree = "<group>"; };
 		6BCCB87D5708C7FE91E53D05 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		6CAC1C611A06368669497022 /* RiskProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiskProfileView.swift; sourceTree = "<group>"; };
 		718A352A42414E5955FA4C23 /* ChooseHabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseHabitsView.swift; sourceTree = "<group>"; };
 		72D38970CE026E2A1CF932C0 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
 		79160ACE5732BC2449E1F285 /* SignInWithAppleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInWithAppleView.swift; sourceTree = "<group>"; };
@@ -119,6 +124,7 @@
 		C7657D7B3133359058ABB5E8 /* PledgeHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeHaptics.swift; sourceTree = "<group>"; };
 		D01DDB6F0EF3836344A536ED /* CustomNumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNumberPad.swift; sourceTree = "<group>"; };
 		D03F8D12D74554C800FB1114 /* LocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
+		D0737B0801FC046D7BBDA948 /* CoinbaseOnrampView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinbaseOnrampView.swift; sourceTree = "<group>"; };
 		E077FB4B49BAD5F3A56C236F /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitsView.swift; sourceTree = "<group>"; };
@@ -184,6 +190,7 @@
 			isa = PBXGroup;
 			children = (
 				6BCCB87D5708C7FE91E53D05 /* AppState.swift */,
+				296CA2AD6371685134178657 /* EnvConfig.swift */,
 				517A347A9B0345FA9A58EB78 /* Models.swift */,
 				72D38970CE026E2A1CF932C0 /* SupabaseConfig.swift */,
 				845CB51DABBFFDBEEFB46833 /* Design */,
@@ -198,6 +205,7 @@
 				718A352A42414E5955FA4C23 /* ChooseHabitsView.swift */,
 				5B142E203612DBFEE96E71FB /* ConfigureHabitsView.swift */,
 				3AD91D2AB87F830628472335 /* PermissionsView.swift */,
+				6CAC1C611A06368669497022 /* RiskProfileView.swift */,
 				F6EB4E1730AF827ED92F5817 /* SetStakesView.swift */,
 				1A80A7CCD0CE6FEBB8AA3036 /* SetupContainerView.swift */,
 				208911E19F8F90C9A88BD75C /* SetupDepositView.swift */,
@@ -215,6 +223,14 @@
 			path = Home;
 			sourceTree = "<group>";
 		};
+		6496CAFAE782E69C9043EFDC /* Funding */ = {
+			isa = PBXGroup;
+			children = (
+				D0737B0801FC046D7BBDA948 /* CoinbaseOnrampView.swift */,
+			);
+			path = Funding;
+			sourceTree = "<group>";
+		};
 		6B4FCA4BDA93C3E1A4B19A32 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -227,6 +243,7 @@
 			isa = PBXGroup;
 			children = (
 				282F94196AC4189A01013F0E /* Auth */,
+				6496CAFAE782E69C9043EFDC /* Funding */,
 				F43C481554E8735EC4A9C0B1 /* Habits */,
 				60A464B733AD2DCE110ABD16 /* Home */,
 				97B5BCFD4C58FD1535887044 /* Main */,
@@ -418,9 +435,11 @@
 				638B78F401097CAE9F7CA750 /* BackgroundTheme.swift in Sources */,
 				A05DE1ABD03236251B074977 /* BeRealVerificationView.swift in Sources */,
 				D3C4BB43675033C5B4E52EDB /* ChooseHabitsView.swift in Sources */,
+				01BAA8F59D9400F4E2308A1E /* CoinbaseOnrampView.swift in Sources */,
 				6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */,
 				20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */,
 				F6449EAB552487CA51C7D658 /* EditHabitView.swift in Sources */,
+				712085E923AC624D7299A399 /* EnvConfig.swift in Sources */,
 				A276444A0034DB6D4F84EF74 /* ExerciseCounterView.swift in Sources */,
 				35348CC84A4F6578A23814B4 /* FloatingOrbs.swift in Sources */,
 				7B9F1586F7013EDE4E26ACD1 /* HabitActivityGrid.swift in Sources */,
@@ -454,6 +473,7 @@
 				950412C9BD7B801824E1B58C /* PrivyAuthView.swift in Sources */,
 				D27751DCB76392AA53BA1F0A /* PrivyManager.swift in Sources */,
 				1BCF3C7F5DFF196E87FDCB18 /* PushupCounterView.swift in Sources */,
+				59A4BE1068030DB9BA73DBAC /* RiskProfileView.swift in Sources */,
 				6C12ED84926FDE95F2B7589D /* RollingCounter.swift in Sources */,
 				9C5E20CDC94DD8903B1C47CE /* SetStakesView.swift in Sources */,
 				3C788C62222C7F3021A3B9F1 /* SettingsView.swift in Sources */,
