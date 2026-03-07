@@ -1,8 +1,10 @@
 import Foundation
 
 enum EnvConfig {
-    static func value(for key: String) -> String {
-        ProcessInfo.processInfo.environment[key] ?? ""
+    // MARK: - Bundle Reader
+
+    private static func value(for key: String) -> String {
+        Bundle.main.infoDictionary?[key] as? String ?? ""
     }
 
     // MARK: - Privy
@@ -13,4 +15,13 @@ enum EnvConfig {
     // MARK: - Coinbase
 
     static var coinbaseOnrampAppId: String { value(for: "COINBASE_ONRAMP_APP_ID") }
+
+    // MARK: - Supabase
+
+    static var supabaseURL: String { value(for: "SUPABASE_URL") }
+    static var supabaseAnonKey: String { value(for: "SUPABASE_ANON_KEY") }
+
+    // MARK: - Gemini
+
+    static var geminiApiKey: String { value(for: "GEMINI_API_KEY") }
 }

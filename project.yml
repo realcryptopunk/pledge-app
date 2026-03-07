@@ -27,15 +27,44 @@ targets:
       - path: Core
       - path: Features
       - path: Assets.xcassets
-    resources:
-      - path: .env
-        optional: true
+    configFiles:
+      Debug: Secrets.xcconfig
+      Release: Secrets.xcconfig
     dependencies:
       - package: Vortex
       - package: Supabase
         product: Supabase
       - package: PrivySDK
         product: Privy
+    info:
+      path: Info.plist
+      properties:
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations: {}
+        UIApplicationSupportsIndirectInputEvents: true
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIBackgroundModes:
+          - location
+        NSHealthShareUsageDescription: "Pledge uses your health data to automatically verify habits like steps, sleep, and workouts."
+        NSHealthUpdateUsageDescription: "Pledge records your habit completion to HealthKit."
+        NSMotionUsageDescription: "Pledge uses motion data to verify step-based habits."
+        NSCameraUsageDescription: "Pledge uses your camera to count exercise reps like pushups using body pose detection."
+        NSLocationWhenInUseUsageDescription: "Pledge uses your location to verify habits like gym attendance and outdoor time."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Pledge monitors your location in the background to automatically verify location-based habits like gym visits."
+        PRIVY_APP_ID: $(PRIVY_APP_ID)
+        PRIVY_APP_CLIENT_ID: $(PRIVY_APP_CLIENT_ID)
+        COINBASE_ONRAMP_APP_ID: $(COINBASE_ONRAMP_APP_ID)
+        SUPABASE_URL: $(SUPABASE_URL)
+        SUPABASE_ANON_KEY: $(SUPABASE_ANON_KEY)
+        GEMINI_API_KEY: $(GEMINI_API_KEY)
     entitlements:
       path: PledgeApp.entitlements
       properties:
@@ -46,20 +75,6 @@ targets:
     settings:
       base:
         CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION: YES
-        INFOPLIST_GENERATION: YES
         PRODUCT_BUNDLE_IDENTIFIER: com.navro.pledgeapp
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
-        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
-        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
-        INFOPLIST_KEY_NSHealthShareUsageDescription: "Pledge uses your health data to automatically verify habits like steps, sleep, and workouts."
-        INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Pledge records your habit completion to HealthKit."
-        INFOPLIST_KEY_NSMotionUsageDescription: "Pledge uses motion data to verify step-based habits."
-        INFOPLIST_KEY_NSCameraUsageDescription: "Pledge uses your camera to count exercise reps like pushups using body pose detection."
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "Pledge uses your location to verify habits like gym attendance and outdoor time."
-        INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "Pledge monitors your location in the background to automatically verify location-based habits like gym visits."
-        INFOPLIST_KEY_UIBackgroundModes: "location"

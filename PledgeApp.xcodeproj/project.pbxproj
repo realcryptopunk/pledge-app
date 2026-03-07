@@ -116,6 +116,7 @@
 		8021AE389456CF118680E361 /* PledgeStreakStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeStreakStartView.swift; sourceTree = "<group>"; };
 		82D8E42DF7DAE008F2F55720 /* PhotoVerificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoVerificationService.swift; sourceTree = "<group>"; };
 		8BC231027668FF614F7560CA /* PledgeButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeButtons.swift; sourceTree = "<group>"; };
+		8C6574EB31FFD35DADA3B416 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		93BE91C85702554B2F2DAC79 /* AquaGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaGlass.swift; sourceTree = "<group>"; };
 		94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		9798D8F8A6AEF76AA1D917F6 /* AquaTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaTypography.swift; sourceTree = "<group>"; };
@@ -165,6 +166,7 @@
 				49A01AB3752386F6E773267F /* PledgeApp.swift */,
 				50DED0B13A2C9F4A4B64928A /* Core */,
 				81C8A179ECB5DCA5DCAF3265 /* Features */,
+				6158EC484AFCFD18CCF97B52 /* pledge-app */,
 				6B4FCA4BDA93C3E1A4B19A32 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -229,6 +231,15 @@
 				5CC9B4DA152DFDD26C57996E /* HomeView.swift */,
 			);
 			path = Home;
+			sourceTree = "<group>";
+		};
+		6158EC484AFCFD18CCF97B52 /* pledge-app */ = {
+			isa = PBXGroup;
+			children = (
+				8C6574EB31FFD35DADA3B416 /* Secrets.xcconfig */,
+			);
+			name = "pledge-app";
+			path = .;
 			sourceTree = "<group>";
 		};
 		6496CAFAE782E69C9043EFDC /* Funding */ = {
@@ -505,26 +516,14 @@
 /* Begin XCBuildConfiguration section */
 		2E4FA7E3B034F5E745EA989C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8C6574EB31FFD35DADA3B416 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
 				CODE_SIGN_ENTITLEMENTS = PledgeApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_GENERATION = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Pledge uses your camera to count exercise reps like pushups using body pose detection.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Pledge uses your health data to automatically verify habits like steps, sleep, and workouts.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Pledge records your habit completion to HealthKit.";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Pledge monitors your location in the background to automatically verify location-based habits like gym visits.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Pledge uses your location to verify habits like gym attendance and outdoor time.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "Pledge uses motion data to verify step-based habits.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = location;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -659,26 +658,14 @@
 		};
 		AFE59393B5F0A8815E8EC299 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8C6574EB31FFD35DADA3B416 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ALLOW_ENTITLEMENTS_MODIFICATION = YES;
 				CODE_SIGN_ENTITLEMENTS = PledgeApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_GENERATION = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Pledge uses your camera to count exercise reps like pushups using body pose detection.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Pledge uses your health data to automatically verify habits like steps, sleep, and workouts.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Pledge records your habit completion to HealthKit.";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Pledge monitors your location in the background to automatically verify location-based habits like gym visits.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Pledge uses your location to verify habits like gym attendance and outdoor time.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "Pledge uses motion data to verify step-based habits.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = location;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
