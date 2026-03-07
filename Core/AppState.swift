@@ -310,9 +310,11 @@ class AppState: ObservableObject {
             )
             recentActivity.insert(activity, at: 0)
         } else if result.status == .failed {
-            let stakeAmount = todayHabits[index].habit.stakeAmount
-            investmentPoolValue += stakeAmount
-            vaultBalance -= stakeAmount
+            let stakeAmount = min(todayHabits[index].habit.stakeAmount, vaultBalance)
+            if stakeAmount > 0 {
+                investmentPoolValue += stakeAmount
+                vaultBalance -= stakeAmount
+            }
             if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
                 habits[habitIndex].currentStreak = 0
             }
@@ -376,9 +378,11 @@ class AppState: ObservableObject {
                 recentActivity.insert(activity, at: 0)
             } else if result.status == .failed {
                 // Miss your habit, fund your future
-                let stakeAmount = todayHabits[index].habit.stakeAmount
-                investmentPoolValue += stakeAmount
-                vaultBalance -= stakeAmount
+                let stakeAmount = min(todayHabits[index].habit.stakeAmount, vaultBalance)
+                if stakeAmount > 0 {
+                    investmentPoolValue += stakeAmount
+                    vaultBalance -= stakeAmount
+                }
                 // Reset streak
                 if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
                     habits[habitIndex].currentStreak = 0
