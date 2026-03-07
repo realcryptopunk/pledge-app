@@ -319,6 +319,7 @@ class AppState: ObservableObject {
         } else if result.status == .failed {
             let stakeAmount = todayHabits[index].habit.stakeAmount
             investmentPoolValue += stakeAmount
+            vaultBalance -= stakeAmount
             if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
                 habits[habitIndex].currentStreak = 0
             }
@@ -330,6 +331,10 @@ class AppState: ObservableObject {
             )
             recentActivity.insert(activity, at: 0)
         }
+
+        // Record habit log and sync updates to Supabase
+        recordHabitLog(for: todayHabits[index], status: result.status)
+        syncHabitAfterVerification(habitId: habitId, status: result.status)
 
         updateStreakCount()
         saveHabits()
@@ -380,6 +385,7 @@ class AppState: ObservableObject {
                 // Miss your habit, fund your future
                 let stakeAmount = todayHabits[index].habit.stakeAmount
                 investmentPoolValue += stakeAmount
+                vaultBalance -= stakeAmount
                 // Reset streak
                 if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
                     habits[habitIndex].currentStreak = 0
@@ -393,6 +399,10 @@ class AppState: ObservableObject {
                 )
                 recentActivity.insert(activity, at: 0)
             }
+
+            // Record habit log and sync updates to Supabase
+            recordHabitLog(for: todayHabits[index], status: result.status)
+            syncHabitAfterVerification(habitId: habitId, status: result.status)
         }
 
         updateStreakCount()
@@ -422,6 +432,10 @@ class AppState: ObservableObject {
         )
         recentActivity.insert(activity, at: 0)
 
+        // Record habit log and sync to Supabase
+        recordHabitLog(for: todayHabits[index], status: .verified)
+        syncHabitAfterVerification(habitId: habitId, status: .verified)
+
         updateStreakCount()
         saveHabits()
     }
@@ -450,6 +464,54 @@ class AppState: ObservableObject {
             }
         }
         todayHabits = updatedTodayHabits
+    }
+
+    // MARK: - Habit Log Recording (Supabase)
+
+    /// Records a habit log entry to Supabase after verification.
+    private func recordHabitLog(for todayHabit: TodayHabit, status: HabitStatus) {
+        guard let service = supabaseService else { return }
+        let stakeAmount = todayHabit.habit.stakeAmount
+        let isFailed = status == .failed
+
+        let log = HabitLog(
+            id: UUID(),
+            habitId: todayHabit.habit.id,
+            date: Date(),
+            status: status,
+            verifiedAt: status == .verified ? Date() : nil,
+            penaltyAmount: isFailed ? stakeAmount : 0,
+            investedAmount: isFailed ? stakeAmount * 0.98 : 0,
+            feeAmount: isFailed ? stakeAmount * 0.02 : 0
+        )
+        Task {
+            do {
+                try await service.recordHabitLog(log)
+                print("[AppState] Recorded habit log: \(status.rawValue) for \(todayHabit.habit.name)")
+            } catch {
+                print("[AppState] Failed to record habit log: \(error)")
+            }
+        }
+    }
+
+    /// Syncs habit streak/success_rate and user profile balances to Supabase after verification.
+    private func syncHabitAfterVerification(habitId: UUID, status: HabitStatus) {
+        guard let service = supabaseService else { return }
+
+        // Sync updated habit (streak, success_rate)
+        if let habit = habits.first(where: { $0.id == habitId }) {
+            Task { try? await service.updateHabit(habit) }
+        }
+
+        // Sync user profile balances on failure (stake moves from vault to investment pool)
+        if status == .failed {
+            Task {
+                try? await service.updateUserProfile(
+                    vaultBalance: vaultBalance,
+                    investmentPoolBalance: investmentPoolValue
+                )
+            }
+        }
     }
 
     // MARK: - Streak
