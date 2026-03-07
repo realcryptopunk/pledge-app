@@ -8,6 +8,7 @@ class AppState: ObservableObject {
     @AppStorage("backgroundTheme") var backgroundTheme: BackgroundTheme = .aqua
     @AppStorage("userName") var userName = ""
     @AppStorage("walletAddress") var walletAddress: String = ""
+    @AppStorage("riskProfile") var riskProfile: RiskProfile = .moderate
     @Published var isAuthenticated = false
     @Published var userPhone: String = ""
     @Published var habits: [Habit] = []
@@ -458,5 +459,11 @@ class AppState: ObservableObject {
 // MARK: - BackgroundTheme @AppStorage Conformance
 
 extension BackgroundTheme: RawRepresentable {
+    // Already String-based via enum declaration, but we need explicit conformance for @AppStorage
+}
+
+// MARK: - RiskProfile @AppStorage Conformance
+
+extension RiskProfile: RawRepresentable {
     // Already String-based via enum declaration, but we need explicit conformance for @AppStorage
 }

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 // MARK: - Habit
 
@@ -175,12 +176,116 @@ struct ActivityItem: Identifiable, Codable {
     }
 }
 
+// MARK: - Allocation Item
+
+struct AllocationItem: Identifiable {
+    let id = UUID()
+    let symbol: String
+    let name: String
+    let icon: String
+    let percentage: Double
+    let fixedAPY: Double
+    let color: Color
+}
+
 // MARK: - Photo Verification Result
 
 struct PhotoVerificationResult {
     let isVerified: Bool
     let confidence: Double  // 0-1
     let reason: String
+}
+
+// MARK: - Risk Profile
+
+enum RiskProfile: String, Codable, CaseIterable {
+    case conservative = "Conservative"
+    case moderate = "Moderate"
+    case aggressive = "Aggressive"
+
+    var title: String { rawValue }
+
+    var subtitle: String {
+        switch self {
+        case .conservative: return "US Treasury Bills"
+        case .moderate: return "Fixed Yield DeFi"
+        case .aggressive: return "Tokenized Ventures"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .conservative: return "Short-term US Treasury Bills with guaranteed returns and government backing."
+        case .moderate: return "Fixed-yield DeFi positions via Pendle Principal Tokens on stablecoin underlyings."
+        case .aggressive: return "Tokenized private company equity via Robinhood — venture-style risk and reward."
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .conservative: return "building.columns.fill"
+        case .moderate: return "chart.line.uptrend.xyaxis"
+        case .aggressive: return "flame.fill"
+        }
+    }
+
+    var expectedReturn: String {
+        switch self {
+        case .conservative: return "4-5% APY"
+        case .moderate: return "5-9% APY"
+        case .aggressive: return "15-50%+ (variable)"
+        }
+    }
+
+    var riskLevel: String {
+        switch self {
+        case .conservative: return "Very Low"
+        case .moderate: return "Low-Medium"
+        case .aggressive: return "High"
+        }
+    }
+
+    var lockPeriod: String {
+        switch self {
+        case .conservative: return "3-6 months"
+        case .moderate: return "1-12 months"
+        case .aggressive: return "12-36 months"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .conservative: return .pledgeGreen
+        case .moderate: return .pledgeBlue
+        case .aggressive: return .pledgeOrange
+        }
+    }
+
+    var allocations: [AllocationItem] {
+        switch self {
+        case .conservative:
+            return [
+                AllocationItem(symbol: "T-Bill 3M", name: "US Treasury 3-Month", icon: "\u{1F3DB}\u{FE0F}", percentage: 0.60, fixedAPY: 4.2, color: .pledgeGreen),
+                AllocationItem(symbol: "T-Bill 6M", name: "US Treasury 6-Month", icon: "\u{1F3DB}\u{FE0F}", percentage: 0.40, fixedAPY: 4.8, color: .pledgeBlue),
+            ]
+        case .moderate:
+            return [
+                AllocationItem(symbol: "PT-sUSDai", name: "Pendle sUSDai", icon: "\u{1F512}", percentage: 0.35, fixedAPY: 9.0, color: .pledgeBlue),
+                AllocationItem(symbol: "PT-USDai", name: "Pendle USDai", icon: "\u{1F3E6}", percentage: 0.25, fixedAPY: 5.5, color: .pledgeViolet),
+                AllocationItem(symbol: "PT-thBILL", name: "Pendle T-Bills", icon: "\u{1F4DC}", percentage: 0.20, fixedAPY: 5.7, color: .pledgeGreen),
+                AllocationItem(symbol: "PT-weETH", name: "Pendle weETH", icon: "\u{27E0}", percentage: 0.12, fixedAPY: 2.7, color: .pledgeOrange),
+                AllocationItem(symbol: "PT-gUSDC", name: "Pendle gUSDC", icon: "\u{1F4B5}", percentage: 0.08, fixedAPY: 6.6, color: .cyan),
+            ]
+        case .aggressive:
+            return [
+                AllocationItem(symbol: "RH-SpaceX", name: "SpaceX (Robinhood)", icon: "\u{1F680}", percentage: 0.30, fixedAPY: 0, color: .pledgeOrange),
+                AllocationItem(symbol: "RH-Stripe", name: "Stripe (Robinhood)", icon: "\u{1F4B3}", percentage: 0.25, fixedAPY: 0, color: .pledgeViolet),
+                AllocationItem(symbol: "RH-Databricks", name: "Databricks (Robinhood)", icon: "\u{1F4CA}", percentage: 0.20, fixedAPY: 0, color: .pledgeBlue),
+                AllocationItem(symbol: "RH-Anthropic", name: "Anthropic (Robinhood)", icon: "\u{1F9E0}", percentage: 0.15, fixedAPY: 0, color: .pledgeGreen),
+                AllocationItem(symbol: "PT-thBILL", name: "Pendle T-Bills (Buffer)", icon: "\u{1F4DC}", percentage: 0.10, fixedAPY: 5.7, color: .cyan),
+            ]
+        }
+    }
 }
 
 // MARK: - Mock Data

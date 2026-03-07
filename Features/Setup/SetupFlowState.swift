@@ -6,6 +6,7 @@ enum SetupStep: Int, CaseIterable {
     case chooseHabits
     case configureHabits
     case setStakes
+    case riskProfile
     case deposit
     case permissions
     case success
@@ -49,6 +50,7 @@ struct TargetConfig {
     var isNavigatingForward = true
     var selectedTypes: [HabitType] = []
     var configs: [HabitType: HabitSetupConfig] = [:]
+    var selectedRiskProfile: RiskProfile = .moderate
     var depositAmount: Double = 0
     var configPageIndex: Int = 0
 
