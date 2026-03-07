@@ -5,7 +5,6 @@ struct SetupDepositView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.themeColors) var theme
     @State private var depositString = ""
-    @State private var showOnramp = false
 
     private let quickAmounts = ["50", "100", "200", "500"]
 
@@ -102,16 +101,13 @@ struct SetupDepositView: View {
 
             Spacer().frame(height: 20)
 
-            // MARK: - Fund with Coinbase Button
+            // MARK: - Fund Button
             Button {
                 PPHaptic.heavy()
-                if appState.walletAddress.isEmpty {
-                    // Guest mode: skip real onramp, just advance flow
-                    flowState.depositAmount = depositValue
-                    flowState.goForward()
-                } else {
-                    showOnramp = true
-                }
+                // Simulated deposit — real Coinbase Onramp requires server-side
+                // sessionToken generation (no backend yet)
+                flowState.depositAmount = depositValue
+                flowState.goForward()
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "dollarsign.circle.fill")
@@ -139,15 +135,11 @@ struct SetupDepositView: View {
             .opacity(canDeposit ? 1.0 : 0.35)
             .padding(.horizontal, 20)
 
-            // Or pay with card (also opens Coinbase — supports card payments)
+            // Or pay with card
             Button {
                 PPHaptic.light()
-                if appState.walletAddress.isEmpty {
-                    flowState.depositAmount = depositValue
-                    flowState.goForward()
-                } else {
-                    showOnramp = true
-                }
+                flowState.depositAmount = depositValue
+                flowState.goForward()
             } label: {
                 Text("Or pay with card")
             }
@@ -166,17 +158,6 @@ struct SetupDepositView: View {
             .foregroundColor(.secondary.opacity(0.6))
             .padding(.top, 8)
             .padding(.bottom, 16)
-        }
-        .sheet(isPresented: $showOnramp) {
-            CoinbaseOnrampView(
-                walletAddress: appState.walletAddress,
-                amount: depositValue,
-                onDismiss: {
-                    showOnramp = false
-                    flowState.depositAmount = depositValue
-                    flowState.goForward()
-                }
-            )
         }
     }
 }
