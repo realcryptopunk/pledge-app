@@ -57,11 +57,9 @@ class PrivyManager: ObservableObject {
     func initialize() {
         guard privy == nil else { return }
 
-        // TODO: Replace with actual credentials from Privy Dashboard
-        // Register bundle ID com.navro.pledgeapp at https://dashboard.privy.io
         let config = PrivyConfig(
-            appId: "YOUR_PRIVY_APP_ID",
-            appClientId: "YOUR_PRIVY_APP_CLIENT_ID"
+            appId: EnvConfig.privyAppId,
+            appClientId: EnvConfig.privyAppClientId
         )
 
         privy = PrivySdk.initialize(config: config)
