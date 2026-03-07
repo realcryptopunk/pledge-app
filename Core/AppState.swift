@@ -42,6 +42,12 @@ class AppState: ObservableObject {
     private var supabaseUserIdCancellable: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
 
+    // MARK: - Supabase Service
+
+    /// Cloud persistence service, created when both supabaseClient and supabaseUserId are available.
+    /// Nil for guest mode — falls back to UserDefaults.
+    private var supabaseService: SupabaseService?
+
     // MARK: - Yield
 
     private var yieldTimer: Timer?
@@ -111,6 +117,7 @@ class AppState: ObservableObject {
                     print("[AppState] Authenticated Supabase client created")
                 } else {
                     self.supabaseClient = nil
+                    self.supabaseService = nil
                 }
             }
             .store(in: &cancellables)
@@ -120,6 +127,27 @@ class AppState: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] userId in
                 self?.supabaseUserId = userId
+            }
+            .store(in: &cancellables)
+
+        // Create SupabaseService and load data when both client and userId are available
+        $supabaseClient
+            .combineLatest($supabaseUserId)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] client, userId in
+                guard let self else { return }
+                if let client, let userId {
+                    do {
+                        self.supabaseService = try SupabaseService(client: client, userId: userId)
+                        print("[AppState] SupabaseService created, loading data from cloud")
+                        Task { await self.loadFromSupabase() }
+                    } catch {
+                        print("[AppState] Failed to create SupabaseService: \(error)")
+                        self.supabaseService = nil
+                    }
+                } else {
+                    self.supabaseService = nil
+                }
             }
             .store(in: &cancellables)
     }
@@ -143,36 +171,54 @@ class AppState: ObservableObject {
 
     func addHabit(_ habit: Habit) {
         habits.append(habit)
-        saveHabits()
         generateTodayHabits()
         updateStreakCount()
         // Start geofence monitoring if this is a location-verified habit
         if habit.verificationType == .location && habit.hasLocation {
             startGeofenceForHabit(habit)
         }
+        // Persist: cloud if authenticated, local otherwise
+        if let service = supabaseService {
+            Task { try? await service.createHabit(habit) }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     func updateHabit(_ updated: Habit) {
         guard let index = habits.firstIndex(where: { $0.id == updated.id }) else { return }
         habits[index] = updated
-        saveHabits()
         generateTodayHabits()
         updateStreakCount()
+        if let service = supabaseService {
+            Task { try? await service.updateHabit(updated) }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     func togglePauseHabit(_ habit: Habit) {
         guard let index = habits.firstIndex(where: { $0.id == habit.id }) else { return }
         habits[index].isPaused.toggle()
-        saveHabits()
         generateTodayHabits()
         updateStreakCount()
+        let updatedHabit = habits[index]
+        if let service = supabaseService {
+            Task { try? await service.updateHabit(updatedHabit) }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     func deleteHabit(_ habit: Habit) {
         habits.removeAll { $0.id == habit.id }
         todayHabits.removeAll { $0.habit.id == habit.id }
-        saveHabits()
         updateStreakCount()
+        if let service = supabaseService {
+            Task { try? await service.deleteHabit(habit.id) }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     func deleteHabit(at offsets: IndexSet) {
@@ -181,8 +227,14 @@ class AppState: ObservableObject {
             todayHabits.removeAll { $0.habit.id == habit.id }
         }
         habits.remove(atOffsets: offsets)
-        saveHabits()
         updateStreakCount()
+        if let service = supabaseService {
+            for habit in habitsToDelete {
+                Task { try? await service.deleteHabit(habit.id) }
+            }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     // MARK: - Geofence Monitoring
@@ -415,18 +467,68 @@ class AppState: ObservableObject {
 
     private static let savedHabitsKey = "savedHabits"
 
+    /// Save habits and state: prefers Supabase if authenticated, else UserDefaults.
     private func saveHabits() {
+        if supabaseService != nil {
+            // Cloud persistence handled by individual CRUD methods (local-first pattern)
+            return
+        }
+        saveHabitsLocally()
+    }
+
+    /// Save habits to UserDefaults (guest mode / offline fallback).
+    private func saveHabitsLocally() {
         guard let data = try? JSONEncoder().encode(habits) else { return }
         UserDefaults.standard.set(data, forKey: Self.savedHabitsKey)
     }
 
-    private func loadHabits() {
+    /// Load habits from UserDefaults (guest mode / initial boot before auth).
+    private func loadHabitsLocally() {
         guard let data = UserDefaults.standard.data(forKey: Self.savedHabitsKey),
               let decoded = try? JSONDecoder().decode([Habit].self, from: data) else {
             habits = []
             return
         }
         habits = decoded
+    }
+
+    /// Load habits and profile from Supabase (authenticated users).
+    func loadFromSupabase() async {
+        guard let service = supabaseService else {
+            loadHabitsLocally()
+            return
+        }
+        do {
+            let cloudHabits = try await service.fetchHabits()
+            habits = cloudHabits
+
+            let profile = try await service.fetchUserProfile()
+            vaultBalance = profile.vaultBalance
+            investmentPoolValue = profile.investmentPoolBalance
+            // Sync risk profile from server if it differs
+            if let serverProfile = RiskProfile(rawValue: profile.riskProfile) {
+                riskProfile = serverProfile
+            }
+            // Sync username if available
+            if let serverUsername = profile.username, !serverUsername.isEmpty {
+                userName = serverUsername
+            }
+
+            generateTodayHabits()
+            updateStreakCount()
+            setupGeofenceMonitoring()
+            print("[AppState] Loaded \(habits.count) habits from Supabase")
+        } catch {
+            print("[AppState] Supabase load failed, falling back to local: \(error)")
+            loadHabitsLocally()
+            generateTodayHabits()
+            updateStreakCount()
+        }
+    }
+
+    /// Initial load: use local data first, cloud data will overwrite when auth completes.
+    private func loadHabits() {
+        loadHabitsLocally()
     }
 
     // MARK: - Helpers
@@ -488,6 +590,7 @@ class AppState: ObservableObject {
         userName = ""
         walletAddress = ""
         userPhone = ""
+        supabaseService = nil
         supabaseClient = nil
         supabaseUserId = nil
         // Reset flow state (triggers navigation back to sign-in)
