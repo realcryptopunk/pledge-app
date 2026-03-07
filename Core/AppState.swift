@@ -48,6 +48,14 @@ class AppState: ObservableObject {
     /// Nil for guest mode — falls back to UserDefaults.
     private var supabaseService: SupabaseService?
 
+    // MARK: - Supabase Realtime
+
+    /// Realtime channel for listening to habits table changes.
+    private var habitsChannel: RealtimeChannelV2?
+
+    /// Subscription handle for postgres changes callback on habits channel.
+    private var habitsChangeSubscription: RealtimeSubscription?
+
     // MARK: - Yield
 
     private var yieldTimer: Timer?
@@ -130,7 +138,7 @@ class AppState: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Create SupabaseService and load data when both client and userId are available
+        // Create SupabaseService, load data, and start Realtime when both client and userId are available
         $supabaseClient
             .combineLatest($supabaseUserId)
             .receive(on: DispatchQueue.main)
@@ -140,13 +148,17 @@ class AppState: ObservableObject {
                     do {
                         self.supabaseService = try SupabaseService(client: client, userId: userId)
                         print("[AppState] SupabaseService created, loading data from cloud")
-                        Task { await self.loadFromSupabase() }
+                        Task {
+                            await self.loadFromSupabase()
+                            self.setupRealtimeSubscriptions()
+                        }
                     } catch {
                         print("[AppState] Failed to create SupabaseService: \(error)")
                         self.supabaseService = nil
                     }
                 } else {
                     self.supabaseService = nil
+                    self.teardownRealtimeSubscriptions()
                 }
             }
             .store(in: &cancellables)
@@ -593,6 +605,73 @@ class AppState: ObservableObject {
         loadHabitsLocally()
     }
 
+    // MARK: - Realtime Subscriptions
+
+    /// Sets up Supabase Realtime subscriptions for the habits table.
+    /// Any INSERT, UPDATE, or DELETE on the habits table triggers a full reload.
+    /// Must be called after supabaseClient is available (i.e., after SupabaseService creation).
+    func setupRealtimeSubscriptions() {
+        guard let client = supabaseClient else { return }
+
+        // Tear down any existing subscription before creating a new one
+        teardownRealtimeSubscriptions()
+
+        let channel = client.realtimeV2.channel("habits-changes")
+
+        // Register postgres change listener BEFORE subscribing (SDK requirement)
+        habitsChangeSubscription = channel.onPostgresChange(
+            AnyAction.self,
+            schema: "public",
+            table: "habits"
+        ) { [weak self] _ in
+            // Any change to habits table -> reload all habits from Supabase
+            Task { @MainActor [weak self] in
+                await self?.handleRealtimeHabitChange()
+            }
+        }
+
+        // Subscribe to the channel asynchronously
+        Task {
+            do {
+                try await channel.subscribeWithError()
+                print("[AppState] Realtime subscribed to habits-changes channel")
+            } catch {
+                print("[AppState] Realtime subscription failed: \(error)")
+            }
+        }
+
+        habitsChannel = channel
+    }
+
+    /// Handles a Realtime change event on the habits table by reloading all habits.
+    private func handleRealtimeHabitChange() async {
+        guard let service = supabaseService else { return }
+        do {
+            let updatedHabits = try await service.fetchHabits()
+            self.habits = updatedHabits
+            self.generateTodayHabits()
+            self.updateStreakCount()
+            self.setupGeofenceMonitoring()
+            print("[AppState] Realtime: reloaded \(updatedHabits.count) habits")
+        } catch {
+            print("[AppState] Realtime habit refresh failed: \(error)")
+        }
+    }
+
+    /// Unsubscribes from Realtime channels and cleans up subscriptions.
+    func teardownRealtimeSubscriptions() {
+        habitsChangeSubscription?.cancel()
+        habitsChangeSubscription = nil
+
+        if let channel = habitsChannel {
+            Task {
+                await channel.unsubscribe()
+                print("[AppState] Realtime unsubscribed from habits-changes channel")
+            }
+            habitsChannel = nil
+        }
+    }
+
     // MARK: - Helpers
 
     private func currentWeekday() -> Int {
@@ -637,6 +716,8 @@ class AppState: ObservableObject {
     // MARK: - Auth
 
     func signOut() async {
+        // Tear down Realtime subscriptions before clearing state
+        teardownRealtimeSubscriptions()
         await privyManager.signOut()
         await authService.signOut()
         // Clear persisted data
