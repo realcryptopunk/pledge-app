@@ -57,9 +57,13 @@ class PrivyManager: ObservableObject {
     func initialize() {
         guard privy == nil else { return }
 
+        let appId = EnvConfig.privyAppId
+        let clientId = EnvConfig.privyAppClientId
+        print("[PrivyManager] appId='\(appId)' clientId='\(clientId)'")
+
         let config = PrivyConfig(
-            appId: EnvConfig.privyAppId,
-            appClientId: EnvConfig.privyAppClientId
+            appId: appId,
+            appClientId: clientId
         )
 
         privy = PrivySdk.initialize(config: config)

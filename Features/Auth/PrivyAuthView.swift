@@ -19,6 +19,8 @@ struct PrivyAuthView: View {
     @State private var isLoading: Bool = false
     @State private var errorMessage: String?
     @State private var shakeError: Bool = false
+    @FocusState private var phoneFieldFocused: Bool
+    @FocusState private var otpFieldFocused: Bool
 
     var body: some View {
         ZStack {
@@ -41,6 +43,13 @@ struct PrivyAuthView: View {
             }
         }
         .animation(.springBounce, value: step)
+        .onChange(of: step) { _, newStep in
+            if newStep == .otp {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    otpFieldFocused = true
+                }
+            }
+        }
     }
 
     // MARK: - Phone Step
@@ -105,6 +114,7 @@ struct PrivyAuthView: View {
                         .font(.system(size: 20, weight: .semibold, design: .monospaced))
                         .keyboardType(.numberPad)
                         .textContentType(.telephoneNumber)
+                        .focused($phoneFieldFocused)
                         .onChange(of: phoneNumber) { _, newValue in
                             phoneNumber = formatPhoneDisplay(newValue)
                         }
@@ -261,7 +271,6 @@ struct PrivyAuthView: View {
             }
             .buttonStyle(PrimaryCapsuleStyle(isEnabled: isOTPComplete && !isLoading))
             .disabled(!isOTPComplete || isLoading)
-            .padding(.horizontal, 24)
             .staggerIn(index: 3)
 
             Spacer().frame(height: 16)
@@ -279,40 +288,43 @@ struct PrivyAuthView: View {
 
             Spacer()
         }
+        .padding(.horizontal, 24)
     }
 
     // MARK: - OTP Code Field
 
     private var otpCodeField: some View {
-        HStack(spacing: 10) {
-            // Hidden text field to capture input
-            ZStack {
-                TextField("", text: $otpCode)
-                    .font(.system(size: 1))
-                    .foregroundColor(.clear)
-                    .tint(.clear)
-                    .keyboardType(.numberPad)
-                    .textContentType(.oneTimeCode)
-                    .frame(width: 1, height: 1)
-                    .opacity(0.01)
-                    .onChange(of: otpCode) { _, newValue in
-                        // Only allow digits, max 6
-                        let filtered = String(newValue.filter { $0.isNumber }.prefix(6))
-                        if filtered != newValue {
-                            otpCode = filtered
-                        }
-                        // Auto-submit when 6 digits entered
-                        if filtered.count == 6 {
-                            verifyOTP()
-                        }
+        ZStack {
+            // Hidden text field to capture keyboard input
+            TextField("", text: $otpCode)
+                .keyboardType(.numberPad)
+                .textContentType(.oneTimeCode)
+                .focused($otpFieldFocused)
+                .foregroundColor(.clear)
+                .tint(.clear)
+                .accentColor(.clear)
+                .frame(maxWidth: .infinity, maxHeight: 56)
+                .onChange(of: otpCode) { _, newValue in
+                    let filtered = String(newValue.filter { $0.isNumber }.prefix(6))
+                    if filtered != newValue {
+                        otpCode = filtered
                     }
-            }
+                    if filtered.count == 6 {
+                        verifyOTP()
+                    }
+                }
 
-            ForEach(0..<6, id: \.self) { index in
-                otpDigitBox(at: index)
+            // Visual digit boxes on top
+            HStack(spacing: 10) {
+                ForEach(0..<6, id: \.self) { index in
+                    otpDigitBox(at: index)
+                }
             }
+            .allowsHitTesting(false)
         }
-        .padding(.horizontal, 24)
+        .onTapGesture {
+            otpFieldFocused = true
+        }
     }
 
     private func otpDigitBox(at index: Int) -> some View {
