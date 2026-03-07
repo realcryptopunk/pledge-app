@@ -6,6 +6,7 @@ import WebKit
 struct CoinbaseOnrampView: View {
     let walletAddress: String
     let amount: Double
+    let sessionToken: String
     let onDismiss: () -> Void
 
     @Environment(\.themeColors) var theme
@@ -130,8 +131,8 @@ struct CoinbaseOnrampView: View {
 
         var components = URLComponents(string: "https://pay.coinbase.com/buy/select-asset")!
         components.queryItems = [
-            // TODO: Replace with production appId from Coinbase Developer Platform
             URLQueryItem(name: "appId", value: EnvConfig.coinbaseOnrampAppId),
+            URLQueryItem(name: "sessionToken", value: sessionToken),
             URLQueryItem(name: "addresses", value: addressesString),
             URLQueryItem(name: "assets", value: assetsJSON),
             URLQueryItem(name: "presetFiatAmount", value: String(Int(amount))),
@@ -141,6 +142,60 @@ struct CoinbaseOnrampView: View {
         ]
 
         return components.url!
+    }
+}
+
+// MARK: - Session Token Fetcher
+
+enum OnrampError: LocalizedError {
+    case missingToken
+    case serverError(String)
+    case networkError(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .missingToken:
+            return "Session token not found in response"
+        case .serverError(let message):
+            return "Server error: \(message)"
+        case .networkError(let error):
+            return "Network error: \(error.localizedDescription)"
+        }
+    }
+}
+
+enum OnrampService {
+    /// Fetches a Coinbase Onramp session token from the Supabase edge function.
+    static func fetchSessionToken(walletAddress: String, amount: Double) async throws -> String {
+        guard let url = URL(string: "\(EnvConfig.supabaseURL)/functions/v1/coinbase-session-token") else {
+            throw OnrampError.serverError("Invalid Supabase URL")
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(EnvConfig.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body: [String: Any] = ["wallet_address": walletAddress, "amount": amount]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw OnrampError.serverError("Invalid response")
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw OnrampError.serverError("HTTP \(httpResponse.statusCode): \(errorBody)")
+        }
+
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let token = json["token"] as? String else {
+            throw OnrampError.missingToken
+        }
+
+        return token
     }
 }
 

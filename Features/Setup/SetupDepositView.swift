@@ -5,6 +5,11 @@ struct SetupDepositView: View {
     @EnvironmentObject var appState: AppState
     @Environment(\.themeColors) var theme
     @State private var depositString = ""
+    @State private var isFetchingToken = false
+    @State private var showOnramp = false
+    @State private var sessionToken: String?
+    @State private var showError = false
+    @State private var errorMessage = ""
 
     private let quickAmounts = ["50", "100", "200", "500"]
 
@@ -104,15 +109,18 @@ struct SetupDepositView: View {
             // MARK: - Fund Button
             Button {
                 PPHaptic.heavy()
-                // Simulated deposit — real Coinbase Onramp requires server-side
-                // sessionToken generation (no backend yet)
-                flowState.depositAmount = depositValue
-                flowState.goForward()
+                fundWithCoinbase()
             } label: {
                 HStack(spacing: 8) {
-                    Image(systemName: "dollarsign.circle.fill")
-                        .font(.system(size: 18))
-                    Text("Fund with Coinbase")
+                    if isFetchingToken {
+                        ProgressView()
+                            .tint(.white)
+                            .scaleEffect(0.9)
+                    } else {
+                        Image(systemName: "dollarsign.circle.fill")
+                            .font(.system(size: 18))
+                    }
+                    Text(isFetchingToken ? "Connecting..." : "Fund with Coinbase")
                         .font(.system(size: 17, weight: .semibold))
                 }
                 .foregroundColor(.white)
@@ -131,8 +139,8 @@ struct SetupDepositView: View {
                 .clipShape(Capsule())
                 .shadow(color: Color(red: 0.0, green: 0.32, blue: 1.0).opacity(0.3), radius: 8, y: 4)
             }
-            .disabled(!canDeposit)
-            .opacity(canDeposit ? 1.0 : 0.35)
+            .disabled(!canDeposit || isFetchingToken)
+            .opacity(canDeposit && !isFetchingToken ? 1.0 : 0.35)
             .padding(.horizontal, 20)
 
             // Or pay with card
@@ -144,8 +152,8 @@ struct SetupDepositView: View {
                 Text("Or pay with card")
             }
             .buttonStyle(GhostButtonStyle())
-            .disabled(!canDeposit)
-            .opacity(canDeposit ? 1.0 : 0.35)
+            .disabled(!canDeposit || isFetchingToken)
+            .opacity(canDeposit && !isFetchingToken ? 1.0 : 0.35)
             .padding(.top, 8)
 
             // Security note
@@ -158,6 +166,65 @@ struct SetupDepositView: View {
             .foregroundColor(.secondary.opacity(0.6))
             .padding(.top, 8)
             .padding(.bottom, 16)
+        }
+        .sheet(isPresented: $showOnramp) {
+            if let token = sessionToken {
+                CoinbaseOnrampView(
+                    walletAddress: appState.walletAddress,
+                    amount: depositValue,
+                    sessionToken: token,
+                    onDismiss: {
+                        showOnramp = false
+                        flowState.depositAmount = depositValue
+                        flowState.goForward()
+                    }
+                )
+            }
+        }
+        .alert("Deposit Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+            #if DEBUG
+            Button("Use Simulated Deposit") {
+                flowState.depositAmount = depositValue
+                flowState.goForward()
+            }
+            #endif
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    // MARK: - Fund with Coinbase
+
+    private func fundWithCoinbase() {
+        #if DEBUG
+        // In debug builds, if wallet address is empty, use simulated deposit
+        if appState.walletAddress.isEmpty {
+            flowState.depositAmount = depositValue
+            flowState.goForward()
+            return
+        }
+        #endif
+
+        isFetchingToken = true
+        Task {
+            do {
+                let token = try await OnrampService.fetchSessionToken(
+                    walletAddress: appState.walletAddress,
+                    amount: depositValue
+                )
+                await MainActor.run {
+                    sessionToken = token
+                    isFetchingToken = false
+                    showOnramp = true
+                }
+            } catch {
+                await MainActor.run {
+                    isFetchingToken = false
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
+            }
         }
     }
 }
