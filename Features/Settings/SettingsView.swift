@@ -67,6 +67,63 @@ struct SettingsView: View {
                             ThemePickerView()
                         }
 
+                        // MARK: - Wallet
+                        if !appState.walletAddress.isEmpty {
+                            settingsSection("WALLET") {
+                                // Wallet address with copy
+                                Button {
+                                    UIPasteboard.general.string = appState.walletAddress
+                                    PPHaptic.light()
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        Text("\u{1F4B3}")
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("Wallet Address")
+                                                .pledgeHeadline()
+                                                .foregroundColor(.primary)
+                                            Text(truncatedAddress(appState.walletAddress))
+                                                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                                .foregroundColor(.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "doc.on.doc")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundColor(.secondary.opacity(0.5))
+                                    }
+                                    .padding(.vertical, 10)
+                                }
+                                StatRowDivider()
+                                // View on BaseScan
+                                Button {
+                                    if let url = URL(string: "https://basescan.org/address/\(appState.walletAddress)") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        Text("\u{1F50D}")
+                                        Text("View on BaseScan")
+                                            .pledgeHeadline()
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "arrow.up.right.square")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundColor(.secondary.opacity(0.5))
+                                    }
+                                    .padding(.vertical, 10)
+                                }
+                                StatRowDivider()
+                                // Security note
+                                HStack(spacing: 12) {
+                                    Text("\u{1F512}")
+                                    Text("Your wallet is secured by Privy")
+                                        .pledgeCaption()
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 10)
+                            }
+                        }
+
                         // MARK: - Account
                         settingsSection("ACCOUNT") {
                             settingsRow(icon: "💳", label: "Payment Methods")
@@ -234,6 +291,11 @@ struct SettingsView: View {
             }
             .cleanCard()
         }
+    }
+
+    private func truncatedAddress(_ address: String) -> String {
+        guard address.count > 10 else { return address }
+        return "\(address.prefix(6))...\(address.suffix(4))"
     }
 
     private func settingsRow(icon: String, label: String, value: String? = nil) -> some View {

@@ -127,17 +127,19 @@ struct PortfolioView: View {
                     .font(.system(size: 44, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
 
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 11, weight: .bold))
-                    Text("+$14.38 (\(appState.investmentGrowth, specifier: "%.1f")%)")
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                if appState.investmentGrowth != 0 {
+                    HStack(spacing: 6) {
+                        Image(systemName: appState.investmentGrowth >= 0 ? "arrow.up.right" : "arrow.down.right")
+                            .font(.system(size: 11, weight: .bold))
+                        Text("\(appState.investmentGrowth >= 0 ? "+" : "")\(appState.investmentGrowth, specifier: "%.1f")%")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    }
+                    .foregroundColor(appState.investmentGrowth >= 0 ? .pledgeGreen : .pledgeRed)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                    .background((appState.investmentGrowth >= 0 ? Color.pledgeGreen : Color.pledgeRed).opacity(0.12))
+                    .clipShape(Capsule())
                 }
-                .foregroundColor(.pledgeGreen)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
-                .background(Color.pledgeGreen.opacity(0.12))
-                .clipShape(Capsule())
 
                 // Risk tier badge
                 HStack(spacing: 5) {
@@ -313,7 +315,7 @@ struct PortfolioView: View {
             StatRowDivider()
             StatRow(icon: "💰", label: "Weighted APY", value: apyDisplayString, valueColor: .pledgeGreen)
             StatRowDivider()
-            StatRow(icon: "🔒", label: "Vault unlock", value: "47 days")
+            StatRow(icon: "🔒", label: "Vault unlock", value: "--")
             StatRowDivider()
             StatRow(icon: "💸", label: "Platform fee (2%)", value: "$\(String(format: "%.2f", appState.investmentPoolValue * 0.02))")
             StatRowDivider()
@@ -432,20 +434,6 @@ struct PortfolioView: View {
             ))
         }
 
-        if items.count < 3 {
-            let baseTx: [(String, String, String, String)] = [
-                ("📈", "Portfolio rebalance", "Auto-rebalanced allocation", "$0"),
-                ("🔒", "Vault deposit", "Initial stake deposit", "+$50"),
-                ("💰", "Yield earned", "Daily PT yield", "+$0.47"),
-            ]
-            for (i, tx) in baseTx.enumerated() {
-                items.append(TransactionItem(
-                    icon: tx.0, title: tx.1, detail: tx.2,
-                    amount: tx.3, isPositive: true,
-                    date: cal.date(byAdding: .day, value: -(i + 1), to: Date()) ?? Date()
-                ))
-            }
-        }
         cachedTransactions = items
     }
 }

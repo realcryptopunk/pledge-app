@@ -13,10 +13,10 @@ class AppState: ObservableObject {
     @Published var isAuthenticated = false
     @Published var userPhone: String = ""
     @Published var habits: [Habit] = []
-    @Published var vaultBalance: Double = 247.00
+    @Published var vaultBalance: Double = 0
     @Published var streakCount: Int = 0
-    @Published var investmentPoolValue: Double = 261.38
-    @Published var investmentGrowth: Double = 5.8
+    @Published var investmentPoolValue: Double = 0
+    @Published var investmentGrowth: Double = 0
     @Published var todayHabits: [TodayHabit] = []
     @Published var recentActivity: [ActivityItem] = []
     @Published var isVerifying = false
@@ -57,10 +57,6 @@ class AppState: ObservableObject {
     /// Subscription handle for postgres changes callback on habits channel.
     private var habitsChangeSubscription: RealtimeSubscription?
 
-    // MARK: - Yield
-
-    private var yieldTimer: Timer?
-
     // MARK: - Services
 
     let verificationService = HabitVerificationService(
@@ -90,7 +86,6 @@ class AppState: ObservableObject {
         updateStreakCount()
         setupGeofenceMonitoring()
         observeGeofenceNotifications()
-        startYieldTimer()
 
         // Initialize Privy SDK
         privyManager.initialize()
@@ -163,21 +158,6 @@ class AppState: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-    }
-
-    // MARK: - Yield Timer
-
-    private func startYieldTimer() {
-        yieldTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.applyYieldTick()
-            }
-        }
-    }
-
-    private func applyYieldTick() {
-        vaultBalance += 0.01
-        investmentPoolValue += 0.01
     }
 
     // MARK: - Habit CRUD

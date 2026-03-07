@@ -24,15 +24,6 @@ struct PrivyAuthView: View {
 
     var body: some View {
         ZStack {
-            WaterBackgroundView()
-
-            // Fluid purple glow at top
-            VStack {
-                FluidPurpleGlow()
-                Spacer()
-            }
-            .ignoresSafeArea()
-
             switch step {
             case .phone:
                 phoneStepView
@@ -41,6 +32,17 @@ struct PrivyAuthView: View {
                 otpStepView
                     .transition(.slideIn)
             }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background {
+            ZStack {
+                WaterBackgroundView()
+                VStack {
+                    FluidPurpleGlow()
+                    Spacer()
+                }
+            }
+            .ignoresSafeArea()
         }
         .animation(.springBounce, value: step)
         .onChange(of: step) { _, newStep in
@@ -144,6 +146,7 @@ struct PrivyAuthView: View {
                         .pledgeCaption()
                         .foregroundColor(.pledgeRed)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                         .transition(.move(edge: .top).combined(with: .opacity))
                 }
 
@@ -252,6 +255,7 @@ struct PrivyAuthView: View {
                     .pledgeCaption()
                     .foregroundColor(.pledgeRed)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 24)
                     .transition(.move(edge: .top).combined(with: .opacity))
             }

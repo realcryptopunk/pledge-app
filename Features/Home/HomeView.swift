@@ -401,11 +401,21 @@ struct AddFundsSheet: View {
     @ObservedObject var appState: AppState
     @Environment(\.dismiss) private var dismiss
     @State private var amountString = ""
-    @State private var showSuccess = false
+    @State private var isFetchingToken = false
+    @State private var showOnramp = false
+    @State private var sessionToken: String?
+    @State private var showError = false
+    @State private var errorMessage = ""
     @Environment(\.themeColors) var theme
+
+    private let quickAmounts = ["50", "100", "200", "500"]
 
     private var amount: Double {
         Double(amountString) ?? 0
+    }
+
+    private var canDeposit: Bool {
+        amount >= 50
     }
 
     var body: some View {
@@ -437,87 +447,158 @@ struct AddFundsSheet: View {
 
                 Spacer()
 
-                VStack(spacing: 4) {
-                    if showSuccess {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 64))
-                            .foregroundColor(.pledgeGreen)
-                            .transition(.scale.combined(with: .opacity))
+                VStack(spacing: 8) {
+                    Text("FUND YOUR WALLET")
+                        .pledgeCaption()
+                        .foregroundColor(.secondary)
+                        .tracking(1)
 
-                        Text("Funds added!")
-                            .pledgeHeadline()
-                            .foregroundColor(.pledgeGreen)
-                            .padding(.top, 8)
-                    } else {
-                        Text("$\(amountString.isEmpty ? "0" : amountString)")
-                            .font(.system(size: 64, weight: .black, design: .rounded))
-                            .foregroundColor(amountString.isEmpty ? .secondary.opacity(0.4) : .primary)
+                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                        Text("$")
+                            .font(.system(size: 40, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary.opacity(0.5))
+
+                        Text(amountString.isEmpty ? "0" : amountString)
+                            .pledgeXL(72)
+                            .foregroundColor(amountString.isEmpty ? .secondary.opacity(0.3) : .primary)
                             .embossed(.raised)
                             .contentTransition(.numericText())
-                            .animation(.spring(response: 0.3), value: amountString)
-
-                        Text("Enter amount to deposit")
-                            .pledgeCaption()
-                            .foregroundColor(.secondary)
+                            .animation(.quickSnap, value: amountString)
                     }
+
+                    Text("Minimum deposit: $50")
+                        .pledgeCaption()
+                        .foregroundColor(.secondary.opacity(0.6))
                 }
 
-                Spacer()
+                Spacer().frame(height: 24)
 
-                if !showSuccess {
-                    HStack(spacing: 10) {
-                        ForEach(["25", "50", "100", "250"], id: \.self) { preset in
-                            Button {
-                                PPHaptic.light()
+                HStack(spacing: 10) {
+                    ForEach(quickAmounts, id: \.self) { preset in
+                        Button {
+                            PPHaptic.light()
+                            withAnimation(.quickSnap) {
                                 amountString = preset
-                            } label: {
-                                Text("$\(preset)")
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(amountString == preset ? .white : .primary)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 10)
-                                    .background(
-                                        Capsule()
-                                            .fill(amountString == preset
-                                                  ? LinearGradient(colors: [theme.buttonTop, theme.buttonBottom], startPoint: .top, endPoint: .bottom)
-                                                  : LinearGradient(colors: [Color.primary.opacity(0.08), Color.primary.opacity(0.03)], startPoint: .top, endPoint: .bottom)
-                                            )
-                                    )
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(Color.primary.opacity(amountString == preset ? 0.3 : 0.1), lineWidth: 0.5)
-                                    )
-                                    .clipShape(Capsule())
                             }
+                        } label: {
+                            Text("$\(preset)")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(amountString == preset ? .white : .primary)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(
+                                    Capsule()
+                                        .fill(amountString == preset
+                                              ? LinearGradient(colors: [theme.buttonTop, theme.buttonBottom], startPoint: .top, endPoint: .bottom)
+                                              : LinearGradient(colors: [Color.primary.opacity(0.08), Color.primary.opacity(0.03)], startPoint: .top, endPoint: .bottom)
+                                        )
+                                )
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.primary.opacity(amountString == preset ? 0.3 : 0.1), lineWidth: 0.5)
+                                )
+                                .clipShape(Capsule())
                         }
                     }
-                    .padding(.bottom, 20)
-
-                    NumberPadView(value: $amountString, maxDigits: 5, allowDecimal: true)
-                        .padding(.horizontal, 20)
-
-                    Button {
-                        guard amount > 0 else { return }
-                        PPHaptic.success()
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                            appState.vaultBalance += amount
-                            showSuccess = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                            dismiss()
-                        }
-                    } label: {
-                        Text(amount > 0 ? "Add $\(amountString)" : "Enter amount")
-                    }
-                    .buttonStyle(PrimaryCapsuleStyle(isEnabled: amount > 0))
-                    .disabled(amount <= 0)
-                    .padding(.horizontal, 24)
-                    .padding(.top, 16)
-                    .padding(.bottom, 8)
                 }
+                .padding(.bottom, 20)
+
+                NumberPadView(value: $amountString, maxDigits: 5, allowDecimal: false)
+                    .padding(.horizontal, 20)
+
+                Spacer().frame(height: 20)
+
+                Button {
+                    PPHaptic.heavy()
+                    fundWithCoinbase()
+                } label: {
+                    HStack(spacing: 8) {
+                        if isFetchingToken {
+                            ProgressView()
+                                .tint(.white)
+                                .scaleEffect(0.9)
+                        } else {
+                            Image(systemName: "dollarsign.circle.fill")
+                                .font(.system(size: 18))
+                        }
+                        Text(isFetchingToken ? "Connecting..." : "Fund with Coinbase")
+                            .font(.system(size: 17, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color(red: 0.0, green: 0.32, blue: 1.0), Color(red: 0.0, green: 0.25, blue: 0.85)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                    )
+                    .clipShape(Capsule())
+                    .shadow(color: Color(red: 0.0, green: 0.32, blue: 1.0).opacity(0.3), radius: 8, y: 4)
+                }
+                .disabled(!canDeposit || isFetchingToken)
+                .opacity(canDeposit && !isFetchingToken ? 1.0 : 0.35)
+                .padding(.horizontal, 20)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 10))
+                    Text("Powered by Coinbase. Funds sent as USDC to your wallet.")
+                        .font(.system(size: 11, weight: .medium))
+                }
+                .foregroundColor(.secondary.opacity(0.6))
+                .padding(.top, 8)
+                .padding(.bottom, 16)
             }
         }
         .presentationDetents([.large])
+        .sheet(isPresented: $showOnramp) {
+            if let token = sessionToken {
+                CoinbaseOnrampView(
+                    walletAddress: appState.walletAddress,
+                    amount: amount,
+                    sessionToken: token,
+                    onDismiss: {
+                        showOnramp = false
+                        dismiss()
+                    }
+                )
+            }
+        }
+        .alert("Deposit Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    // MARK: - Fund with Coinbase
+
+    private func fundWithCoinbase() {
+        isFetchingToken = true
+        Task {
+            do {
+                let token = try await OnrampService.fetchSessionToken(
+                    walletAddress: appState.walletAddress,
+                    amount: amount
+                )
+                await MainActor.run {
+                    sessionToken = token
+                    isFetchingToken = false
+                    showOnramp = true
+                }
+            } catch {
+                await MainActor.run {
+                    isFetchingToken = false
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
+            }
+        }
     }
 }
 
