@@ -59,7 +59,6 @@ class PrivyManager: ObservableObject {
 
         let appId = EnvConfig.privyAppId
         let clientId = EnvConfig.privyAppClientId
-        print("[PrivyManager] appId='\(appId)' clientId='\(clientId)'")
 
         let config = PrivyConfig(
             appId: appId,
@@ -103,17 +102,20 @@ class PrivyManager: ObservableObject {
 
         isLoading = true
         authError = nil
-        defer { isLoading = false }
 
         do {
             let user = try await privy.sms.loginWithCode(code, sentTo: phoneNumber)
             authenticatedUser = user
-            isAuthenticated = true
             userPhone = phoneNumber
 
-            // Automatically create wallet if needed
-            try await createWalletIfNeeded()
+            // Create wallet before setting isAuthenticated so routing doesn't
+            // see isLoading=true and get stuck on SplashView.
+            try? await createWalletIfNeeded()
+
+            isLoading = false
+            isAuthenticated = true
         } catch {
+            isLoading = false
             let message = error.localizedDescription
             authError = message
             throw PrivyManagerError.otpVerifyFailed(message)
