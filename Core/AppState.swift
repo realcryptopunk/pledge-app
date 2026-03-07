@@ -20,6 +20,7 @@ class AppState: ObservableObject {
     @Published var todayHabits: [TodayHabit] = []
     @Published var recentActivity: [ActivityItem] = []
     @Published var isVerifying = false
+    @Published var needsUsername = false
 
     // MARK: - Auth
 
@@ -583,9 +584,12 @@ class AppState: ObservableObject {
             if let serverProfile = RiskProfile(rawValue: profile.riskProfile) {
                 riskProfile = serverProfile
             }
-            // Sync username if available
+            // Sync username if available, or flag that username is needed
             if let serverUsername = profile.username, !serverUsername.isEmpty {
                 userName = serverUsername
+                needsUsername = false
+            } else {
+                needsUsername = true
             }
 
             generateTodayHabits()
@@ -713,6 +717,34 @@ class AppState: ObservableObject {
         return formatter.string(from: date)
     }
 
+    // MARK: - Username & Profile
+
+    /// Complete the username setup flow. Persists to Supabase and updates local state.
+    func completeUsernameSetup(username: String, displayName: String?) async throws {
+        guard let service = supabaseService else { return }
+        try await service.setUsername(username, displayName: displayName)
+        userName = username
+        needsUsername = false
+    }
+
+    /// Check if a username is available via Supabase.
+    func checkUsernameAvailable(_ username: String) async throws -> Bool {
+        guard let service = supabaseService else { return false }
+        return try await service.checkUsernameAvailable(username)
+    }
+
+    /// Update user profile (username, display name, avatar).
+    func updateProfile(username: String?, displayName: String?, avatarUrl: String? = nil) async throws {
+        guard let service = supabaseService else { return }
+        try await service.updateProfile(username: username, displayName: displayName, avatarUrl: avatarUrl)
+        if let username { userName = username }
+    }
+
+    /// Get the current Supabase service for direct use by views (e.g., friend search, leaderboard).
+    var currentSupabaseService: SupabaseService? {
+        supabaseService
+    }
+
     // MARK: - Auth
 
     func signOut() async {
@@ -733,6 +765,7 @@ class AppState: ObservableObject {
         userName = ""
         walletAddress = ""
         userPhone = ""
+        needsUsername = false
         supabaseService = nil
         supabaseClient = nil
         supabaseUserId = nil

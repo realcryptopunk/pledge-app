@@ -13,11 +13,13 @@
 		0AA72C7828051137A15E352E /* PortfolioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B7BEDFB20FA262572543418 /* PortfolioView.swift */; };
 		0E44C8B3C8D8EDE9AA98CBEC /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CC9B4DA152DFDD26C57996E /* HomeView.swift */; };
 		0F9D18EA5C5FCAF96C4762E3 /* SocialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610F2A5B8B1B27FD1B711639 /* SocialView.swift */; };
+		10AACC0F96BE5762E148F4DB /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92650B53BE839E86FA0599C /* EditProfileView.swift */; };
 		10C8E3BA883765DED6AC2ACB /* PledgeAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D64C5317E01BAAA55673FC /* PledgeAnimations.swift */; };
 		143D9648A4E58D487DD68A70 /* PledgeHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7657D7B3133359058ABB5E8 /* PledgeHaptics.swift */; };
 		18F054B1D6BA1C438C3970AE /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226031696306ADAA024AC893 /* SplashView.swift */; };
 		1BCF3C7F5DFF196E87FDCB18 /* PushupCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58804F5578B3CF9EA06B192F /* PushupCounterView.swift */; };
 		1FCE8DE6571B33EC34F35849 /* AquaTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9798D8F8A6AEF76AA1D917F6 /* AquaTypography.swift */; };
+		20E533B63AEDF7646E2A9E52 /* UsernameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C07125FCE3D04C0C524B9B1 /* UsernameView.swift */; };
 		20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01DDB6F0EF3836344A536ED /* CustomNumberPad.swift */; };
 		229422FECE24CAD71401142C /* OnboardingPage3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C52DDE25BB46980AD48293B /* OnboardingPage3.swift */; };
 		22AB9AF5C33E17075CF65E12 /* SetupFlowState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */; };
@@ -50,7 +52,9 @@
 		85BB3A66BCD2295FA6BC6B08 /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D38970CE026E2A1CF932C0 /* SupabaseConfig.swift */; };
 		89E5E47AEB99B094AFFCA792 /* PledgeCelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F65311B09BEFD24A3CD2602 /* PledgeCelebrationView.swift */; };
 		950412C9BD7B801824E1B58C /* PrivyAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EE36EEC2A60149E783CC9E /* PrivyAuthView.swift */; };
+		9A55E6A19F67BBE39241CFF4 /* UsernameSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C844D6478A1AB689046F39 /* UsernameSetupView.swift */; };
 		9B35B0AF2088CF71E4BDDA7C /* PledgeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D8376BCD890EE15E97BF80 /* PledgeCards.swift */; };
+		9B6142C21E3D155F9B183307 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F09D4E855560D9DAE90441F /* SupabaseService.swift */; };
 		9C5E20CDC94DD8903B1C47CE /* SetStakesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EB4E1730AF827ED92F5817 /* SetStakesView.swift */; };
 		9E3249FA8972FFEA2B31870A /* Vortex in Frameworks */ = {isa = PBXBuildFile; productRef = 6F4550AC64675E0303E4FF39 /* Vortex */; };
 		A05DE1ABD03236251B074977 /* BeRealVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D686B86BCDCAC8E89F6C79 /* BeRealVerificationView.swift */; };
@@ -90,6 +94,7 @@
 		3AD91D2AB87F830628472335 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
 		45D64C5317E01BAAA55673FC /* PledgeAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeAnimations.swift; sourceTree = "<group>"; };
 		49A01AB3752386F6E773267F /* PledgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeApp.swift; sourceTree = "<group>"; };
+		4C07125FCE3D04C0C524B9B1 /* UsernameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameView.swift; sourceTree = "<group>"; };
 		4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowState.swift; sourceTree = "<group>"; };
 		50F35BF85EEEA0CE3A5604E9 /* ExerciseCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseCounterView.swift; sourceTree = "<group>"; };
 		517A347A9B0345FA9A58EB78 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -104,6 +109,7 @@
 		610F2A5B8B1B27FD1B711639 /* SocialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialView.swift; sourceTree = "<group>"; };
 		6BCCB87D5708C7FE91E53D05 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		6CAC1C611A06368669497022 /* RiskProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiskProfileView.swift; sourceTree = "<group>"; };
+		6F09D4E855560D9DAE90441F /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		718A352A42414E5955FA4C23 /* ChooseHabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseHabitsView.swift; sourceTree = "<group>"; };
 		72D38970CE026E2A1CF932C0 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
 		79160ACE5732BC2449E1F285 /* SignInWithAppleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInWithAppleView.swift; sourceTree = "<group>"; };
@@ -116,6 +122,7 @@
 		94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		9798D8F8A6AEF76AA1D917F6 /* AquaTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AquaTypography.swift; sourceTree = "<group>"; };
 		9F65311B09BEFD24A3CD2602 /* PledgeCelebrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeCelebrationView.swift; sourceTree = "<group>"; };
+		A3C844D6478A1AB689046F39 /* UsernameSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameSetupView.swift; sourceTree = "<group>"; };
 		A4AB7F258E58E8BE02C3CB08 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		B5E5D6102C9AC89775547155 /* PledgeTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PledgeTypography.swift; sourceTree = "<group>"; };
 		B8C338151783FE4C3B8FF523 /* PledgeApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PledgeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,6 +132,7 @@
 		D01DDB6F0EF3836344A536ED /* CustomNumberPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomNumberPad.swift; sourceTree = "<group>"; };
 		D03F8D12D74554C800FB1114 /* LocationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
 		D0737B0801FC046D7BBDA948 /* CoinbaseOnrampView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinbaseOnrampView.swift; sourceTree = "<group>"; };
+		D92650B53BE839E86FA0599C /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
 		E077FB4B49BAD5F3A56C236F /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		E52A4C9F73F9EA658C4F3FD8 /* HabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitsView.swift; sourceTree = "<group>"; };
@@ -173,6 +181,7 @@
 				94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */,
 				82D8E42DF7DAE008F2F55720 /* PhotoVerificationService.swift */,
 				36B11935BE63B65139157506 /* PrivyManager.swift */,
+				6F09D4E855560D9DAE90441F /* SupabaseService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -211,6 +220,8 @@
 				208911E19F8F90C9A88BD75C /* SetupDepositView.swift */,
 				4CBF2B025EB0F7BEE911B669 /* SetupFlowState.swift */,
 				7DDC77336647A692AF44789B /* SetupSuccessView.swift */,
+				A3C844D6478A1AB689046F39 /* UsernameSetupView.swift */,
+				4C07125FCE3D04C0C524B9B1 /* UsernameView.swift */,
 			);
 			path = Setup;
 			sourceTree = "<group>";
@@ -297,6 +308,7 @@
 		B5B01DBC4AA02924601B33FA /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				D92650B53BE839E86FA0599C /* EditProfileView.swift */,
 				E5DEDED6FBE7157EDD72CD30 /* NotificationSettingsView.swift */,
 				EBE06B51B9FF761CB1CA4860 /* SettingsView.swift */,
 			);
@@ -439,6 +451,7 @@
 				6FA643C378DE2C4EAB662C97 /* ConfigureHabitsView.swift in Sources */,
 				20F7AE332C11FA99F0756268 /* CustomNumberPad.swift in Sources */,
 				F6449EAB552487CA51C7D658 /* EditHabitView.swift in Sources */,
+				10AACC0F96BE5762E148F4DB /* EditProfileView.swift in Sources */,
 				712085E923AC624D7299A399 /* EnvConfig.swift in Sources */,
 				A276444A0034DB6D4F84EF74 /* ExerciseCounterView.swift in Sources */,
 				35348CC84A4F6578A23814B4 /* FloatingOrbs.swift in Sources */,
@@ -485,6 +498,9 @@
 				0F9D18EA5C5FCAF96C4762E3 /* SocialView.swift in Sources */,
 				18F054B1D6BA1C438C3970AE /* SplashView.swift in Sources */,
 				85BB3A66BCD2295FA6BC6B08 /* SupabaseConfig.swift in Sources */,
+				9B6142C21E3D155F9B183307 /* SupabaseService.swift in Sources */,
+				9A55E6A19F67BBE39241CFF4 /* UsernameSetupView.swift in Sources */,
+				20E533B63AEDF7646E2A9E52 /* UsernameView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

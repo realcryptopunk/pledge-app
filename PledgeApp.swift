@@ -8,7 +8,7 @@ struct PledgeApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if showSplash || appState.privyManager.isLoading {
+                if showSplash {
                     SplashView()
                         .transition(.opacity)
                 } else if !appState.hasCompletedOnboarding {
@@ -16,6 +16,9 @@ struct PledgeApp: App {
                         .transition(.opacity)
                 } else if !appState.isAuthenticated {
                     PrivyAuthView()
+                        .transition(.slideIn)
+                } else if appState.needsUsername {
+                    UsernameSetupView()
                         .transition(.slideIn)
                 } else if !appState.hasCompletedSetup {
                     SetupContainerView()
@@ -29,9 +32,9 @@ struct PledgeApp: App {
             .environment(\.themeColors, appState.backgroundTheme.colors)
             .preferredColorScheme(appState.backgroundTheme.isLight ? .light : .dark)
             .animation(.easeInOut(duration: 0.4), value: showSplash)
-            .animation(.easeInOut(duration: 0.4), value: appState.privyManager.isLoading)
             .animation(.springBounce, value: appState.hasCompletedOnboarding)
             .animation(.springBounce, value: appState.isAuthenticated)
+            .animation(.springBounce, value: appState.needsUsername)
             .animation(.springBounce, value: appState.hasCompletedSetup)
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {

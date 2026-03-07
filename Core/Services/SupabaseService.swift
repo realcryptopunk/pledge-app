@@ -453,6 +453,117 @@ class SupabaseService {
         return dtos.map { $0.toHabitLog() }
     }
 
+    // MARK: - Username & Profile
+
+    /// Check if a username is available (not taken by another user).
+    func checkUsernameAvailable(_ username: String) async throws -> Bool {
+        let profiles: [UserProfileDTO] = try await client.from("user_profiles")
+            .select("id")
+            .eq("username", value: username)
+            .limit(1)
+            .execute()
+            .value
+        // Available if no other user has it, or the only match is the current user
+        if let match = profiles.first {
+            return match.id == userId
+        }
+        return true
+    }
+
+    /// Set the username (and optional display name) for the current user.
+    func setUsername(_ username: String, displayName: String?) async throws {
+        var dto = UserProfileUpdateDTO()
+        dto.username = username
+        dto.displayName = displayName
+        try await client.from("user_profiles")
+            .update(dto)
+            .eq("id", value: userId.uuidString)
+            .execute()
+    }
+
+    /// Update profile fields. Only non-nil values are sent.
+    func updateProfile(username: String?, displayName: String?, avatarUrl: String?) async throws {
+        // Build a minimal update with only the fields being changed
+        var updates: [String: String] = [:]
+        if let username { updates["username"] = username }
+        if let displayName { updates["display_name"] = displayName }
+        if let avatarUrl { updates["avatar_url"] = avatarUrl }
+        guard !updates.isEmpty else { return }
+        try await client.from("user_profiles")
+            .update(updates)
+            .eq("id", value: userId.uuidString)
+            .execute()
+    }
+
+    // MARK: - Friends
+
+    /// Search user profiles by username prefix (for adding friends).
+    func searchUsers(prefix: String) async throws -> [UserProfileDTO] {
+        let profiles: [UserProfileDTO] = try await client.from("user_profiles")
+            .select()
+            .ilike("username", pattern: "\(prefix)%")
+            .neq("id", value: userId.uuidString)
+            .limit(10)
+            .execute()
+            .value
+        return profiles
+    }
+
+    /// Fetch accepted friendships for the current user.
+    func fetchFriends() async throws -> [FriendshipDTO] {
+        let friendships: [FriendshipDTO] = try await client.from("friendships")
+            .select("*, friend:friend_id(id, username, display_name, avatar_url), user:user_id(id, username, display_name, avatar_url)")
+            .or("user_id.eq.\(userId.uuidString),friend_id.eq.\(userId.uuidString)")
+            .execute()
+            .value
+        return friendships
+    }
+
+    /// Send a friend request to another user.
+    func sendFriendRequest(to friendId: UUID) async throws {
+        let dto = FriendshipInsertDTO(userId: userId, friendId: friendId)
+        try await client.from("friendships")
+            .insert(dto)
+            .execute()
+    }
+
+    /// Accept a pending friend request.
+    func acceptFriendRequest(_ friendshipId: UUID) async throws {
+        try await client.from("friendships")
+            .update(["status": "accepted"])
+            .eq("id", value: friendshipId.uuidString)
+            .execute()
+    }
+
+    // MARK: - Leaderboard
+
+    /// Fetch leaderboard data from the edge function.
+    func fetchLeaderboard(type: String, limit: Int = 50, period: Int = 30) async throws -> [LeaderboardEntry] {
+        let url = SupabaseConfig.url
+            .appendingPathComponent("functions/v1/leaderboard")
+
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+        components.queryItems = [
+            URLQueryItem(name: "type", value: type),
+            URLQueryItem(name: "limit", value: String(limit)),
+            URLQueryItem(name: "period", value: String(period)),
+        ]
+
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(SupabaseConfig.anonKey)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw SupabaseServiceError.leaderboardFetchFailed
+        }
+
+        let decoded = try JSONDecoder().decode(LeaderboardResponse.self, from: data)
+        return decoded.entries
+    }
+
     // MARK: - Helpers
 
     private func todayDateString() -> String {
@@ -467,11 +578,88 @@ class SupabaseService {
     }()
 }
 
+// MARK: - Leaderboard Models
+
+struct LeaderboardEntry: Codable, Identifiable {
+    let rank: Int
+    let userId: UUID
+    let username: String
+    let displayName: String?
+    let avatarUrl: String?
+    let value: Double
+    let label: String
+
+    var id: UUID { userId }
+
+    enum CodingKeys: String, CodingKey {
+        case rank, username, value, label
+        case userId = "user_id"
+        case displayName = "display_name"
+        case avatarUrl = "avatar_url"
+    }
+}
+
+struct LeaderboardResponse: Codable {
+    let type: String
+    let entries: [LeaderboardEntry]
+}
+
+// MARK: - Friendship DTOs
+
+struct FriendshipDTO: Codable, Identifiable {
+    let id: UUID
+    let userId: UUID
+    let friendId: UUID
+    let status: String
+    let createdAt: String?
+    let friend: FriendProfileDTO?
+    let user: FriendProfileDTO?
+
+    enum CodingKeys: String, CodingKey {
+        case id, status, friend, user
+        case userId = "user_id"
+        case friendId = "friend_id"
+        case createdAt = "created_at"
+    }
+}
+
+struct FriendProfileDTO: Codable {
+    let id: UUID
+    let username: String?
+    let displayName: String?
+    let avatarUrl: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, username
+        case displayName = "display_name"
+        case avatarUrl = "avatar_url"
+    }
+}
+
+struct FriendshipInsertDTO: Codable {
+    let userId: UUID
+    let friendId: UUID
+    let status: String
+
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case friendId = "friend_id"
+        case status
+    }
+
+    init(userId: UUID, friendId: UUID) {
+        self.userId = userId
+        self.friendId = friendId
+        self.status = "pending"
+    }
+}
+
 // MARK: - Errors
 
 enum SupabaseServiceError: LocalizedError {
     case invalidUserId(String)
     case profileNotFound
+    case leaderboardFetchFailed
 
     var errorDescription: String? {
         switch self {
@@ -479,6 +667,8 @@ enum SupabaseServiceError: LocalizedError {
             return "Invalid Supabase user ID: \(id)"
         case .profileNotFound:
             return "User profile not found in Supabase"
+        case .leaderboardFetchFailed:
+            return "Failed to fetch leaderboard data"
         }
     }
 }

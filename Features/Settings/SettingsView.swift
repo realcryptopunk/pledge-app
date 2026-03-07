@@ -3,8 +3,6 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
     @State private var faceIDEnabled = true
-    @State private var showEditProfile = false
-    @State private var editingName = ""
     @State private var showSignOutConfirmation = false
     @State private var showDeleteConfirmation = false
     @Environment(\.themeColors) var theme
@@ -17,42 +15,50 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(spacing: 24) {
                         // MARK: - Profile Header
-                        HStack(spacing: 16) {
-                            ZStack {
-                                Circle()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [theme.light, theme.buttonTop],
-                                            startPoint: .top,
-                                            endPoint: .bottom
+                        NavigationLink {
+                            EditProfileView()
+                        } label: {
+                            HStack(spacing: 16) {
+                                ZStack {
+                                    Circle()
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [theme.light, theme.buttonTop],
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            )
                                         )
-                                    )
-                                    .frame(width: 56, height: 56)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(Color.primary.opacity(0.15), lineWidth: 1)
-                                    )
-                                Text(String(appState.userName.prefix(1)).uppercased())
-                                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                                    .foregroundColor(.white)
-                            }
+                                        .frame(width: 56, height: 56)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.primary.opacity(0.15), lineWidth: 1)
+                                        )
+                                    Text(String(appState.userName.prefix(1)).uppercased())
+                                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                }
 
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(appState.userName)
-                                    .pledgeHeadline()
-                                    .foregroundColor(.primary)
-                                Text("@\(appState.userName.lowercased()) · Joined Feb 2026")
-                                    .pledgeCaption()
-                                    .foregroundColor(.secondary)
-                            }
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(appState.userName.isEmpty ? "Set username" : appState.userName)
+                                        .pledgeHeadline()
+                                        .foregroundColor(.primary)
+                                    if !appState.userName.isEmpty {
+                                        Text("@\(appState.userName.lowercased())")
+                                            .pledgeCaption()
+                                            .foregroundColor(.secondary)
+                                    } else {
+                                        Text("Tap to set your username")
+                                            .pledgeCaption()
+                                            .foregroundColor(theme.surface)
+                                    }
+                                }
 
-                            Spacer()
+                                Spacer()
 
-                            Button("Edit") {
-                                editingName = appState.userName
-                                showEditProfile = true
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.secondary.opacity(0.5))
                             }
-                            .buttonStyle(GhostButtonStyle(color: theme.surface))
                         }
                         .cleanCard()
 
@@ -184,18 +190,6 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .toolbarColorScheme(theme.isLight ? .light : .dark, for: .navigationBar)
-            .alert("Edit Name", isPresented: $showEditProfile) {
-                TextField("Name", text: $editingName)
-                Button("Save") {
-                    let trimmed = editingName.trimmingCharacters(in: .whitespaces)
-                    if !trimmed.isEmpty {
-                        appState.userName = trimmed
-                    }
-                }
-                Button("Cancel", role: .cancel) { }
-            } message: {
-                Text("Enter your display name")
-            }
             .alert(
                 "Sign Out",
                 isPresented: $showSignOutConfirmation
