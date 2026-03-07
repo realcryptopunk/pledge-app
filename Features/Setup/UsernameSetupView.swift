@@ -45,6 +45,12 @@ struct UsernameSetupView: View {
         return nil
     }
 
+    private var usernameFieldBorderColor: Color {
+        if isAvailable == true && isValidFormat { return .pledgeGreen.opacity(0.5) }
+        if isAvailable == false { return .pledgeRed.opacity(0.5) }
+        return Color.white.opacity(0.2)
+    }
+
     private var validationColor: Color {
         if isChecking { return .secondary }
         if isAvailable == true && isValidFormat { return .pledgeGreen }
@@ -126,18 +132,7 @@ struct UsernameSetupView: View {
                         .background(.ultraThinMaterial)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(
-                                    isAvailable == true && isValidFormat
-                                        ? Color.pledgeGreen.opacity(0.5)
-                                        : isAvailable == false
-                                            ? Color.pledgeRed.opacity(0.5)
-                                            : LinearGradient(
-                                                colors: [Color.white.opacity(0.3), Color.white.opacity(0.1)],
-                                                startPoint: .top,
-                                                endPoint: .bottom
-                                            ).opacity(1) == .init() ? .clear : Color.white.opacity(0.2),
-                                    lineWidth: 1
-                                )
+                                .stroke(usernameFieldBorderColor, lineWidth: 1)
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
