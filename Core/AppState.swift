@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import Supabase
 
 @MainActor
 class AppState: ObservableObject {
@@ -27,6 +28,19 @@ class AppState: ObservableObject {
     private var authCancellable: AnyCancellable?
     private var privyAuthCancellable: AnyCancellable?
     private var privyWalletCancellable: AnyCancellable?
+
+    // MARK: - Supabase
+
+    /// Authenticated Supabase client, created after auth bridge returns a JWT.
+    /// Use this for all RLS-protected database operations.
+    @Published var supabaseClient: SupabaseClient?
+
+    /// The Supabase user profile UUID (maps to user_profiles.id and auth.uid() in RLS).
+    @Published var supabaseUserId: String?
+
+    private var supabaseTokenCancellable: AnyCancellable?
+    private var supabaseUserIdCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Yield
 
@@ -84,6 +98,30 @@ class AppState: ObservableObject {
         authCancellable = authService.$isAuthenticated
             .receive(on: DispatchQueue.main)
             .sink { _ in }
+
+        // Create authenticated Supabase client when token arrives from auth bridge
+        privyManager.$supabaseAccessToken
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] token in
+                guard let self else { return }
+                if let token {
+                    self.supabaseClient = SupabaseConfig.authenticatedClient {
+                        return token
+                    }
+                    print("[AppState] Authenticated Supabase client created")
+                } else {
+                    self.supabaseClient = nil
+                }
+            }
+            .store(in: &cancellables)
+
+        // Propagate Supabase user ID for use in queries
+        privyManager.$supabaseUserId
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] userId in
+                self?.supabaseUserId = userId
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Yield Timer
@@ -450,6 +488,8 @@ class AppState: ObservableObject {
         userName = ""
         walletAddress = ""
         userPhone = ""
+        supabaseClient = nil
+        supabaseUserId = nil
         // Reset flow state (triggers navigation back to sign-in)
         hasCompletedOnboarding = false
         hasCompletedSetup = false

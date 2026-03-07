@@ -40,6 +40,11 @@ class PrivyManager: ObservableObject {
     @Published var userPhone: String?
     @Published var authError: String?
     @Published var isLoading = false
+    @Published var supabaseAccessToken: String?
+    @Published var supabaseUserId: String?
+
+    /// Timestamp when the current Supabase token expires (Unix epoch seconds)
+    private var supabaseTokenExpiresAt: TimeInterval = 0
 
     // MARK: - Private Properties
 
@@ -112,6 +117,9 @@ class PrivyManager: ObservableObject {
             // see isLoading=true and get stuck on SplashView.
             try? await createWalletIfNeeded()
 
+            // Obtain Supabase session via auth bridge (non-blocking on failure)
+            await authenticateWithSupabase()
+
             isLoading = false
             isAuthenticated = true
         } catch {
@@ -148,6 +156,69 @@ class PrivyManager: ObservableObject {
         }
     }
 
+    // MARK: - Supabase Auth Bridge
+
+    /// Calls the auth-bridge edge function to exchange a Privy token for a Supabase JWT.
+    /// Upserts the user profile in Supabase and stores the access token + user ID.
+    private func authenticateWithSupabase() async {
+        guard let user = authenticatedUser else { return }
+
+        do {
+            let privyToken = try await user.getAccessToken()
+
+            let bridgeURL = URL(string: "\(EnvConfig.supabaseURL)/functions/v1/auth-bridge")!
+            var request = URLRequest(url: bridgeURL)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            let body: [String: Any] = [
+                "privy_token": privyToken,
+                "wallet_address": walletAddress ?? "",
+                "phone": userPhone ?? ""
+            ]
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("[PrivyManager] Auth bridge: invalid response type")
+                return
+            }
+
+            guard httpResponse.statusCode == 200 else {
+                let errorBody = String(data: data, encoding: .utf8) ?? "unknown"
+                print("[PrivyManager] Auth bridge failed (\(httpResponse.statusCode)): \(errorBody)")
+                return
+            }
+
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                print("[PrivyManager] Auth bridge: failed to parse response JSON")
+                return
+            }
+
+            supabaseAccessToken = json["access_token"] as? String
+            supabaseUserId = json["user_id"] as? String
+            supabaseTokenExpiresAt = json["expires_at"] as? TimeInterval ?? 0
+
+            print("[PrivyManager] Supabase auth bridge success — user_id: \(supabaseUserId ?? "nil")")
+        } catch {
+            print("[PrivyManager] Auth bridge error: \(error.localizedDescription)")
+        }
+    }
+
+    /// Refreshes the Supabase token if it has expired or is about to expire (within 5 minutes).
+    func refreshSupabaseTokenIfNeeded() async {
+        let now = Date().timeIntervalSince1970
+        // Refresh if token expires within 5 minutes
+        guard supabaseAccessToken != nil,
+              now > supabaseTokenExpiresAt - 300 else {
+            return
+        }
+
+        print("[PrivyManager] Supabase token expiring soon, refreshing...")
+        await authenticateWithSupabase()
+    }
+
     // MARK: - Auth State
 
     /// Checks the current authentication state and updates published properties.
@@ -161,12 +232,16 @@ class PrivyManager: ObservableObject {
         switch privy.authState {
         case .authenticated(let user):
             authenticatedUser = user
-            isAuthenticated = true
 
             // Load existing wallet address if available
             if let firstWallet = user.embeddedEthereumWallets.first {
                 walletAddress = firstWallet.address
             }
+
+            // Obtain Supabase session on app relaunch
+            await authenticateWithSupabase()
+
+            isAuthenticated = true
         case .unauthenticated:
             isAuthenticated = false
             authenticatedUser = nil
@@ -204,5 +279,8 @@ class PrivyManager: ObservableObject {
         walletAddress = nil
         userPhone = nil
         authError = nil
+        supabaseAccessToken = nil
+        supabaseUserId = nil
+        supabaseTokenExpiresAt = 0
     }
 }
