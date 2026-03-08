@@ -535,6 +535,14 @@ class SupabaseService {
             .execute()
     }
 
+    /// Decline a pending friend request (deletes the row).
+    func declineFriendRequest(_ friendshipId: UUID) async throws {
+        try await client.from("friendships")
+            .delete()
+            .eq("id", value: friendshipId.uuidString)
+            .execute()
+    }
+
     // MARK: - Leaderboard
 
     /// Fetch leaderboard data from the edge function.

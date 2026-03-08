@@ -514,8 +514,17 @@ struct FriendsTabView: View {
                     VStack(spacing: 0) {
                         ForEach(Array(friends.enumerated()), id: \.element.id) { index, friendship in
                             if index > 0 { StatRowDivider() }
-                            FriendRow(friendship: friendship, currentUserId: appState.supabaseUserId)
-                                .staggerIn(index: index)
+                            FriendRow(
+                                friendship: friendship,
+                                currentUserId: appState.supabaseUserId,
+                                onAccept: {
+                                    acceptRequest(friendship)
+                                },
+                                onDecline: {
+                                    declineRequest(friendship)
+                                }
+                            )
+                            .staggerIn(index: index)
                         }
                     }
                     .cleanCard()
@@ -586,6 +595,36 @@ struct FriendsTabView: View {
 
     // MARK: - Friend Request
 
+    private func acceptRequest(_ friendship: FriendshipDTO) {
+        guard let service = appState.currentSupabaseService else { return }
+        PPHaptic.medium()
+        Task {
+            do {
+                try await service.acceptFriendRequest(friendship.id)
+                PPHaptic.success()
+                await refreshFriends()
+            } catch {
+                PPHaptic.error()
+                print("[SocialView] Accept friend error: \(error)")
+            }
+        }
+    }
+
+    private func declineRequest(_ friendship: FriendshipDTO) {
+        guard let service = appState.currentSupabaseService else { return }
+        PPHaptic.medium()
+        Task {
+            do {
+                try await service.declineFriendRequest(friendship.id)
+                PPHaptic.success()
+                await refreshFriends()
+            } catch {
+                PPHaptic.error()
+                print("[SocialView] Decline friend error: \(error)")
+            }
+        }
+    }
+
     private func sendRequest(to userId: UUID) {
         guard let service = appState.currentSupabaseService else { return }
         PPHaptic.medium()
@@ -608,15 +647,21 @@ struct FriendsTabView: View {
 struct FriendRow: View {
     let friendship: FriendshipDTO
     let currentUserId: String?
+    var onAccept: (() -> Void)? = nil
+    var onDecline: (() -> Void)? = nil
     @Environment(\.themeColors) var theme
 
     private var friendProfile: FriendProfileDTO? {
-        // Show the OTHER user in the friendship
         if friendship.userId.uuidString == currentUserId {
             return friendship.friend
         } else {
             return friendship.user
         }
+    }
+
+    /// True when this is an incoming request the current user can act on
+    private var isIncomingPending: Bool {
+        friendship.status == "pending" && friendship.friendId.uuidString == currentUserId
     }
 
     private var statusColor: Color {
@@ -646,9 +691,35 @@ struct FriendRow: View {
 
             Spacer()
 
-            Text(friendship.status == "pending" ? "Pending" : "Friend")
-                .pledgeCaption()
-                .foregroundColor(statusColor)
+            if isIncomingPending {
+                HStack(spacing: 8) {
+                    Button {
+                        onDecline?()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.secondary)
+                            .frame(width: 32, height: 32)
+                            .background(Color.secondary.opacity(0.15))
+                            .clipShape(Circle())
+                    }
+
+                    Button {
+                        onAccept?()
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 32, height: 32)
+                            .background(Color.pledgeGreen)
+                            .clipShape(Circle())
+                    }
+                }
+            } else {
+                Text(friendship.status == "pending" ? "Pending" : "Friend")
+                    .pledgeCaption()
+                    .foregroundColor(statusColor)
+            }
         }
         .padding(.vertical, 14)
     }
