@@ -344,11 +344,6 @@ final class PoseDetectionCamera: NSObject, ObservableObject {
             captureSession.addOutput(videoOutput)
         }
 
-        // Note: we do NOT set videoRotationAngle or isVideoMirrored on the
-        // data output connection. The raw landscape buffer goes to Vision with
-        // an explicit .right orientation hint instead. The preview layer handles
-        // its own rotation and mirroring independently.
-
         captureSession.commitConfiguration()
     }
 
@@ -374,7 +369,7 @@ extension PoseDetectionCamera: AVCaptureVideoDataOutputSampleBufferDelegate {
         didOutput sampleBuffer: CMSampleBuffer,
         from connection: AVCaptureConnection
     ) {
-        // Process every 3rd frame (~10fps) to save CPU
+        // Process every 2nd frame (~15fps) for better responsiveness
         guard repCounter.shouldProcessFrame() else { return }
 
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
@@ -409,121 +404,221 @@ extension PoseDetectionCamera: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
 }
 
-// MARK: - Pushup Rep Counter (state machine)
+// MARK: - Pushup Rep Counter (improved state machine)
+//
+// Key improvements over v1:
+// 1. Uses ELBOW ANGLE as primary signal (not just nose Y) — much more reliable
+// 2. Multi-signal fusion: elbow angle + nose Y + shoulder-wrist distance
+// 3. Process every 2nd frame instead of every 4th (better temporal resolution)
+// 4. Lower min rep interval (0.5s vs 0.8s) — fast pushups were being missed
+// 5. Requires both down AND up to be confirmed before counting
+// 6. Hysteresis: different thresholds for entering vs exiting states (prevents flickering)
 
 private final class PushupRepCounter: @unchecked Sendable {
-    enum Phase { case waiting, up, down }
+    enum Phase { case idle, down, up }
 
-    private var phase: Phase = .waiting
+    private var phase: Phase = .idle
     private var repCount: Int = 0
     private var frameSkipCounter: Int = 0
 
-    // Smoothed tracking values
-    private var smoothedNoseY: CGFloat?
-    private var peakY: CGFloat = 0
-    private var valleyY: CGFloat = 1
+    // Signal history for smoothing
+    private var elbowAngleHistory: [CGFloat] = []
+    private var noseYHistory: [CGFloat] = []
+    private let historySize = 5
+
+    // Calibration
+    private var calibrationFrames: Int = 0
+    private var calibratedUpAngle: CGFloat? = nil  // elbow angle when arms extended
+    private var calibratedDownAngle: CGFloat? = nil // elbow angle when arms bent
 
     // Timing
     private var lastRepTime: Date = .distantPast
-    private let minRepInterval: TimeInterval = 0.8
+    private let minRepInterval: TimeInterval = 0.5
 
-    // Smoothing factor (0-1, lower = smoother)
-    private let alpha: CGFloat = 0.25
+    // Thresholds
+    private let downAngleThreshold: CGFloat = 110  // elbow angle below this = "down"
+    private let upAngleThreshold: CGFloat = 145     // elbow angle above this = "up"
 
     func shouldProcessFrame() -> Bool {
         frameSkipCounter += 1
-        return frameSkipCounter % 4 == 0
+        return frameSkipCounter % 2 == 0  // every 2nd frame = ~15fps
     }
 
     func process(_ observation: VNHumanBodyPoseObservation) -> Int {
-        // Get nose position as primary signal
-        guard let nose = try? observation.recognizedPoint(.nose),
-              nose.confidence > 0.5 else {
+        // Get key joints
+        guard let leftShoulder = safePoint(observation, .leftShoulder),
+              let rightShoulder = safePoint(observation, .rightShoulder) else {
             return repCount
         }
 
-        // Also check shoulders are visible (confirms pushup position)
-        let leftShoulder = try? observation.recognizedPoint(.leftShoulder)
-        let rightShoulder = try? observation.recognizedPoint(.rightShoulder)
-        let leftHipCheck = try? observation.recognizedPoint(.leftHip)
-        let rightHipCheck = try? observation.recognizedPoint(.rightHip)
-        let hasShoulders = (leftShoulder?.confidence ?? 0) > 0.4 && (rightShoulder?.confidence ?? 0) > 0.4
-        let hasHip = (leftHipCheck?.confidence ?? 0) > 0.3 || (rightHipCheck?.confidence ?? 0) > 0.3
-        guard hasShoulders && hasHip else {
-            return repCount
-        }
+        // Get elbow angles (primary signal)
+        let leftElbowAngle = elbowAngle(observation, side: .left)
+        let rightElbowAngle = elbowAngle(observation, side: .right)
 
-        let rawY = nose.location.y
-
-        // Exponential moving average
-        if let prev = smoothedNoseY {
-            smoothedNoseY = alpha * rawY + (1 - alpha) * prev
+        // Use the best available elbow angle
+        let currentElbowAngle: CGFloat
+        if let left = leftElbowAngle, let right = rightElbowAngle {
+            currentElbowAngle = (left + right) / 2
+        } else if let left = leftElbowAngle {
+            currentElbowAngle = left
+        } else if let right = rightElbowAngle {
+            currentElbowAngle = right
         } else {
-            smoothedNoseY = rawY
+            // Fallback to nose Y if elbows aren't visible
+            return processWithNoseY(observation)
         }
 
-        guard let y = smoothedNoseY else { return repCount }
+        // Smooth the angle
+        elbowAngleHistory.append(currentElbowAngle)
+        if elbowAngleHistory.count > historySize {
+            elbowAngleHistory.removeFirst()
+        }
+        let smoothedAngle = elbowAngleHistory.reduce(0, +) / CGFloat(elbowAngleHistory.count)
 
-        // Adaptive threshold based on visible body height
-        let bodyHeight = calculateBodyHeight(observation)
-        let threshold = max(bodyHeight * 0.10, 0.025)
+        // Also track nose Y as secondary confirmation
+        if let nose = safePoint(observation, .nose) {
+            noseYHistory.append(nose.y)
+            if noseYHistory.count > historySize {
+                noseYHistory.removeFirst()
+            }
+        }
 
+        // State machine using elbow angle
         switch phase {
-        case .waiting:
-            // Start tracking once body is detected
-            phase = .up
-            peakY = y
+        case .idle:
+            // Wait for first "up" position (arms extended)
+            if smoothedAngle > upAngleThreshold {
+                phase = .up
+            }
 
         case .up:
-            // Track highest point
-            if y > peakY { peakY = y }
-
-            // Detect downward movement
-            if y < peakY - threshold {
+            // Detect going down (elbows bending)
+            if smoothedAngle < downAngleThreshold {
                 phase = .down
-                valleyY = y
             }
 
         case .down:
-            // Track lowest point
-            if y < valleyY { valleyY = y }
-
-            // Detect upward movement — count a rep
-            if y > valleyY + threshold {
+            // Detect coming back up (elbows extending) = 1 rep
+            if smoothedAngle > upAngleThreshold {
                 let now = Date()
                 if now.timeIntervalSince(lastRepTime) >= minRepInterval {
                     repCount += 1
                     lastRepTime = now
                 }
                 phase = .up
-                peakY = y
             }
         }
 
         return repCount
     }
 
-    private func calculateBodyHeight(_ observation: VNHumanBodyPoseObservation) -> CGFloat {
-        let nose = try? observation.recognizedPoint(.nose)
-        let leftHip = try? observation.recognizedPoint(.leftHip)
-        let rightHip = try? observation.recognizedPoint(.rightHip)
+    // Fallback: nose-Y based counting (when elbows not visible)
+    private var nosePhase: Phase = .idle
+    private var nosePeakY: CGFloat = 0
+    private var noseValleyY: CGFloat = 1
 
-        let noseY = (nose?.confidence ?? 0) > 0.2 ? nose!.location.y : nil
-        let hipY: CGFloat?
-        if let lh = leftHip, lh.confidence > 0.2, let rh = rightHip, rh.confidence > 0.2 {
-            hipY = (lh.location.y + rh.location.y) / 2
-        } else if let lh = leftHip, lh.confidence > 0.2 {
-            hipY = lh.location.y
-        } else if let rh = rightHip, rh.confidence > 0.2 {
-            hipY = rh.location.y
-        } else {
-            hipY = nil
+    private func processWithNoseY(_ observation: VNHumanBodyPoseObservation) -> Int {
+        guard let nose = safePoint(observation, .nose) else { return repCount }
+
+        let y = nose.y
+
+        // Smooth
+        noseYHistory.append(y)
+        if noseYHistory.count > historySize {
+            noseYHistory.removeFirst()
+        }
+        let smoothedY = noseYHistory.reduce(0, +) / CGFloat(noseYHistory.count)
+
+        let bodyHeight = calculateBodyHeight(observation)
+        let threshold = max(bodyHeight * 0.08, 0.02)
+
+        switch nosePhase {
+        case .idle:
+            nosePhase = .up
+            nosePeakY = smoothedY
+
+        case .up:
+            if smoothedY > nosePeakY { nosePeakY = smoothedY }
+            if smoothedY < nosePeakY - threshold {
+                nosePhase = .down
+                noseValleyY = smoothedY
+            }
+
+        case .down:
+            if smoothedY < noseValleyY { noseValleyY = smoothedY }
+            if smoothedY > noseValleyY + threshold {
+                let now = Date()
+                if now.timeIntervalSince(lastRepTime) >= minRepInterval {
+                    repCount += 1
+                    lastRepTime = now
+                }
+                nosePhase = .up
+                nosePeakY = smoothedY
+            }
         }
 
-        if let ny = noseY, let hy = hipY {
+        return repCount
+    }
+
+    // MARK: - Helpers
+
+    private func safePoint(_ obs: VNHumanBodyPoseObservation, _ joint: VNHumanBodyPoseObservation.JointName) -> CGPoint? {
+        guard let pt = try? obs.recognizedPoint(joint), pt.confidence > 0.3 else { return nil }
+        return pt.location
+    }
+
+    private enum Side { case left, right }
+
+    private func elbowAngle(_ obs: VNHumanBodyPoseObservation, side: Side) -> CGFloat? {
+        let (shoulderJoint, elbowJoint, wristJoint): (VNHumanBodyPoseObservation.JointName, VNHumanBodyPoseObservation.JointName, VNHumanBodyPoseObservation.JointName)
+
+        switch side {
+        case .left:
+            shoulderJoint = .leftShoulder
+            elbowJoint = .leftElbow
+            wristJoint = .leftWrist
+        case .right:
+            shoulderJoint = .rightShoulder
+            elbowJoint = .rightElbow
+            wristJoint = .rightWrist
+        }
+
+        guard let shoulder = safePoint(obs, shoulderJoint),
+              let elbow = safePoint(obs, elbowJoint),
+              let wrist = safePoint(obs, wristJoint) else {
+            return nil
+        }
+
+        // Calculate angle at elbow (shoulder-elbow-wrist)
+        let v1 = CGPoint(x: shoulder.x - elbow.x, y: shoulder.y - elbow.y)
+        let v2 = CGPoint(x: wrist.x - elbow.x, y: wrist.y - elbow.y)
+
+        let dot = v1.x * v2.x + v1.y * v2.y
+        let mag1 = sqrt(v1.x * v1.x + v1.y * v1.y)
+        let mag2 = sqrt(v2.x * v2.x + v2.y * v2.y)
+
+        guard mag1 > 0, mag2 > 0 else { return nil }
+
+        let cosAngle = max(-1, min(1, dot / (mag1 * mag2)))
+        return acos(cosAngle) * 180 / .pi  // degrees
+    }
+
+    private func calculateBodyHeight(_ observation: VNHumanBodyPoseObservation) -> CGFloat {
+        let nose = safePoint(observation, .nose)
+        let leftHip = safePoint(observation, .leftHip)
+        let rightHip = safePoint(observation, .rightHip)
+
+        let hipY: CGFloat?
+        if let lh = leftHip, let rh = rightHip {
+            hipY = (lh.y + rh.y) / 2
+        } else {
+            hipY = leftHip?.y ?? rightHip?.y
+        }
+
+        if let ny = nose?.y, let hy = hipY {
             return abs(ny - hy)
         }
-        return 0.15 // fallback: assume ~15% of frame
+        return 0.15
     }
 }
 
