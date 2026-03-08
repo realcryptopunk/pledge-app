@@ -30,6 +30,39 @@ struct HomeView: View {
                 }
                 .onAppear { scrollProxy = proxy }
             }
+
+            // Investment toast banner
+            if let toast = appState.investmentToast {
+                VStack {
+                    HStack(spacing: 8) {
+                        Text("\u{1F4C8}")
+                            .font(.system(size: 16))
+                        Text(toast)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.pledgeGreen.opacity(0.9), Color.pledgeBlue.opacity(0.9)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+
+                    Spacer()
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.springBounce, value: appState.investmentToast)
+                .zIndex(100)
+            }
         }
         .task {
             await appState.verifyTodayHabits()

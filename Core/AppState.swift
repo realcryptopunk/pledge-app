@@ -22,6 +22,13 @@ class AppState: ObservableObject {
     @Published var isVerifying = false
     @Published var needsUsername = false
 
+    // Per-stock positions (symbol -> USDC value invested)
+    @Published var stockPositions: [String: Double] = [:]
+    // Transaction history for portfolio
+    @Published var investmentTransactions: [InvestmentTransaction] = []
+    // Toast message shown after a habit miss invests into stocks
+    @Published var investmentToast: String?
+
     // MARK: - Auth
 
     let authService = AuthService()
@@ -314,14 +321,17 @@ class AppState: ObservableObject {
             if stakeAmount > 0 {
                 investmentPoolValue += stakeAmount
                 vaultBalance -= stakeAmount
+                allocateStakeToStocks(stakeAmount: stakeAmount, habitName: todayHabits[index].habit.name)
             }
             if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
                 habits[habitIndex].currentStreak = 0
             }
+            let investAmount = stakeAmount * 0.80
+            let topStock = riskProfile.allocations.max(by: { $0.percentage < $1.percentage })?.symbol ?? "stocks"
             let activity = ActivityItem(
                 icon: "📈",
-                title: "Stake invested",
-                detail: "$\(Int(stakeAmount)) from \(todayHabits[index].habit.name)",
+                title: "$\(Int(investAmount)) \u{2192} \(topStock) & more",
+                detail: "From missed \(todayHabits[index].habit.name)",
                 isFailure: true
             )
             recentActivity.insert(activity, at: 0)
@@ -382,16 +392,19 @@ class AppState: ObservableObject {
                 if stakeAmount > 0 {
                     investmentPoolValue += stakeAmount
                     vaultBalance -= stakeAmount
+                    allocateStakeToStocks(stakeAmount: stakeAmount, habitName: todayHabits[index].habit.name)
                 }
                 // Reset streak
                 if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
                     habits[habitIndex].currentStreak = 0
                 }
                 // Create activity item
+                let investAmount = stakeAmount * 0.80
+                let topStock = riskProfile.allocations.max(by: { $0.percentage < $1.percentage })?.symbol ?? "stocks"
                 let activity = ActivityItem(
                     icon: "📈",
-                    title: "Stake invested",
-                    detail: "$\(Int(stakeAmount)) from \(todayHabits[index].habit.name)",
+                    title: "$\(Int(investAmount)) \u{2192} \(topStock) & more",
+                    detail: "From missed \(todayHabits[index].habit.name)",
                     isFailure: true
                 )
                 recentActivity.insert(activity, at: 0)
@@ -591,6 +604,7 @@ class AppState: ObservableObject {
     /// Initial load: use local data first, cloud data will overwrite when auth completes.
     private func loadHabits() {
         loadHabitsLocally()
+        loadStockData()
     }
 
     // MARK: - Realtime Subscriptions
@@ -657,6 +671,83 @@ class AppState: ObservableObject {
                 print("[AppState] Realtime unsubscribed from habits-changes channel")
             }
             habitsChannel = nil
+        }
+    }
+
+    // MARK: - Stock Allocation on Miss
+
+    /// Allocates a missed habit's stake across stocks based on risk profile,
+    /// records the transaction, and shows a toast.
+    private func allocateStakeToStocks(stakeAmount: Double, habitName: String) {
+        let fee = stakeAmount * 0.20
+        let investAmount = stakeAmount * 0.80
+        let allocs = riskProfile.allocations
+
+        var purchases: [InvestmentTransaction.StockPurchase] = []
+        for alloc in allocs {
+            let stockAmount = investAmount * alloc.percentage
+            stockPositions[alloc.symbol, default: 0] += stockAmount
+            purchases.append(InvestmentTransaction.StockPurchase(
+                symbol: alloc.symbol,
+                name: alloc.name,
+                amount: stockAmount,
+                percentage: alloc.percentage
+            ))
+        }
+
+        // Generate mock tx hash (64 hex chars)
+        let txHash = "0x" + UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
+            + UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased().prefix(32)
+
+        let tx = InvestmentTransaction(
+            id: UUID(),
+            date: Date(),
+            habitName: habitName,
+            totalAmount: stakeAmount,
+            feeAmount: fee,
+            investedAmount: investAmount,
+            allocations: purchases,
+            txHash: String(txHash.prefix(66))
+        )
+        investmentTransactions.insert(tx, at: 0)
+
+        // Show toast
+        let topStocks = purchases.sorted { $0.amount > $1.amount }.prefix(2).map { $0.symbol }
+        investmentToast = "$\(Int(investAmount)) invested into \(topStocks.joined(separator: ", ")) & more on Robinhood Chain"
+
+        // Auto-dismiss toast after 4 seconds
+        Task {
+            try? await Task.sleep(nanoseconds: 4_000_000_000)
+            await MainActor.run {
+                self.investmentToast = nil
+            }
+        }
+
+        saveStockData()
+    }
+
+    // MARK: - Stock Data Persistence
+
+    private static let stockPositionsKey = "savedStockPositions"
+    private static let investmentTransactionsKey = "savedInvestmentTransactions"
+
+    private func saveStockData() {
+        if let posData = try? JSONEncoder().encode(stockPositions) {
+            UserDefaults.standard.set(posData, forKey: Self.stockPositionsKey)
+        }
+        if let txData = try? JSONEncoder().encode(investmentTransactions) {
+            UserDefaults.standard.set(txData, forKey: Self.investmentTransactionsKey)
+        }
+    }
+
+    private func loadStockData() {
+        if let posData = UserDefaults.standard.data(forKey: Self.stockPositionsKey),
+           let decoded = try? JSONDecoder().decode([String: Double].self, from: posData) {
+            stockPositions = decoded
+        }
+        if let txData = UserDefaults.standard.data(forKey: Self.investmentTransactionsKey),
+           let decoded = try? JSONDecoder().decode([InvestmentTransaction].self, from: txData) {
+            investmentTransactions = decoded
         }
     }
 
@@ -738,6 +829,8 @@ class AppState: ObservableObject {
         await authService.signOut()
         // Clear persisted data
         UserDefaults.standard.removeObject(forKey: Self.savedHabitsKey)
+        UserDefaults.standard.removeObject(forKey: Self.stockPositionsKey)
+        UserDefaults.standard.removeObject(forKey: Self.investmentTransactionsKey)
         // Reset runtime state
         habits = []
         todayHabits = []
@@ -746,6 +839,9 @@ class AppState: ObservableObject {
         investmentPoolValue = 0
         investmentGrowth = 0
         streakCount = 0
+        stockPositions = [:]
+        investmentTransactions = []
+        investmentToast = nil
         userName = ""
         walletAddress = ""
         userPhone = ""

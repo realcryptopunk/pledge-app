@@ -188,6 +188,27 @@ struct AllocationItem: Identifiable {
     let color: Color
 }
 
+// MARK: - Investment Transaction
+
+struct InvestmentTransaction: Identifiable, Codable {
+    let id: UUID
+    let date: Date
+    let habitName: String
+    let totalAmount: Double
+    let feeAmount: Double      // 20%
+    let investedAmount: Double  // 80%
+    let allocations: [StockPurchase]
+    let txHash: String
+
+    struct StockPurchase: Codable, Identifiable {
+        var id: String { symbol }
+        let symbol: String
+        let name: String
+        let amount: Double
+        let percentage: Double
+    }
+}
+
 // MARK: - Photo Verification Result
 
 struct PhotoVerificationResult {

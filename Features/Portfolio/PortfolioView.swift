@@ -31,15 +31,13 @@ struct PortfolioView: View {
     @State private var appeared = false
     @Environment(\.themeColors) var theme
 
-    static let allocations: [AllocationItem] = [
-        AllocationItem(symbol: "TSLA", name: "Tesla", icon: "🚗", percentage: 0.30, fixedAPY: 0, color: .pledgeBlue),
-        AllocationItem(symbol: "AMZN", name: "Amazon", icon: "📦", percentage: 0.25, fixedAPY: 0, color: .pledgeViolet),
-        AllocationItem(symbol: "PLTR", name: "Palantir", icon: "🔮", percentage: 0.25, fixedAPY: 0, color: .pledgeGreen),
-        AllocationItem(symbol: "AMD", name: "AMD", icon: "💻", percentage: 0.20, fixedAPY: 0, color: .pledgeOrange),
-    ]
+    /// Dynamic allocations from the user's selected risk profile
+    private var allocations: [AllocationItem] {
+        appState.riskProfile.allocations
+    }
 
     private var weightedAPY: Double {
-        Self.allocations.reduce(0) { $0 + $1.percentage * $1.fixedAPY }
+        allocations.reduce(0) { $0 + $1.percentage * $1.fixedAPY }
     }
 
     private var daysForRange: Int {
@@ -68,6 +66,7 @@ struct PortfolioView: View {
                             chartSection
                             rangeToggle
                             allocationPreview
+                            recentInvestments
                             statsSection
                             ctaButtons
                         } else {
@@ -84,8 +83,9 @@ struct PortfolioView: View {
             .toolbarColorScheme(theme.isLight ? .light : .dark, for: .navigationBar)
             .sheet(isPresented: $showAllocation) {
                 AllocationDetailView(
-                    allocations: Self.allocations,
-                    totalValue: appState.investmentPoolValue
+                    allocations: allocations,
+                    totalValue: appState.investmentPoolValue,
+                    stockPositions: appState.stockPositions
                 )
             }
             .sheet(isPresented: $showTransactions) {
@@ -133,7 +133,7 @@ struct PortfolioView: View {
 
             // Allocation pill row
             HStack(spacing: 6) {
-                ForEach(Self.allocations) { alloc in
+                ForEach(allocations) { alloc in
                     HStack(spacing: 4) {
                         Circle()
                             .fill(alloc.color)
@@ -246,27 +246,33 @@ struct PortfolioView: View {
                 // Stacked bar
                 GeometryReader { geo in
                     HStack(spacing: 2) {
-                        ForEach(Self.allocations) { alloc in
+                        ForEach(allocations) { alloc in
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(alloc.color)
-                                .frame(width: max(8, (geo.size.width - CGFloat(Self.allocations.count - 1) * 2) * alloc.percentage))
+                                .frame(width: max(8, (geo.size.width - CGFloat(allocations.count - 1) * 2) * alloc.percentage))
                         }
                     }
                 }
                 .frame(height: 8)
 
-                // Labels
+                // Labels with actual invested amounts
                 HStack(spacing: 0) {
-                    ForEach(Self.allocations) { alloc in
+                    ForEach(allocations) { alloc in
                         VStack(spacing: 2) {
                             Text(alloc.icon)
                                 .font(.system(size: 16))
                             Text(alloc.symbol)
                                 .font(.system(size: 9, weight: .medium))
                                 .foregroundColor(.secondary)
-                            Text("\(Int(alloc.percentage * 100))%")
-                                .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                .foregroundColor(alloc.color)
+                            if let invested = appState.stockPositions[alloc.symbol], invested > 0 {
+                                Text("$\(Int(invested))")
+                                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                    .foregroundColor(alloc.color)
+                            } else {
+                                Text("\(Int(alloc.percentage * 100))%")
+                                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                    .foregroundColor(alloc.color)
+                            }
                         }
                         .frame(maxWidth: .infinity)
                     }
@@ -305,6 +311,63 @@ struct PortfolioView: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)
+    }
+
+    // MARK: - Recent Investments
+
+    private var recentInvestments: some View {
+        Group {
+            if !appState.investmentTransactions.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Recent Investments")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.primary)
+
+                    ForEach(appState.investmentTransactions.prefix(5)) { tx in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Missed \(tx.habitName)")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.primary)
+
+                                Text(tx.allocations.map { "\($0.symbol) $\(Int($0.amount))" }.joined(separator: " \u{00B7} "))
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(.secondary)
+
+                                // Tx hash link to Robinhood Chain explorer
+                                Button {
+                                    if let url = URL(string: "https://explorer.testnet.chain.robinhood.com/tx/\(tx.txHash)") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "link")
+                                            .font(.system(size: 10))
+                                        Text(String(tx.txHash.prefix(10)) + "..." + String(tx.txHash.suffix(6)))
+                                            .font(.system(size: 11, design: .monospaced))
+                                    }
+                                    .foregroundColor(theme.surface)
+                                }
+                            }
+
+                            Spacer()
+
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text("-$\(Int(tx.totalAmount))")
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(.pledgeRed)
+                                Text("$\(Int(tx.investedAmount)) invested")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.pledgeGreen)
+                            }
+                        }
+                        .padding(14)
+                        .aquaGlass(cornerRadius: 14)
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+        }
     }
 
     // MARK: - CTA Buttons
@@ -433,6 +496,7 @@ struct PortfolioView: View {
 struct AllocationDetailView: View {
     let allocations: [AllocationItem]
     let totalValue: Double
+    var stockPositions: [String: Double] = [:]
     @Environment(\.dismiss) private var dismiss
     @Environment(\.themeColors) var theme
 
@@ -490,7 +554,8 @@ struct AllocationDetailView: View {
                                     Spacer()
 
                                     VStack(alignment: .trailing, spacing: 2) {
-                                        Text("$\(String(format: "%.2f", totalValue * alloc.percentage))")
+                                        let actualValue = stockPositions[alloc.symbol] ?? (totalValue * alloc.percentage)
+                                        Text("$\(String(format: "%.2f", actualValue))")
                                             .font(.system(size: 15, weight: .semibold, design: .monospaced))
                                             .foregroundColor(.primary)
                                         Text("\(Int(alloc.percentage * 100))%")
