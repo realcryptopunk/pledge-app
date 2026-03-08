@@ -49,6 +49,7 @@ enum MintUSDCService {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(EnvConfig.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
 
         let body: [String: Any] = [
             "user_wallet": toWallet,
