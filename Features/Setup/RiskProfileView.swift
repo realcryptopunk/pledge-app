@@ -32,7 +32,7 @@ struct RiskProfileView: View {
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
-                        Text("Where should failed stakes be invested?")
+                        Text("Where should failed stakes earn yield?")
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(.secondary)
                     }

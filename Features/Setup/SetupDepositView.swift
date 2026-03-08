@@ -11,6 +11,7 @@ struct SetupDepositView: View {
     @State private var sessionToken: String?
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var pendingPaymentMethod: PaymentMethodsView.PaymentMethod?
 
     private let quickAmounts = ["50", "100", "200", "500"]
 
@@ -145,10 +146,15 @@ struct SetupDepositView: View {
             .padding(.top, 12)
             .padding(.bottom, 20)
         }
-        .sheet(isPresented: $showPaymentMethods) {
-            PaymentMethodsView(depositAmount: depositValue) { method in
-                showPaymentMethods = false
+        .sheet(isPresented: $showPaymentMethods, onDismiss: {
+            if let method = pendingPaymentMethod {
+                pendingPaymentMethod = nil
                 handlePayment(method)
+            }
+        }) {
+            PaymentMethodsView(depositAmount: depositValue) { method in
+                pendingPaymentMethod = method
+                showPaymentMethods = false
             }
             .presentationDetents([.medium])
         }

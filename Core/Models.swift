@@ -220,88 +220,84 @@ struct PhotoVerificationResult {
 // MARK: - Risk Profile
 
 enum RiskProfile: String, Codable, CaseIterable {
-    case conservative = "Conservative"
-    case moderate = "Moderate"
-    case aggressive = "Aggressive"
+    case safe = "Treasury"
+    case stableCore = "Stable Core"
+    case growth = "Growth"
 
     var title: String { rawValue }
 
     var subtitle: String {
         switch self {
-        case .conservative: return "Blue Chip Stocks"
-        case .moderate: return "Growth Mix"
-        case .aggressive: return "High Conviction"
+        case .safe: return "Treasury-Backed Yields"
+        case .stableCore: return "Stable Yield"
+        case .growth: return "High Yield + Equity"
         }
     }
 
     var description: String {
         switch self {
-        case .conservative: return "Established tech giants on Robinhood Chain — Amazon, Netflix, AMD. Lower volatility, proven companies."
-        case .moderate: return "Balanced mix of tokenized stocks on Robinhood Chain — Tesla, Amazon, Palantir, AMD."
-        case .aggressive: return "Tokenized private company equity via Robinhood — venture-style risk and reward."
+        case .safe: return "US Treasury-backed yield tokens — USDY and pt-THbill. Lowest risk, government-backed returns."
+        case .stableCore: return "Stablecoin yield strategies — pt-USDe and pt-sUSDai. Predictable yields from battle-tested protocols."
+        case .growth: return "Higher yield plus equity exposure — pt-USDre and xStocks. Greater upside with more volatility."
         }
     }
 
     var icon: String {
         switch self {
-        case .conservative: return "building.columns.fill"
-        case .moderate: return "chart.line.uptrend.xyaxis"
-        case .aggressive: return "flame.fill"
+        case .safe: return "building.columns.fill"
+        case .stableCore: return "chart.line.uptrend.xyaxis"
+        case .growth: return "flame.fill"
         }
     }
 
     var expectedReturn: String {
         switch self {
-        case .conservative: return "Market returns"
-        case .moderate: return "Growth potential"
-        case .aggressive: return "15-50%+ (variable)"
+        case .safe: return "4-5% APY"
+        case .stableCore: return "8-12% APY"
+        case .growth: return "15-30%+ (variable)"
         }
     }
 
     var riskLevel: String {
         switch self {
-        case .conservative: return "Very Low"
-        case .moderate: return "Low-Medium"
-        case .aggressive: return "High"
+        case .safe: return "Very Low"
+        case .stableCore: return "Low-Medium"
+        case .growth: return "High"
         }
     }
 
     var lockPeriod: String {
         switch self {
-        case .conservative: return "3-6 months"
-        case .moderate: return "1-12 months"
-        case .aggressive: return "12-36 months"
+        case .safe: return "3-6 months"
+        case .stableCore: return "3-12 months"
+        case .growth: return "6-12 months"
         }
     }
 
     var color: Color {
         switch self {
-        case .conservative: return .pledgeGreen
-        case .moderate: return .pledgeBlue
-        case .aggressive: return .pledgeOrange
+        case .safe: return .pledgeGreen
+        case .stableCore: return .pledgeBlue
+        case .growth: return .pledgeOrange
         }
     }
 
     var allocations: [AllocationItem] {
         switch self {
-        case .conservative:
+        case .safe:
             return [
-                AllocationItem(symbol: "AMZN", name: "Amazon", icon: "\u{1F4E6}", percentage: 0.40, fixedAPY: 0, color: .pledgeBlue),
-                AllocationItem(symbol: "NFLX", name: "Netflix", icon: "\u{1F3AC}", percentage: 0.35, fixedAPY: 0, color: .pledgeViolet),
-                AllocationItem(symbol: "AMD", name: "AMD", icon: "\u{1F4BB}", percentage: 0.25, fixedAPY: 0, color: .pledgeGreen),
+                AllocationItem(symbol: "USDY", name: "Ondo USDY", icon: "\u{1F3E6}", percentage: 0.50, fixedAPY: 4.5, color: .pledgeGreen),
+                AllocationItem(symbol: "pt-THbill", name: "PT T-Bill", icon: "\u{1F4DC}", percentage: 0.50, fixedAPY: 4.8, color: .pledgeBlue),
             ]
-        case .moderate:
+        case .stableCore:
             return [
-                AllocationItem(symbol: "TSLA", name: "Tesla", icon: "\u{1F697}", percentage: 0.30, fixedAPY: 0, color: .pledgeBlue),
-                AllocationItem(symbol: "AMZN", name: "Amazon", icon: "\u{1F4E6}", percentage: 0.25, fixedAPY: 0, color: .pledgeViolet),
-                AllocationItem(symbol: "PLTR", name: "Palantir", icon: "\u{1F52E}", percentage: 0.25, fixedAPY: 0, color: .pledgeGreen),
-                AllocationItem(symbol: "AMD", name: "AMD", icon: "\u{1F4BB}", percentage: 0.20, fixedAPY: 0, color: .pledgeOrange),
+                AllocationItem(symbol: "pt-USDe", name: "PT USDe", icon: "\u{1F4B2}", percentage: 0.50, fixedAPY: 10.0, color: .pledgeBlue),
+                AllocationItem(symbol: "pt-sUSDai", name: "PT sUSDai", icon: "\u{1F4B0}", percentage: 0.50, fixedAPY: 8.5, color: .pledgeViolet),
             ]
-        case .aggressive:
+        case .growth:
             return [
-                AllocationItem(symbol: "TSLA", name: "Tesla", icon: "\u{1F697}", percentage: 0.50, fixedAPY: 0, color: .pledgeOrange),
-                AllocationItem(symbol: "PLTR", name: "Palantir", icon: "\u{1F52E}", percentage: 0.30, fixedAPY: 0, color: .pledgeViolet),
-                AllocationItem(symbol: "AMD", name: "AMD", icon: "\u{1F4BB}", percentage: 0.20, fixedAPY: 0, color: .pledgeBlue),
+                AllocationItem(symbol: "pt-USDre", name: "PT USDre", icon: "\u{1F680}", percentage: 0.50, fixedAPY: 18.0, color: .pledgeOrange),
+                AllocationItem(symbol: "xStocks", name: "xStocks", icon: "\u{1F4C8}", percentage: 0.50, fixedAPY: 0, color: .pledgeViolet),
             ]
         }
     }

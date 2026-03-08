@@ -9,7 +9,7 @@ class AppState: ObservableObject {
     @AppStorage("backgroundTheme") var backgroundTheme: BackgroundTheme = .aqua
     @AppStorage("userName") var userName = ""
     @AppStorage("walletAddress") var walletAddress: String = ""
-    @AppStorage("riskProfile") var riskProfile: RiskProfile = .moderate
+    @AppStorage("riskProfile") var riskProfile: RiskProfile = .stableCore
     @Published var isAuthenticated = false
     @Published var userPhone: String = ""
     @Published var habits: [Habit] = []
@@ -715,7 +715,7 @@ class AppState: ObservableObject {
 
         // Show toast
         let topStocks = purchases.sorted { $0.amount > $1.amount }.prefix(2).map { $0.symbol }
-        investmentToast = "$\(Int(investAmount)) invested into \(topStocks.joined(separator: ", ")) & more on Robinhood Chain"
+        investmentToast = "$\(Int(investAmount)) invested into \(topStocks.joined(separator: ", ")) & more on-chain"
 
         // Auto-dismiss toast after 4 seconds
         Task {
@@ -742,11 +742,20 @@ class AppState: ObservableObject {
             return
         }
 
+        // Map RiskProfile to contract tier: safe=0, stableCore=1, growth=2
+        let tier: Int
+        switch riskProfile {
+        case .safe: tier = 0
+        case .stableCore: tier = 1
+        case .growth: tier = 2
+        }
+
         Task {
             do {
                 let relayerResult = try await InvestRelayerService.callInvestRelayer(
                     userWallet: wallet,
-                    usdcAmount: stakeAmount
+                    usdcAmount: stakeAmount,
+                    riskTier: tier
                 )
                 await MainActor.run {
                     self.lastInvestmentExplorerURL = relayerResult.explorerURL

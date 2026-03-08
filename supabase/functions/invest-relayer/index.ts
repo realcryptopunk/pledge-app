@@ -10,31 +10,38 @@ const corsHeaders = {
     "Authorization, Content-Type, apikey, x-client-info",
 };
 
-// MARK: - Contract Addresses (RH Chain Testnet)
+// MARK: - Contract Addresses (Arbitrum Sepolia)
 
-const PLEDGE_VAULT_ADDRESS = "0x70d73b04d0c2ee4f73eb44cbf5377a2c3fbc52ba";
-const USDC_ADDRESS = "0xbf4479C07Dc6fdc6dAa764A0ccA06969e894275F";
-const DEFAULT_RPC_URL = "https://rpc.testnet.chain.robinhood.com";
-const EXPLORER_BASE = "https://explorer.testnet.chain.robinhood.com";
+const PLEDGE_VAULT_ADDRESS = "0xb7DdF629007C2A489C254eea3726750235B82178";
+const USDC_ADDRESS = "0x9cA75917e9c158569a602cb2504823282fb4Fc45";
+const DEFAULT_RPC_URL = "https://sepolia-rollup.arbitrum.io/rpc";
+const EXPLORER_BASE = "https://sepolia.arbiscan.io";
 
 // MARK: - Minimal ABIs
 
 const VAULT_ABI = [
-  "function investForUser(address user, uint256 usdcAmount) external",
+  "function register(uint8 tier) external",
+  "function deposit(uint256 amount) external returns (uint256)",
+  "function investOnFailure(uint256 pledgeId, uint256 usdyMinOut, uint256 bcspxMinOut) external",
 ];
 
-const ERC20_ABI = ["function decimals() view returns (uint8)"];
+const ERC20_ABI = [
+  "function approve(address spender, uint256 amount) external returns (bool)",
+  "function decimals() view returns (uint8)",
+];
 
 // MARK: - Input Validation
 
 const ETH_ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/;
 const MAX_USDC_AMOUNT = 1000; // Testnet safety cap
+const VALID_RISK_TIERS = [0, 1, 2]; // 0=LOW, 1=MEDIUM, 2=HIGH
 
 function validateInput(body: {
   user_wallet?: string;
   usdc_amount?: number;
-}): { user_wallet: string; usdc_amount: number } | Response {
-  const { user_wallet, usdc_amount } = body;
+  risk_tier?: number;
+}): { user_wallet: string; usdc_amount: number; risk_tier: number } | Response {
+  const { user_wallet, usdc_amount, risk_tier } = body;
 
   if (!user_wallet || typeof user_wallet !== "string") {
     return new Response(
@@ -93,7 +100,20 @@ function validateInput(body: {
     );
   }
 
-  return { user_wallet, usdc_amount };
+  const tier = risk_tier ?? 1; // Default to MEDIUM
+  if (!VALID_RISK_TIERS.includes(tier)) {
+    return new Response(
+      JSON.stringify({
+        error: "Invalid risk_tier — must be 0 (LOW), 1 (MEDIUM), or 2 (HIGH)",
+      }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  return { user_wallet, usdc_amount, risk_tier: tier };
 }
 
 // MARK: - Main Handler
@@ -122,7 +142,7 @@ serve(async (req: Request) => {
     if (validated instanceof Response) {
       return validated;
     }
-    const { user_wallet, usdc_amount } = validated;
+    const { user_wallet, usdc_amount, risk_tier } = validated;
 
     // Load environment variables
     const relayerPrivateKey = Deno.env.get("RELAYER_PRIVATE_KEY");
@@ -141,21 +161,17 @@ serve(async (req: Request) => {
     }
 
     const rpcUrl =
-      Deno.env.get("RH_TESTNET_RPC_URL") || DEFAULT_RPC_URL;
+      Deno.env.get("ARBITRUM_SEPOLIA_RPC_URL") || DEFAULT_RPC_URL;
 
     // Set up ethers provider and signer
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(relayerPrivateKey, provider);
 
     // Query USDC decimals from contract (with fallback)
+    const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, wallet);
     let decimals = 18;
     try {
-      const usdcContract = new ethers.Contract(
-        USDC_ADDRESS,
-        ERC20_ABI,
-        provider
-      );
-      decimals = Number(await usdcContract.decimals());
+      decimals = Number(await usdc.decimals());
     } catch (err) {
       console.warn(
         "Failed to query USDC decimals, defaulting to 18:",
@@ -169,32 +185,64 @@ serve(async (req: Request) => {
       decimals
     );
 
-    // Create vault contract instance and call investForUser
+    // Create vault contract instance
     const vault = new ethers.Contract(
       PLEDGE_VAULT_ADDRESS,
       VAULT_ABI,
       wallet
     );
 
-    console.log(
-      `Calling investForUser(${user_wallet}, ${parsedAmount.toString()}) with decimals=${decimals}`
-    );
+    // Step 1: Register relayer's risk tier
+    console.log(`Step 1: register(tier=${risk_tier})`);
+    const registerTx = await vault.register(risk_tier);
+    await registerTx.wait(1);
+    console.log(`Register confirmed: ${registerTx.hash}`);
 
-    const tx = await vault.investForUser(user_wallet, parsedAmount);
-    console.log(`Transaction submitted: ${tx.hash}`);
+    // Step 2: Approve USDC to vault
+    console.log(`Step 2: approve(vault, ${parsedAmount.toString()})`);
+    const approveTx = await usdc.approve(PLEDGE_VAULT_ADDRESS, parsedAmount);
+    await approveTx.wait(1);
+    console.log(`Approve confirmed: ${approveTx.hash}`);
 
-    // Wait for 1 confirmation
-    const receipt = await tx.wait(1);
+    // Step 3: Deposit USDC into vault — capture pledgeId from return value
+    console.log(`Step 3: deposit(${parsedAmount.toString()})`);
+    const depositTx = await vault.deposit(parsedAmount);
+    const depositReceipt = await depositTx.wait(1);
+    console.log(`Deposit confirmed: ${depositTx.hash}`);
+
+    // Extract pledgeId from deposit return value via static call
+    let pledgeId: bigint;
+    try {
+      pledgeId = await vault.deposit.staticCall(parsedAmount);
+    } catch {
+      // Fallback: parse from deposit logs or use 0
+      // The pledgeId is typically emitted in an event; for now use the tx index approach
+      console.warn("Static call for pledgeId failed, using log-based extraction");
+      // Try to get pledgeId from deposit receipt logs
+      const depositEvent = depositReceipt.logs[depositReceipt.logs.length - 1];
+      if (depositEvent && depositEvent.data) {
+        pledgeId = BigInt(depositEvent.data);
+      } else {
+        pledgeId = BigInt(0);
+      }
+    }
+    console.log(`PledgeId: ${pledgeId.toString()}`);
+
+    // Step 4: Invest on failure (0 minOut for testnet)
+    console.log(`Step 4: investOnFailure(${pledgeId.toString()}, 0, 0)`);
+    const investTx = await vault.investOnFailure(pledgeId, 0, 0);
+    const investReceipt = await investTx.wait(1);
     console.log(
-      `Transaction confirmed in block ${receipt.blockNumber}`
+      `investOnFailure confirmed in block ${investReceipt.blockNumber}: ${investReceipt.hash}`
     );
 
     // Return success response
     return new Response(
       JSON.stringify({
         success: true,
-        tx_hash: receipt.hash,
-        explorer_url: `${EXPLORER_BASE}/tx/${receipt.hash}`,
+        tx_hash: investReceipt.hash,
+        explorer_url: `${EXPLORER_BASE}/tx/${investReceipt.hash}`,
+        pledge_id: pledgeId.toString(),
       }),
       {
         status: 200,

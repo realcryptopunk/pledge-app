@@ -78,7 +78,7 @@ struct PortfolioView: View {
                     .padding(.top, 20)
                 }
             }
-            .navigationTitle("Stock Portfolio")
+            .navigationTitle("Portfolio")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(theme.isLight ? .light : .dark, for: .navigationBar)
             .sheet(isPresented: $showAllocation) {
@@ -109,7 +109,7 @@ struct PortfolioView: View {
     private var portfolioHeader: some View {
         VStack(spacing: 16) {
             VStack(spacing: 6) {
-                Text("STOCK PORTFOLIO")
+                Text("PORTFOLIO")
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundColor(.secondary)
                     .tracking(1.5)
@@ -229,12 +229,12 @@ struct PortfolioView: View {
         } label: {
             VStack(spacing: 12) {
                 HStack {
-                    Text("Stock Allocation")
+                    Text("Allocation")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.primary)
                     Spacer()
                     HStack(spacing: 4) {
-                        Text("Tokenized Stocks")
+                        Text("Yield Tokens")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.pledgeGreen)
                         Image(systemName: "chevron.right")
@@ -402,7 +402,7 @@ struct PortfolioView: View {
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
 
-            Text("When you miss a habit pledge, your stake auto-invests into tokenized stocks on Robinhood Chain.")
+            Text("When you miss a habit pledge, your stake auto-invests into yield-bearing tokens on-chain.")
                 .font(.system(size: 15))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -410,10 +410,10 @@ struct PortfolioView: View {
 
             // Show what they'd earn
             VStack(spacing: 8) {
-                Text("Portfolio stocks")
+                Text("Portfolio assets")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.secondary)
-                Text("TSLA · AMZN · PLTR · AMD")
+                Text("USDY · pt-USDe · pt-USDre")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
                     .foregroundColor(.pledgeGreen)
             }
@@ -477,7 +477,7 @@ struct PortfolioView: View {
             let baseTx: [(String, String, String, String)] = [
                 ("📈", "Portfolio rebalance", "Auto-rebalanced allocation", "$0"),
                 ("🔒", "Vault deposit", "Initial stake deposit", "+$50"),
-                ("💰", "Dividend received", "Stock portfolio dividend", "+$0.47"),
+                ("💰", "Yield received", "Portfolio yield", "+$0.47"),
             ]
             for (i, tx) in baseTx.enumerated() {
                 items.append(TransactionItem(
@@ -520,7 +520,7 @@ struct AllocationDetailView: View {
                             Image(systemName: "percent")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.pledgeGreen)
-                            Text("Tokenized Stocks on Robinhood Chain")
+                            Text("Yield-Bearing Tokens")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.pledgeGreen)
                         }
@@ -546,7 +546,7 @@ struct AllocationDetailView: View {
                                         Text(alloc.name)
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(.primary)
-                                        Text("Tokenized Stock")
+                                        Text("Yield Token")
                                             .font(.system(size: 12, weight: .medium))
                                             .foregroundColor(.pledgeGreen)
                                     }
@@ -579,14 +579,14 @@ struct AllocationDetailView: View {
                             HStack(spacing: 6) {
                                 Image(systemName: "info.circle")
                                     .foregroundColor(.secondary.opacity(0.5))
-                                Text("Tokenized stocks on Robinhood Chain. Auto-rebalances weekly.")
+                                Text("Yield-bearing tokens. Auto-rebalances weekly.")
                                     .font(.system(size: 12))
                                     .foregroundColor(.secondary)
                             }
                             HStack(spacing: 6) {
                                 Image(systemName: "shield.checkered")
                                     .foregroundColor(.secondary.opacity(0.5))
-                                Text("Backed 1:1 by real equities held in custody by Robinhood.")
+                                Text("Backed by treasury, stablecoin, and equity yield protocols.")
                                     .font(.system(size: 12))
                                     .foregroundColor(.secondary)
                             }

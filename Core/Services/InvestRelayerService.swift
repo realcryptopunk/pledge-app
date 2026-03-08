@@ -3,7 +3,7 @@ import Foundation
 // MARK: - InvestRelayerService
 
 /// Calls the invest-relayer Supabase edge function to execute on-chain investments
-/// via PledgeVaultRH.investForUser when a user misses a habit.
+/// via PledgeVault on Arbitrum Sepolia when a user misses a habit.
 enum InvestRelayerService {
 
     // MARK: - Response Model
@@ -11,6 +11,7 @@ enum InvestRelayerService {
     struct Response {
         let txHash: String
         let explorerURL: String
+        let pledgeId: String?
     }
 
     // MARK: - Error Types
@@ -39,9 +40,10 @@ enum InvestRelayerService {
     /// - Parameters:
     ///   - userWallet: The user's embedded wallet address (0x...)
     ///   - usdcAmount: The USDC amount to invest (e.g., 5.0)
-    /// - Returns: `Response` containing the transaction hash and explorer URL
+    ///   - riskTier: Contract risk tier (0=LOW, 1=MEDIUM, 2=HIGH)
+    /// - Returns: `Response` containing the transaction hash, explorer URL, and pledge ID
     /// - Throws: `RelayerError` on failure
-    static func callInvestRelayer(userWallet: String, usdcAmount: Double) async throws -> Response {
+    static func callInvestRelayer(userWallet: String, usdcAmount: Double, riskTier: Int) async throws -> Response {
         guard let url = URL(string: "\(EnvConfig.supabaseURL)/functions/v1/invest-relayer") else {
             throw RelayerError.invalidURL
         }
@@ -52,7 +54,8 @@ enum InvestRelayerService {
 
         let body: [String: Any] = [
             "user_wallet": userWallet,
-            "usdc_amount": usdcAmount
+            "usdc_amount": usdcAmount,
+            "risk_tier": riskTier
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
@@ -73,6 +76,8 @@ enum InvestRelayerService {
             throw RelayerError.invalidResponse
         }
 
-        return Response(txHash: txHash, explorerURL: explorerURL)
+        let pledgeId = json["pledge_id"] as? String
+
+        return Response(txHash: txHash, explorerURL: explorerURL, pledgeId: pledgeId)
     }
 }

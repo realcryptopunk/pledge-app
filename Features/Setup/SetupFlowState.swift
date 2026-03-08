@@ -50,7 +50,7 @@ struct TargetConfig {
     var isNavigatingForward = true
     var selectedTypes: [HabitType] = []
     var configs: [HabitType: HabitSetupConfig] = [:]
-    var selectedRiskProfile: RiskProfile = .moderate
+    var selectedRiskProfile: RiskProfile = .stableCore
     var depositAmount: Double = 0
     var configPageIndex: Int = 0
 
