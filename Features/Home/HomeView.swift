@@ -448,7 +448,7 @@ struct AddFundsSheet: View {
     }
 
     private var canDeposit: Bool {
-        amount >= 50
+        amount >= 1
     }
 
     var body: some View {

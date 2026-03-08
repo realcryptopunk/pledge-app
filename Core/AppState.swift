@@ -326,7 +326,7 @@ class AppState: ObservableObject {
             if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
                 habits[habitIndex].currentStreak = 0
             }
-            let investAmount = stakeAmount * 0.80
+            let investAmount = stakeAmount * 0.98
             let topStock = riskProfile.allocations.max(by: { $0.percentage < $1.percentage })?.symbol ?? "stocks"
             let activity = ActivityItem(
                 icon: "📈",
@@ -399,7 +399,7 @@ class AppState: ObservableObject {
                     habits[habitIndex].currentStreak = 0
                 }
                 // Create activity item
-                let investAmount = stakeAmount * 0.80
+                let investAmount = stakeAmount * 0.98
                 let topStock = riskProfile.allocations.max(by: { $0.percentage < $1.percentage })?.symbol ?? "stocks"
                 let activity = ActivityItem(
                     icon: "📈",
@@ -679,8 +679,8 @@ class AppState: ObservableObject {
     /// Allocates a missed habit's stake across stocks based on risk profile,
     /// records the transaction, and shows a toast.
     private func allocateStakeToStocks(stakeAmount: Double, habitName: String) {
-        let fee = stakeAmount * 0.20
-        let investAmount = stakeAmount * 0.80
+        let fee = stakeAmount * 0.02
+        let investAmount = stakeAmount * 0.98
         let allocs = riskProfile.allocations
 
         var purchases: [InvestmentTransaction.StockPurchase] = []

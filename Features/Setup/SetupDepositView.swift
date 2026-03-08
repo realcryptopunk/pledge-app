@@ -18,7 +18,7 @@ struct SetupDepositView: View {
     }
 
     private var canDeposit: Bool {
-        depositValue >= 50
+        depositValue >= 1
     }
 
     var body: some View {
@@ -60,7 +60,7 @@ struct SetupDepositView: View {
                         .animation(.quickSnap, value: depositString)
                 }
 
-                Text("Minimum deposit: $50")
+                Text("No minimum deposit")
                     .pledgeCaption()
                     .foregroundColor(.secondary.opacity(0.6))
             }

@@ -195,7 +195,7 @@ struct InvestmentTransaction: Identifiable, Codable {
     let date: Date
     let habitName: String
     let totalAmount: Double
-    let feeAmount: Double      // 20%
+    let feeAmount: Double      // 2%
     let investedAmount: Double  // 80%
     let allocations: [StockPurchase]
     let txHash: String
