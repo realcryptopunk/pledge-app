@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pledge — Pitch Deck</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--deep:#F0F0FF;--mid:#E8EEFF;--surface:#6366F1;--light:#818CF8;--accent:#4F46E5;--green:#22C55E;--red:#EF4444;--text:#1E1B4B;--subtle:#6B7280}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--deep);color:var(--text);overflow:hidden}
+.slide{width:100vw;height:100vh;display:none;flex-direction:column;justify-content:center;align-items:center;padding:60px 80px;position:absolute;top:0;left:0;background:var(--deep);overflow:hidden}
+.slide.active{display:flex}
+.slide::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,0.08) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none}
+.slide::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(129,140,248,0.06) 0%,transparent 70%);bottom:-150px;left:-150px;pointer-events:none}
+.serif{font-family:'DM Serif Display',serif}
+h1{font-size:56px;font-weight:900;line-height:1.1}
+h2{font-size:42px;font-weight:800;line-height:1.2}
+h3{font-size:28px;font-weight:700;line-height:1.3}
+p{font-size:20px;line-height:1.6;color:var(--subtle)}
+.shield{font-size:80px;background:linear-gradient(135deg,var(--surface),var(--light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px;filter:drop-shadow(0 8px 24px rgba(99,102,241,0.3))}
+.tag{display:inline-block;padding:6px 16px;border-radius:20px;font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.tag-purple{background:rgba(99,102,241,0.1);color:var(--surface)}
+.tag-green{background:rgba(34,197,94,0.1);color:var(--green)}
+.tag-red{background:rgba(239,68,68,0.1);color:var(--red)}
+.card{background:rgba(255,255,255,0.7);backdrop-filter:blur(20px);border:1px solid rgba(99,102,241,0.1);border-radius:20px;padding:28px 32px;box-shadow:0 4px 20px rgba(99,102,241,0.06)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:100%}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;width:100%}
+.center{text-align:center}.left{text-align:left;align-items:flex-start}
+.gap-16{gap:16px}.gap-24{gap:24px}.gap-32{gap:32px}
+.mt-8{margin-top:8px}.mt-16{margin-top:16px}.mt-24{margin-top:24px}.mt-32{margin-top:32px}
+.w-full{width:100%}.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}
+.highlight{background:linear-gradient(135deg,var(--surface),var(--light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-num{font-size:64px;font-weight:900;background:linear-gradient(135deg,var(--surface),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.quote{font-family:'DM Serif Display',serif;font-size:32px;font-style:italic;color:var(--surface);border-left:4px solid var(--surface);padding-left:24px;max-width:700px}
+.step-num{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--surface),var(--light));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;flex-shrink:0}
+.stock-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:12px;background:rgba(255,255,255,0.8);border:1px solid rgba(99,102,241,0.15);font-weight:700;font-size:16px}
+.bottom-bar{position:absolute;bottom:24px;left:80px;right:80px;display:flex;justify-content:space-between;font-size:14px;color:var(--subtle);opacity:0.5}
+.progress{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--surface),var(--light));transition:width 0.3s ease}
+</style>
+</head>
+<body>
+<div id="deck">
+
+<div class="slide active center" id="s1">
+<div class="shield">🛡️</div>
+<h1 class="serif" style="font-size:64px">Pledge</h1>
+<p style="color:var(--surface);font-weight:600;font-size:24px" class="mt-8">Discipline With Teeth</p>
+<p class="mt-24" style="max-width:600px">The habit app where missed goals auto-invest into tokenized stocks on Robinhood Chain.</p>
+<div class="mt-32 flex gap-16"><span class="tag tag-purple">Arbitrum Open House NYC</span><span class="tag tag-green">Robinhood Chain</span></div>
+</div>
+
+<div class="slide center" id="s2">
+<p class="serif" style="font-size:48px;color:var(--text);max-width:800px;line-height:1.3">"What if missing a workout made you a <span class="highlight">Tesla shareholder</span>?"</p>
+</div>
+
+<div class="slide left" id="s3">
+<div class="flex-col gap-32 w-full" style="max-width:1000px">
+<div><span class="tag tag-red">The Problem</span><h2 class="mt-16"><span class="highlight">92%</span> of habits fail.</h2><p class="mt-8">Not because people don't care — because there's no real consequence.</p></div>
+<div class="grid-2">
+<div class="card"><h3 style="font-size:22px">😐 Streaks & Badges</h3><p class="mt-8" style="font-size:16px">Easy to ignore. No financial skin in the game.</p></div>
+<div class="card"><h3 style="font-size:22px">🤝 Accountability Partners</h3><p class="mt-8" style="font-size:16px">Awkward. People stop checking in after week 2.</p></div>
+<div class="card"><h3 style="font-size:22px">💸 Beeminder ($50-80K/mo)</h3><p class="mt-8" style="font-size:16px">Proves willingness to pay. But your money is <strong>lost forever</strong>.</p></div>
+<div class="card"><h3 style="font-size:22px">❌ Pact (shut down)</h3><p class="mt-8" style="font-size:16px">Couldn't scale the payout model. RIP.</p></div>
+</div></div>
+</div>
+
+<div class="slide left" id="s4">
+<div class="flex-col gap-32 w-full" style="max-width:1000px">
+<div><span class="tag tag-purple">The Solution</span><h2 class="mt-16">Stake → Verify → <span class="highlight">Invest</span></h2></div>
+<div class="grid-3">
+<div class="card center"><div class="step-num" style="margin:0 auto 16px">1</div><h3 style="font-size:22px">🎯 Stake</h3><p class="mt-8" style="font-size:15px">Put $5-50 on each habit. Real money, real commitment.</p></div>
+<div class="card center"><div class="step-num" style="margin:0 auto 16px">2</div><h3 style="font-size:22px">🔍 Auto-Verify</h3><p class="mt-8" style="font-size:15px">HealthKit, GPS, Vision AI, Gemini 2.0 Flash photo verification.</p></div>
+<div class="card center"><div class="step-num" style="margin:0 auto 16px">3</div><h3 style="font-size:22px">📈 Invest</h3><p class="mt-8" style="font-size:15px">Miss it? 98% auto-invests into tokenized stocks on Robinhood Chain.</p></div>
+</div>
+<div class="quote mt-8">"You never lose money. You build discipline or build a portfolio."</div>
+</div>
+</div>
+
+<div class="slide left" id="s5">
+<div class="flex-col gap-24 w-full" style="max-width:1000px">
+<div><span class="tag tag-purple">No Cheating</span><h2 class="mt-16">4 Verification Methods</h2><p class="mt-8">No manual reporting. No honor system. Verified or it didn't happen.</p></div>
+<div class="grid-2 mt-8">
+<div class="card flex gap-16 items-center"><span style="font-size:40px">🏥</span><div><h3 style="font-size:20px">HealthKit</h3><p style="font-size:15px">Steps, sleep, workouts — direct from Apple Health</p></div></div>
+<div class="card flex gap-16 items-center"><span style="font-size:40px">📍</span><div><h3 style="font-size:20px">GPS Geo-fencing</h3><p style="font-size:15px">Gym check-ins verified by location</p></div></div>
+<div class="card flex gap-16 items-center"><span style="font-size:40px">📹</span><div><h3 style="font-size:20px">Vision AI</h3><p style="font-size:15px">Real-time pushup & pull-up counting with pose detection</p></div></div>
+<div class="card flex gap-16 items-center"><span style="font-size:40px">📸</span><div><h3 style="font-size:20px">Gemini 2.0 Flash</h3><p style="font-size:15px">BeReal-style photo verification for cold showers, meditation, reading</p></div></div>
+</div></div>
+</div>
+
+<div class="slide left" id="s6">
+<div class="flex-col gap-24 w-full" style="max-width:1000px">
+<div><span class="tag tag-green">Perfect Fit</span><h2 class="mt-16">Why <span class="highlight">Robinhood Chain</span>?</h2></div>
+<div class="grid-2 mt-8">
+<div class="flex-col gap-16">
+<div class="card"><h3 style="font-size:18px">🏦 Tokenized stocks on-chain</h3><p style="font-size:15px" class="mt-8">TSLA, AMZN, PLTR, AMD, NFLX as ERC-20s</p></div>
+<div class="card"><h3 style="font-size:18px">👥 23M Robinhood users</h3><p style="font-size:15px" class="mt-8">Already comfortable with fractional stock investing</p></div>
+<div class="card"><h3 style="font-size:18px">⚡ Near-zero gas fees</h3><p style="font-size:15px" class="mt-8">Orbit L3 makes $5-50 micro-transactions viable</p></div>
+</div>
+<div class="card flex-col items-center" style="justify-content:center">
+<p style="font-size:14px;font-weight:700;color:var(--subtle);letter-spacing:1px;text-transform:uppercase">Default Allocation</p>
+<div class="flex-col" style="gap:8px;margin-top:16px;width:100%">
+<div class="stock-pill"><span>🚗</span> TSLA <span style="margin-left:auto;color:var(--surface)">30%</span></div>
+<div class="stock-pill"><span>📦</span> AMZN <span style="margin-left:auto;color:var(--surface)">25%</span></div>
+<div class="stock-pill"><span>🔮</span> PLTR <span style="margin-left:auto;color:var(--surface)">25%</span></div>
+<div class="stock-pill"><span>💻</span> AMD <span style="margin-left:auto;color:var(--surface)">20%</span></div>
+</div></div>
+</div></div>
+</div>
+
+<div class="slide left" id="s7">
+<div class="flex-col gap-24 w-full" style="max-width:1000px">
+<div><span class="tag tag-purple">On-Chain</span><h2 class="mt-16">PledgeVaultRH.sol</h2><p class="mt-8">Deployed on Robinhood Chain Testnet · 21 tests passing</p></div>
+<div class="card" style="font-family:monospace;font-size:16px;line-height:2;background:rgba(30,27,75,0.03)">
+<span style="color:var(--subtle)">User approves USDC →</span> misses habit →<br>
+&nbsp;&nbsp;→ <span style="color:var(--surface);font-weight:700">2% fee</span> to treasury<br>
+&nbsp;&nbsp;→ <span style="color:var(--green);font-weight:700">98% allocated</span> across tokenized stocks<br>
+&nbsp;&nbsp;→ Per-user on-chain portfolio tracking<br>
+&nbsp;&nbsp;→ <span style="font-weight:700">Emergency withdraw</span> always available
+</div>
+<div class="grid-3 mt-8">
+<div class="card center"><p style="font-size:14px;font-weight:600;color:var(--subtle)">Architecture</p><h3 class="mt-8" style="font-size:18px">Non-custodial</h3><p style="font-size:14px">User owns all positions</p></div>
+<div class="card center"><p style="font-size:14px;font-weight:600;color:var(--subtle)">Security</p><h3 class="mt-8" style="font-size:18px">OpenZeppelin</h3><p style="font-size:14px">ReentrancyGuard + SafeERC20</p></div>
+<div class="card center"><p style="font-size:14px;font-weight:600;color:var(--subtle)">Tests</p><h3 class="mt-8" style="font-size:18px">21 / 21 ✅</h3><p style="font-size:14px">Foundry test suite</p></div>
+</div></div>
+</div>
+
+<div class="slide left" id="s8">
+<div class="flex-col gap-24 w-full" style="max-width:1000px">
+<div><span class="tag tag-green">Market</span><h2 class="mt-16">Business Model</h2></div>
+<div class="grid-3">
+<div class="card center"><p style="font-size:14px;font-weight:600;color:var(--subtle)">Platform Fee</p><div class="stat-num" style="font-size:48px">2%</div><p style="font-size:14px">On all missed habit stakes</p></div>
+<div class="card center"><p style="font-size:14px;font-weight:600;color:var(--subtle)">Premium</p><div class="stat-num" style="font-size:48px">$9.99</div><p style="font-size:14px">/month for advanced features</p></div>
+<div class="card center"><p style="font-size:14px;font-weight:600;color:var(--subtle)">TAM</p><div class="stat-num" style="font-size:48px">$5B</div><p style="font-size:14px">Habit app market</p></div>
+</div>
+<div class="grid-2 mt-8">
+<div class="card"><h3 style="font-size:18px">📊 Market Validation</h3><p style="font-size:15px" class="mt-8"><strong>Beeminder</strong> — $50-80K/mo, terrible UX, money is <em>lost</em></p><p style="font-size:15px"><strong>Finch</strong> — $2M/mo habit app, no financial stakes</p></div>
+<div class="card"><h3 style="font-size:18px">🚀 Traction</h3><p style="font-size:15px" class="mt-8"><strong>57+ Swift files</strong> — full production iOS app</p><p style="font-size:15px"><strong>4 verification methods</strong> working</p><p style="font-size:15px"><strong>Smart contract</strong> on Robinhood Chain</p></div>
+</div></div>
+</div>
+
+<div class="slide center" id="s9">
+<div class="flex-col gap-32 items-center" style="max-width:800px">
+<div><span class="tag tag-purple">The Ask</span><h2 class="mt-16">Founder-in-Residence</h2><div class="stat-num mt-8" style="font-size:72px">$100K</div></div>
+<div class="grid-3 w-full">
+<div class="card center"><p style="font-size:13px;font-weight:700;color:var(--surface)">MONTH 1-2</p><p style="font-size:15px" class="mt-8">TestFlight beta + real stock swaps via DEX</p></div>
+<div class="card center"><p style="font-size:13px;font-weight:700;color:var(--surface)">MONTH 3-4</p><p style="font-size:15px" class="mt-8">App Store launch + 1,000 users</p></div>
+<div class="card center"><p style="font-size:13px;font-weight:700;color:var(--surface)">MONTH 5-6</p><p style="font-size:15px" class="mt-8">Scale to 10K + Robinhood Connect</p></div>
+</div>
+<div class="quote" style="border:none;padding:0;text-align:center">"Beeminder proved the model. We proved the money should be invested, not burned."</div>
+</div>
+</div>
+
+<div class="slide center" id="s10">
+<div class="shield" style="font-size:100px">🛡️</div>
+<h1 class="serif" style="font-size:72px">Pledge</h1>
+<p class="serif mt-8" style="font-size:28px;color:var(--surface)">Discipline with teeth.</p>
+<p class="mt-32" style="font-size:18px;color:var(--subtle)">Built on Robinhood Chain · Arbitrum Orbit L3</p>
+<div class="mt-24 flex gap-16"><span class="stock-pill">🚗 TSLA</span><span class="stock-pill">📦 AMZN</span><span class="stock-pill">🔮 PLTR</span><span class="stock-pill">💻 AMD</span></div>
+<p class="mt-32" style="font-size:16px;color:var(--subtle)">@realcryptopunk</p>
+</div>
+
+<div class="progress" id="progress"></div>
+</div>
+<script>
+const s=document.querySelectorAll('.slide');let c=0;const t=s.length;
+function go(n){s[c].classList.remove('active');c=Math.max(0,Math.min(n,t-1));s[c].classList.add('active');document.getElementById('progress').style.width=((c+1)/t*100)+'%'}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(c+1)}if(e.key==='ArrowLeft'){e.preventDefault();go(c-1)}});
+document.addEventListener('click',e=>{if(e.clientX>window.innerWidth/2)go(c+1);else go(c-1)});
+go(0);
+</script>
+</body></html>
