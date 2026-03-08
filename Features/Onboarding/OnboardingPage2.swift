@@ -27,7 +27,7 @@ struct OnboardingPage2: View {
                     HStack(spacing: 8) {
                         Image(systemName: "dollarsign.circle.fill")
                             .foregroundColor(.pledgeGreen)
-                        Text("Your penalties, invested")
+                        Text("Your penalties → tokenized stocks")
                             .pledgeCaption()
                             .foregroundColor(.secondary)
                     }
@@ -55,7 +55,7 @@ struct OnboardingPage2: View {
 
             Spacer().frame(height: 16)
 
-            Text("When you miss a pledge, we invest the money for you. You're building discipline or building wealth.")
+            Text("When you miss a pledge, your stake auto-invests into tokenized stocks — Tesla, Amazon, Palantir — on Robinhood Chain. Build discipline or build a portfolio.")
                 .pledgeBody()
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

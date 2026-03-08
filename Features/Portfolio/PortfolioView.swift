@@ -42,11 +42,10 @@ struct PortfolioView: View {
     @Environment(\.themeColors) var theme
 
     static let allocations: [AllocationItem] = [
-        AllocationItem(symbol: "PT-sUSDai", name: "Pendle sUSDai", icon: "🔒", percentage: 0.35, fixedAPY: 9.0, color: .pledgeBlue),
-        AllocationItem(symbol: "PT-USDai", name: "Pendle USDai", icon: "🏦", percentage: 0.25, fixedAPY: 5.5, color: .pledgeViolet),
-        AllocationItem(symbol: "PT-thBILL", name: "Pendle T-Bills", icon: "📜", percentage: 0.20, fixedAPY: 5.7, color: .pledgeGreen),
-        AllocationItem(symbol: "PT-weETH", name: "Pendle weETH", icon: "⟠", percentage: 0.12, fixedAPY: 2.7, color: .pledgeOrange),
-        AllocationItem(symbol: "PT-gUSDC", name: "Pendle gUSDC", icon: "💵", percentage: 0.08, fixedAPY: 6.6, color: .cyan),
+        AllocationItem(symbol: "TSLA", name: "Tesla", icon: "🚗", percentage: 0.30, fixedAPY: 0, color: .pledgeBlue),
+        AllocationItem(symbol: "AMZN", name: "Amazon", icon: "📦", percentage: 0.25, fixedAPY: 0, color: .pledgeViolet),
+        AllocationItem(symbol: "PLTR", name: "Palantir", icon: "🔮", percentage: 0.25, fixedAPY: 0, color: .pledgeGreen),
+        AllocationItem(symbol: "AMD", name: "AMD", icon: "💻", percentage: 0.20, fixedAPY: 0, color: .pledgeOrange),
     ]
 
     private var weightedAPY: Double {
@@ -90,7 +89,7 @@ struct PortfolioView: View {
                     .padding(.top, 20)
                 }
             }
-            .navigationTitle("Investment Pool")
+            .navigationTitle("Stock Portfolio")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(theme.isLight ? .light : .dark, for: .navigationBar)
             .sheet(isPresented: $showAllocation) {
@@ -120,7 +119,7 @@ struct PortfolioView: View {
     private var portfolioHeader: some View {
         VStack(spacing: 16) {
             VStack(spacing: 6) {
-                Text("INVESTMENT POOL")
+                Text("STOCK PORTFOLIO")
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundColor(.secondary)
                     .tracking(1.5)
@@ -240,13 +239,13 @@ struct PortfolioView: View {
         } label: {
             VStack(spacing: 12) {
                 HStack {
-                    Text("Yield Allocation")
+                    Text("Stock Allocation")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.primary)
                     Spacer()
                     HStack(spacing: 4) {
-                        Text("\(weightedAPY, specifier: "%.1f")% avg APY")
-                            .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        Text("Tokenized Stocks")
+                            .font(.system(size: 12, weight: .medium))
                             .foregroundColor(.pledgeGreen)
                         Image(systemName: "chevron.right")
                             .font(.system(size: 11, weight: .semibold))
@@ -272,10 +271,10 @@ struct PortfolioView: View {
                         VStack(spacing: 2) {
                             Text(alloc.icon)
                                 .font(.system(size: 16))
-                            Text(alloc.symbol.replacingOccurrences(of: "PT-", with: ""))
+                            Text(alloc.symbol)
                                 .font(.system(size: 9, weight: .medium))
                                 .foregroundColor(.secondary)
-                            Text("\(alloc.fixedAPY, specifier: "%.1f")%")
+                            Text("\(Int(alloc.percentage * 100))%")
                                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                                 .foregroundColor(alloc.color)
                         }
@@ -300,7 +299,7 @@ struct PortfolioView: View {
         VStack(spacing: 0) {
             StatRow(icon: "📈", label: "Total invested", value: "$\(Int(appState.investmentPoolValue))")
             StatRowDivider()
-            StatRow(icon: "💰", label: "Weighted APY", value: "\(String(format: "%.1f", weightedAPY))%", valueColor: .pledgeGreen)
+            StatRow(icon: "💰", label: "Total return", value: "\(String(format: "%.1f", appState.investmentGrowth))%", valueColor: .pledgeGreen)
             StatRowDivider()
             StatRow(icon: "🔒", label: "Vault unlock", value: "47 days")
             StatRowDivider()
@@ -350,7 +349,7 @@ struct PortfolioView: View {
                 .font(.system(size: 22, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
 
-            Text("When you miss a habit pledge, your stake gets invested into yield-generating Pendle PTs on Arbitrum.")
+            Text("When you miss a habit pledge, your stake auto-invests into tokenized stocks on Robinhood Chain.")
                 .font(.system(size: 15))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -358,11 +357,11 @@ struct PortfolioView: View {
 
             // Show what they'd earn
             VStack(spacing: 8) {
-                Text("Avg fixed yield")
+                Text("Portfolio stocks")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.secondary)
-                Text("\(weightedAPY, specifier: "%.1f")% APY")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                Text("TSLA · AMZN · PLTR · AMD")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
                     .foregroundColor(.pledgeGreen)
             }
             .padding(.vertical, 16)
@@ -425,7 +424,7 @@ struct PortfolioView: View {
             let baseTx: [(String, String, String, String)] = [
                 ("📈", "Portfolio rebalance", "Auto-rebalanced allocation", "$0"),
                 ("🔒", "Vault deposit", "Initial stake deposit", "+$50"),
-                ("💰", "Yield earned", "Daily PT yield", "+$0.47"),
+                ("💰", "Dividend received", "Stock portfolio dividend", "+$0.47"),
             ]
             for (i, tx) in baseTx.enumerated() {
                 items.append(TransactionItem(
@@ -467,7 +466,7 @@ struct AllocationDetailView: View {
                             Image(systemName: "percent")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.pledgeGreen)
-                            Text("Weighted avg: \(weightedAPY, specifier: "%.1f")% fixed APY")
+                            Text("Tokenized Stocks on Robinhood Chain")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.pledgeGreen)
                         }
@@ -493,7 +492,7 @@ struct AllocationDetailView: View {
                                         Text(alloc.name)
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundColor(.primary)
-                                        Text("\(alloc.fixedAPY, specifier: "%.1f")% fixed APY")
+                                        Text("Tokenized Stock")
                                             .font(.system(size: 12, weight: .medium))
                                             .foregroundColor(.pledgeGreen)
                                     }
@@ -525,14 +524,14 @@ struct AllocationDetailView: View {
                             HStack(spacing: 6) {
                                 Image(systemName: "info.circle")
                                     .foregroundColor(.secondary.opacity(0.5))
-                                Text("All yields are fixed-rate via Pendle Principal Tokens on Arbitrum. Auto-rebalances weekly.")
+                                Text("Tokenized stocks on Robinhood Chain. Auto-rebalances weekly.")
                                     .font(.system(size: 12))
                                     .foregroundColor(.secondary)
                             }
                             HStack(spacing: 6) {
                                 Image(systemName: "shield.checkered")
                                     .foregroundColor(.secondary.opacity(0.5))
-                                Text("Principal protected — PTs mature at full face value regardless of market conditions.")
+                                Text("Backed 1:1 by real equities held in custody by Robinhood.")
                                     .font(.system(size: 12))
                                     .foregroundColor(.secondary)
                             }

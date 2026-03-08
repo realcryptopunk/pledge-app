@@ -10,7 +10,7 @@ struct OnboardingPage3: View {
         [
             ("🎯", theme.light, "Set a habit", "Wake up early, work out, limit screen time"),
             ("💰", .pledgeGreen, "Stake your money", "$10 says you'll follow through"),
-            ("📈", theme.surface, "Miss it? It's invested.", "Your penalty grows in your portfolio"),
+            ("📈", theme.surface, "Miss it? You own stocks.", "Auto-invested into Tesla, Amazon & more on Robinhood Chain"),
         ]
     }
 

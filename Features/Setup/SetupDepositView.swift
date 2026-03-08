@@ -126,6 +126,63 @@ struct SetupDepositView: View {
             .opacity(canDeposit ? 1.0 : 0.35)
             .padding(.horizontal, 20)
 
+            // Robinhood deposit option
+            Button {
+                PPHaptic.heavy()
+                flowState.depositAmount = depositValue
+                flowState.goForward()
+            } label: {
+                HStack(spacing: 10) {
+                    // Robinhood green feather icon
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(red: 0.0, green: 0.82, blue: 0.33).opacity(0.15))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: "leaf.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.33))
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Robinhood")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.primary)
+                        HStack(spacing: 6) {
+                            Text("No Fees")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.33))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Color(red: 0.0, green: 0.82, blue: 0.33).opacity(0.1))
+                                .clipShape(Capsule())
+                        }
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("No Limits")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.primary)
+                        Text("Unlimited Deposit")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Color(red: 0.0, green: 0.82, blue: 0.33).opacity(0.3), lineWidth: 1)
+                        )
+                )
+            }
+            .disabled(!canDeposit)
+            .opacity(canDeposit ? 1.0 : 0.35)
+            .padding(.horizontal, 20)
+
             // Or pay with card
             Button {
                 // Visual only
@@ -149,6 +206,16 @@ struct SetupDepositView: View {
             }
             .foregroundColor(.secondary.opacity(0.6))
             .padding(.top, 8)
+
+            HStack(spacing: 6) {
+                Image(systemName: "leaf.fill")
+                    .font(.system(size: 10))
+                    .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.33))
+                Text("Powered by Robinhood Chain")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary.opacity(0.6))
+            }
+            .padding(.top, 4)
             .padding(.bottom, 16)
         }
     }
