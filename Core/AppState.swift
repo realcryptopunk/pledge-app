@@ -28,6 +28,8 @@ class AppState: ObservableObject {
     @Published var investmentTransactions: [InvestmentTransaction] = []
     // Toast message shown after a habit miss invests into stocks
     @Published var investmentToast: String?
+    // Explorer URL from the most recent on-chain investment (for tappable links)
+    @Published var lastInvestmentExplorerURL: String?
 
     // MARK: - Auth
 
@@ -724,6 +726,38 @@ class AppState: ObservableObject {
         }
 
         saveStockData()
+
+        // Fire on-chain investment via relayer (non-blocking)
+        fireOnChainInvestment(stakeAmount: stakeAmount)
+    }
+
+    // MARK: - On-Chain Investment Relayer
+
+    /// Fires a non-blocking on-chain investment call via the invest-relayer edge function.
+    /// Best-effort: logs success/failure but never blocks the habit failure UX.
+    private func fireOnChainInvestment(stakeAmount: Double) {
+        let wallet = walletAddress
+        guard !wallet.isEmpty else {
+            print("[InvestRelayer] Skipped: no wallet address available")
+            return
+        }
+
+        Task {
+            do {
+                let relayerResult = try await InvestRelayerService.callInvestRelayer(
+                    userWallet: wallet,
+                    usdcAmount: stakeAmount
+                )
+                await MainActor.run {
+                    self.lastInvestmentExplorerURL = relayerResult.explorerURL
+                    self.investmentToast = "$\(Int(stakeAmount * 0.98)) invested on-chain \u{2014} view on explorer"
+                }
+                print("[InvestRelayer] Success: \(relayerResult.txHash)")
+            } catch {
+                // Non-blocking: log the error but don't fail the habit flow
+                print("[InvestRelayer] Failed: \(error.localizedDescription)")
+            }
+        }
     }
 
     // MARK: - Stock Data Persistence
@@ -842,6 +876,7 @@ class AppState: ObservableObject {
         stockPositions = [:]
         investmentTransactions = []
         investmentToast = nil
+        lastInvestmentExplorerURL = nil
         userName = ""
         walletAddress = ""
         userPhone = ""
