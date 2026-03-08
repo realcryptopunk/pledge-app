@@ -2,8 +2,14 @@ import SwiftUI
 
 struct SetupDepositView: View {
     @Bindable var flowState: SetupFlowState
+    @EnvironmentObject var appState: AppState
     @Environment(\.themeColors) var theme
     @State private var depositString = ""
+    @State private var isFetchingToken = false
+    @State private var showOnramp = false
+    @State private var sessionToken: String?
+    @State private var showError = false
+    @State private var errorMessage = ""
 
     private let quickAmounts = ["50", "100", "200", "500"]
 
@@ -100,16 +106,21 @@ struct SetupDepositView: View {
 
             Spacer().frame(height: 20)
 
-            // MARK: - Apple Pay Button
+            // MARK: - Fund Button
             Button {
                 PPHaptic.heavy()
-                flowState.depositAmount = depositValue
-                flowState.goForward()
+                fundWithCoinbase()
             } label: {
                 HStack(spacing: 8) {
-                    Image(systemName: "apple.logo")
-                        .font(.system(size: 18))
-                    Text("Pay")
+                    if isFetchingToken {
+                        ProgressView()
+                            .tint(.white)
+                            .scaleEffect(0.9)
+                    } else {
+                        Image(systemName: "dollarsign.circle.fill")
+                            .font(.system(size: 18))
+                    }
+                    Text(isFetchingToken ? "Connecting..." : "Fund with Coinbase")
                         .font(.system(size: 17, weight: .semibold))
                 }
                 .foregroundColor(.white)
@@ -117,13 +128,19 @@ struct SetupDepositView: View {
                 .frame(height: 52)
                 .background(
                     Capsule()
-                        .fill(Color.black)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color(red: 0.0, green: 0.32, blue: 1.0), Color(red: 0.0, green: 0.25, blue: 0.85)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
                 )
                 .clipShape(Capsule())
-                .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                .shadow(color: Color(red: 0.0, green: 0.32, blue: 1.0).opacity(0.3), radius: 8, y: 4)
             }
-            .disabled(!canDeposit)
-            .opacity(canDeposit ? 1.0 : 0.35)
+            .disabled(!canDeposit || isFetchingToken)
+            .opacity(canDeposit && !isFetchingToken ? 1.0 : 0.35)
             .padding(.horizontal, 20)
 
             // Robinhood deposit option
@@ -185,7 +202,6 @@ struct SetupDepositView: View {
 
             // Or pay with card
             Button {
-                // Visual only
                 PPHaptic.light()
                 flowState.depositAmount = depositValue
                 flowState.goForward()
@@ -193,15 +209,15 @@ struct SetupDepositView: View {
                 Text("Or pay with card")
             }
             .buttonStyle(GhostButtonStyle())
-            .disabled(!canDeposit)
-            .opacity(canDeposit ? 1.0 : 0.35)
+            .disabled(!canDeposit || isFetchingToken)
+            .opacity(canDeposit && !isFetchingToken ? 1.0 : 0.35)
             .padding(.top, 8)
 
             // Security note
             HStack(spacing: 6) {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 10))
-                Text("Funds held securely. Withdraw anytime.")
+                Text("Powered by Coinbase. Funds sent as USDC to your wallet.")
                     .font(.system(size: 11, weight: .medium))
             }
             .foregroundColor(.secondary.opacity(0.6))
@@ -217,6 +233,65 @@ struct SetupDepositView: View {
             }
             .padding(.top, 4)
             .padding(.bottom, 16)
+        }
+        .sheet(isPresented: $showOnramp) {
+            if let token = sessionToken {
+                CoinbaseOnrampView(
+                    walletAddress: appState.walletAddress,
+                    amount: depositValue,
+                    sessionToken: token,
+                    onDismiss: {
+                        showOnramp = false
+                        flowState.depositAmount = depositValue
+                        flowState.goForward()
+                    }
+                )
+            }
+        }
+        .alert("Deposit Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+            #if DEBUG
+            Button("Use Simulated Deposit") {
+                flowState.depositAmount = depositValue
+                flowState.goForward()
+            }
+            #endif
+        } message: {
+            Text(errorMessage)
+        }
+    }
+
+    // MARK: - Fund with Coinbase
+
+    private func fundWithCoinbase() {
+        #if DEBUG
+        // In debug builds, if wallet address is empty, use simulated deposit
+        if appState.walletAddress.isEmpty {
+            flowState.depositAmount = depositValue
+            flowState.goForward()
+            return
+        }
+        #endif
+
+        isFetchingToken = true
+        Task {
+            do {
+                let token = try await OnrampService.fetchSessionToken(
+                    walletAddress: appState.walletAddress,
+                    amount: depositValue
+                )
+                await MainActor.run {
+                    sessionToken = token
+                    isFetchingToken = false
+                    showOnramp = true
+                }
+            } catch {
+                await MainActor.run {
+                    isFetchingToken = false
+                    errorMessage = error.localizedDescription
+                    showError = true
+                }
+            }
         }
     }
 }

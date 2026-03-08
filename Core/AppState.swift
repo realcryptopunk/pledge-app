@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import Supabase
 
 @MainActor
 class AppState: ObservableObject {
@@ -7,24 +8,54 @@ class AppState: ObservableObject {
     @AppStorage("hasCompletedSetup") var hasCompletedSetup = false
     @AppStorage("backgroundTheme") var backgroundTheme: BackgroundTheme = .aqua
     @AppStorage("userName") var userName = ""
+    @AppStorage("walletAddress") var walletAddress: String = ""
+    @AppStorage("riskProfile") var riskProfile: RiskProfile = .moderate
     @Published var isAuthenticated = false
+    @Published var userPhone: String = ""
     @Published var habits: [Habit] = []
-    @Published var vaultBalance: Double = 247.00
+    @Published var vaultBalance: Double = 0
     @Published var streakCount: Int = 0
-    @Published var investmentPoolValue: Double = 261.38
-    @Published var investmentGrowth: Double = 5.8
+    @Published var investmentPoolValue: Double = 0
+    @Published var investmentGrowth: Double = 0
     @Published var todayHabits: [TodayHabit] = []
     @Published var recentActivity: [ActivityItem] = []
     @Published var isVerifying = false
+    @Published var needsUsername = false
 
     // MARK: - Auth
 
     let authService = AuthService()
+    let privyManager = PrivyManager.shared
     private var authCancellable: AnyCancellable?
+    private var privyAuthCancellable: AnyCancellable?
+    private var privyWalletCancellable: AnyCancellable?
 
-    // MARK: - Yield
+    // MARK: - Supabase
 
-    private var yieldTimer: Timer?
+    /// Authenticated Supabase client, created after auth bridge returns a JWT.
+    /// Use this for all RLS-protected database operations.
+    @Published var supabaseClient: SupabaseClient?
+
+    /// The Supabase user profile UUID (maps to user_profiles.id and auth.uid() in RLS).
+    @Published var supabaseUserId: String?
+
+    private var supabaseTokenCancellable: AnyCancellable?
+    private var supabaseUserIdCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
+
+    // MARK: - Supabase Service
+
+    /// Cloud persistence service, created when both supabaseClient and supabaseUserId are available.
+    /// Nil for guest mode — falls back to UserDefaults.
+    private var supabaseService: SupabaseService?
+
+    // MARK: - Supabase Realtime
+
+    /// Realtime channel for listening to habits table changes.
+    private var habitsChannel: RealtimeChannelV2?
+
+    /// Subscription handle for postgres changes callback on habits channel.
+    private var habitsChangeSubscription: RealtimeSubscription?
 
     // MARK: - Services
 
@@ -55,64 +86,132 @@ class AppState: ObservableObject {
         updateStreakCount()
         setupGeofenceMonitoring()
         observeGeofenceNotifications()
-        startYieldTimer()
 
-        authCancellable = authService.$isAuthenticated
+        // Initialize Privy SDK
+        privyManager.initialize()
+
+        // Drive isAuthenticated from PrivyManager (replacing authService)
+        privyAuthCancellable = privyManager.$isAuthenticated
             .receive(on: DispatchQueue.main)
             .sink { [weak self] value in
                 self?.isAuthenticated = value
             }
-    }
 
-    // MARK: - Yield Timer
-
-    private func startYieldTimer() {
-        yieldTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.applyYieldTick()
+        // Sync wallet address from PrivyManager to persisted @AppStorage
+        privyWalletCancellable = privyManager.$walletAddress
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                self?.walletAddress = value ?? ""
             }
-        }
-    }
 
-    private func applyYieldTick() {
-        vaultBalance += 0.01
-        investmentPoolValue += 0.01
+        // Keep authService subscription for backward compatibility (not driving routing)
+        authCancellable = authService.$isAuthenticated
+            .receive(on: DispatchQueue.main)
+            .sink { _ in }
+
+        // Create authenticated Supabase client when token arrives from auth bridge
+        privyManager.$supabaseAccessToken
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] token in
+                guard let self else { return }
+                if let token {
+                    self.supabaseClient = SupabaseConfig.authenticatedClient {
+                        return token
+                    }
+                    print("[AppState] Authenticated Supabase client created")
+                } else {
+                    self.supabaseClient = nil
+                    self.supabaseService = nil
+                }
+            }
+            .store(in: &cancellables)
+
+        // Propagate Supabase user ID for use in queries
+        privyManager.$supabaseUserId
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] userId in
+                self?.supabaseUserId = userId
+            }
+            .store(in: &cancellables)
+
+        // Create SupabaseService, load data, and start Realtime when both client and userId are available
+        $supabaseClient
+            .combineLatest($supabaseUserId)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] client, userId in
+                guard let self else { return }
+                if let client, let userId {
+                    do {
+                        self.supabaseService = try SupabaseService(client: client, userId: userId)
+                        print("[AppState] SupabaseService created, loading data from cloud")
+                        Task {
+                            await self.loadFromSupabase()
+                            self.setupRealtimeSubscriptions()
+                        }
+                    } catch {
+                        print("[AppState] Failed to create SupabaseService: \(error)")
+                        self.supabaseService = nil
+                    }
+                } else {
+                    self.supabaseService = nil
+                    self.teardownRealtimeSubscriptions()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Habit CRUD
 
     func addHabit(_ habit: Habit) {
         habits.append(habit)
-        saveHabits()
         generateTodayHabits()
         updateStreakCount()
         // Start geofence monitoring if this is a location-verified habit
         if habit.verificationType == .location && habit.hasLocation {
             startGeofenceForHabit(habit)
         }
+        // Persist: cloud if authenticated, local otherwise
+        if let service = supabaseService {
+            Task { try? await service.createHabit(habit) }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     func updateHabit(_ updated: Habit) {
         guard let index = habits.firstIndex(where: { $0.id == updated.id }) else { return }
         habits[index] = updated
-        saveHabits()
         generateTodayHabits()
         updateStreakCount()
+        if let service = supabaseService {
+            Task { try? await service.updateHabit(updated) }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     func togglePauseHabit(_ habit: Habit) {
         guard let index = habits.firstIndex(where: { $0.id == habit.id }) else { return }
         habits[index].isPaused.toggle()
-        saveHabits()
         generateTodayHabits()
         updateStreakCount()
+        let updatedHabit = habits[index]
+        if let service = supabaseService {
+            Task { try? await service.updateHabit(updatedHabit) }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     func deleteHabit(_ habit: Habit) {
         habits.removeAll { $0.id == habit.id }
         todayHabits.removeAll { $0.habit.id == habit.id }
-        saveHabits()
         updateStreakCount()
+        if let service = supabaseService {
+            Task { try? await service.deleteHabit(habit.id) }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     func deleteHabit(at offsets: IndexSet) {
@@ -121,8 +220,14 @@ class AppState: ObservableObject {
             todayHabits.removeAll { $0.habit.id == habit.id }
         }
         habits.remove(atOffsets: offsets)
-        saveHabits()
         updateStreakCount()
+        if let service = supabaseService {
+            for habit in habitsToDelete {
+                Task { try? await service.deleteHabit(habit.id) }
+            }
+        } else {
+            saveHabitsLocally()
+        }
     }
 
     // MARK: - Geofence Monitoring
@@ -205,8 +310,11 @@ class AppState: ObservableObject {
             )
             recentActivity.insert(activity, at: 0)
         } else if result.status == .failed {
-            let stakeAmount = todayHabits[index].habit.stakeAmount
-            investmentPoolValue += stakeAmount
+            let stakeAmount = min(todayHabits[index].habit.stakeAmount, vaultBalance)
+            if stakeAmount > 0 {
+                investmentPoolValue += stakeAmount
+                vaultBalance -= stakeAmount
+            }
             if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
                 habits[habitIndex].currentStreak = 0
             }
@@ -218,6 +326,10 @@ class AppState: ObservableObject {
             )
             recentActivity.insert(activity, at: 0)
         }
+
+        // Record habit log and sync updates to Supabase
+        recordHabitLog(for: todayHabits[index], status: result.status)
+        syncHabitAfterVerification(habitId: habitId, status: result.status)
 
         updateStreakCount()
         saveHabits()
@@ -266,8 +378,11 @@ class AppState: ObservableObject {
                 recentActivity.insert(activity, at: 0)
             } else if result.status == .failed {
                 // Miss your habit, fund your future
-                let stakeAmount = todayHabits[index].habit.stakeAmount
-                investmentPoolValue += stakeAmount
+                let stakeAmount = min(todayHabits[index].habit.stakeAmount, vaultBalance)
+                if stakeAmount > 0 {
+                    investmentPoolValue += stakeAmount
+                    vaultBalance -= stakeAmount
+                }
                 // Reset streak
                 if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
                     habits[habitIndex].currentStreak = 0
@@ -281,6 +396,10 @@ class AppState: ObservableObject {
                 )
                 recentActivity.insert(activity, at: 0)
             }
+
+            // Record habit log and sync updates to Supabase
+            recordHabitLog(for: todayHabits[index], status: result.status)
+            syncHabitAfterVerification(habitId: habitId, status: result.status)
         }
 
         updateStreakCount()
@@ -309,6 +428,10 @@ class AppState: ObservableObject {
             isFailure: false
         )
         recentActivity.insert(activity, at: 0)
+
+        // Record habit log and sync to Supabase
+        recordHabitLog(for: todayHabits[index], status: .verified)
+        syncHabitAfterVerification(habitId: habitId, status: .verified)
 
         updateStreakCount()
         saveHabits()
@@ -340,6 +463,54 @@ class AppState: ObservableObject {
         todayHabits = updatedTodayHabits
     }
 
+    // MARK: - Habit Log Recording (Supabase)
+
+    /// Records a habit log entry to Supabase after verification.
+    private func recordHabitLog(for todayHabit: TodayHabit, status: HabitStatus) {
+        guard let service = supabaseService else { return }
+        let stakeAmount = todayHabit.habit.stakeAmount
+        let isFailed = status == .failed
+
+        let log = HabitLog(
+            id: UUID(),
+            habitId: todayHabit.habit.id,
+            date: Date(),
+            status: status,
+            verifiedAt: status == .verified ? Date() : nil,
+            penaltyAmount: isFailed ? stakeAmount : 0,
+            investedAmount: isFailed ? stakeAmount * 0.98 : 0,
+            feeAmount: isFailed ? stakeAmount * 0.02 : 0
+        )
+        Task {
+            do {
+                try await service.recordHabitLog(log)
+                print("[AppState] Recorded habit log: \(status.rawValue) for \(todayHabit.habit.name)")
+            } catch {
+                print("[AppState] Failed to record habit log: \(error)")
+            }
+        }
+    }
+
+    /// Syncs habit streak/success_rate and user profile balances to Supabase after verification.
+    private func syncHabitAfterVerification(habitId: UUID, status: HabitStatus) {
+        guard let service = supabaseService else { return }
+
+        // Sync updated habit (streak, success_rate)
+        if let habit = habits.first(where: { $0.id == habitId }) {
+            Task { try? await service.updateHabit(habit) }
+        }
+
+        // Sync user profile balances on failure (stake moves from vault to investment pool)
+        if status == .failed {
+            Task {
+                try? await service.updateUserProfile(
+                    vaultBalance: vaultBalance,
+                    investmentPoolBalance: investmentPoolValue
+                )
+            }
+        }
+    }
+
     // MARK: - Streak
 
     private func updateStreakCount() {
@@ -355,18 +526,138 @@ class AppState: ObservableObject {
 
     private static let savedHabitsKey = "savedHabits"
 
+    /// Save habits and state: prefers Supabase if authenticated, else UserDefaults.
     private func saveHabits() {
+        if supabaseService != nil {
+            // Cloud persistence handled by individual CRUD methods (local-first pattern)
+            return
+        }
+        saveHabitsLocally()
+    }
+
+    /// Save habits to UserDefaults (guest mode / offline fallback).
+    private func saveHabitsLocally() {
         guard let data = try? JSONEncoder().encode(habits) else { return }
         UserDefaults.standard.set(data, forKey: Self.savedHabitsKey)
     }
 
-    private func loadHabits() {
+    /// Load habits from UserDefaults (guest mode / initial boot before auth).
+    private func loadHabitsLocally() {
         guard let data = UserDefaults.standard.data(forKey: Self.savedHabitsKey),
               let decoded = try? JSONDecoder().decode([Habit].self, from: data) else {
             habits = []
             return
         }
         habits = decoded
+    }
+
+    /// Load habits and profile from Supabase (authenticated users).
+    func loadFromSupabase() async {
+        guard let service = supabaseService else {
+            loadHabitsLocally()
+            return
+        }
+        do {
+            let cloudHabits = try await service.fetchHabits()
+            habits = cloudHabits
+
+            let profile = try await service.fetchUserProfile()
+            vaultBalance = profile.vaultBalance
+            investmentPoolValue = profile.investmentPoolBalance
+            // Sync risk profile from server if it differs
+            if let serverProfile = RiskProfile(rawValue: profile.riskProfile) {
+                riskProfile = serverProfile
+            }
+            // Sync username if available, or flag that username is needed
+            if let serverUsername = profile.username, !serverUsername.isEmpty {
+                userName = serverUsername
+                needsUsername = false
+            } else {
+                needsUsername = true
+            }
+
+            generateTodayHabits()
+            updateStreakCount()
+            setupGeofenceMonitoring()
+            print("[AppState] Loaded \(habits.count) habits from Supabase")
+        } catch {
+            print("[AppState] Supabase load failed, falling back to local: \(error)")
+            loadHabitsLocally()
+            generateTodayHabits()
+            updateStreakCount()
+        }
+    }
+
+    /// Initial load: use local data first, cloud data will overwrite when auth completes.
+    private func loadHabits() {
+        loadHabitsLocally()
+    }
+
+    // MARK: - Realtime Subscriptions
+
+    /// Sets up Supabase Realtime subscriptions for the habits table.
+    /// Any INSERT, UPDATE, or DELETE on the habits table triggers a full reload.
+    /// Must be called after supabaseClient is available (i.e., after SupabaseService creation).
+    func setupRealtimeSubscriptions() {
+        guard let client = supabaseClient else { return }
+
+        // Tear down any existing subscription before creating a new one
+        teardownRealtimeSubscriptions()
+
+        let channel = client.realtimeV2.channel("habits-changes")
+
+        // Register postgres change listener BEFORE subscribing (SDK requirement)
+        habitsChangeSubscription = channel.onPostgresChange(
+            AnyAction.self,
+            schema: "public",
+            table: "habits"
+        ) { [weak self] _ in
+            // Any change to habits table -> reload all habits from Supabase
+            Task { @MainActor [weak self] in
+                await self?.handleRealtimeHabitChange()
+            }
+        }
+
+        // Subscribe to the channel asynchronously
+        Task {
+            do {
+                try await channel.subscribeWithError()
+                print("[AppState] Realtime subscribed to habits-changes channel")
+            } catch {
+                print("[AppState] Realtime subscription failed: \(error)")
+            }
+        }
+
+        habitsChannel = channel
+    }
+
+    /// Handles a Realtime change event on the habits table by reloading all habits.
+    private func handleRealtimeHabitChange() async {
+        guard let service = supabaseService else { return }
+        do {
+            let updatedHabits = try await service.fetchHabits()
+            self.habits = updatedHabits
+            self.generateTodayHabits()
+            self.updateStreakCount()
+            self.setupGeofenceMonitoring()
+            print("[AppState] Realtime: reloaded \(updatedHabits.count) habits")
+        } catch {
+            print("[AppState] Realtime habit refresh failed: \(error)")
+        }
+    }
+
+    /// Unsubscribes from Realtime channels and cleans up subscriptions.
+    func teardownRealtimeSubscriptions() {
+        habitsChangeSubscription?.cancel()
+        habitsChangeSubscription = nil
+
+        if let channel = habitsChannel {
+            Task {
+                await channel.unsubscribe()
+                print("[AppState] Realtime unsubscribed from habits-changes channel")
+            }
+            habitsChannel = nil
+        }
     }
 
     // MARK: - Helpers
@@ -410,9 +701,40 @@ class AppState: ObservableObject {
         return formatter.string(from: date)
     }
 
+    // MARK: - Username & Profile
+
+    /// Complete the username setup flow. Persists to Supabase and updates local state.
+    func completeUsernameSetup(username: String, displayName: String?) async throws {
+        guard let service = supabaseService else { return }
+        try await service.setUsername(username, displayName: displayName)
+        userName = username
+        needsUsername = false
+    }
+
+    /// Check if a username is available via Supabase.
+    func checkUsernameAvailable(_ username: String) async throws -> Bool {
+        guard let service = supabaseService else { return false }
+        return try await service.checkUsernameAvailable(username)
+    }
+
+    /// Update user profile (username, display name, avatar).
+    func updateProfile(username: String?, displayName: String?, avatarUrl: String? = nil) async throws {
+        guard let service = supabaseService else { return }
+        try await service.updateProfile(username: username, displayName: displayName, avatarUrl: avatarUrl)
+        if let username { userName = username }
+    }
+
+    /// Get the current Supabase service for direct use by views (e.g., friend search, leaderboard).
+    var currentSupabaseService: SupabaseService? {
+        supabaseService
+    }
+
     // MARK: - Auth
 
     func signOut() async {
+        // Tear down Realtime subscriptions before clearing state
+        teardownRealtimeSubscriptions()
+        await privyManager.signOut()
         await authService.signOut()
         // Clear persisted data
         UserDefaults.standard.removeObject(forKey: Self.savedHabitsKey)
@@ -425,6 +747,12 @@ class AppState: ObservableObject {
         investmentGrowth = 0
         streakCount = 0
         userName = ""
+        walletAddress = ""
+        userPhone = ""
+        needsUsername = false
+        supabaseService = nil
+        supabaseClient = nil
+        supabaseUserId = nil
         // Reset flow state (triggers navigation back to sign-in)
         hasCompletedOnboarding = false
         hasCompletedSetup = false
@@ -434,5 +762,11 @@ class AppState: ObservableObject {
 // MARK: - BackgroundTheme @AppStorage Conformance
 
 extension BackgroundTheme: RawRepresentable {
+    // Already String-based via enum declaration, but we need explicit conformance for @AppStorage
+}
+
+// MARK: - RiskProfile @AppStorage Conformance
+
+extension RiskProfile: RawRepresentable {
     // Already String-based via enum declaration, but we need explicit conformance for @AppStorage
 }

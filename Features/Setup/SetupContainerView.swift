@@ -17,6 +17,8 @@ struct SetupContainerView: View {
                     ConfigureHabitsView(flowState: flowState)
                 case .setStakes:
                     SetStakesView(flowState: flowState)
+                case .riskProfile:
+                    RiskProfileView(flowState: flowState)
                 case .deposit:
                     SetupDepositView(flowState: flowState)
                 case .permissions:
@@ -60,6 +62,7 @@ struct SetupContainerView: View {
             appState.addHabit(habit)
         }
 
+        appState.riskProfile = flowState.selectedRiskProfile
         appState.vaultBalance = flowState.depositAmount
         appState.hasCompletedSetup = true
 

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 // MARK: - Habit
 
@@ -175,12 +176,114 @@ struct ActivityItem: Identifiable, Codable {
     }
 }
 
+// MARK: - Allocation Item
+
+struct AllocationItem: Identifiable {
+    let id = UUID()
+    let symbol: String
+    let name: String
+    let icon: String
+    let percentage: Double
+    let fixedAPY: Double
+    let color: Color
+}
+
 // MARK: - Photo Verification Result
 
 struct PhotoVerificationResult {
     let isVerified: Bool
     let confidence: Double  // 0-1
     let reason: String
+}
+
+// MARK: - Risk Profile
+
+enum RiskProfile: String, Codable, CaseIterable {
+    case conservative = "Conservative"
+    case moderate = "Moderate"
+    case aggressive = "Aggressive"
+
+    var title: String { rawValue }
+
+    var subtitle: String {
+        switch self {
+        case .conservative: return "Blue Chip Stocks"
+        case .moderate: return "Growth Mix"
+        case .aggressive: return "High Conviction"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .conservative: return "Established tech giants on Robinhood Chain — Amazon, Netflix, AMD. Lower volatility, proven companies."
+        case .moderate: return "Balanced mix of tokenized stocks on Robinhood Chain — Tesla, Amazon, Palantir, AMD."
+        case .aggressive: return "Tokenized private company equity via Robinhood — venture-style risk and reward."
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .conservative: return "building.columns.fill"
+        case .moderate: return "chart.line.uptrend.xyaxis"
+        case .aggressive: return "flame.fill"
+        }
+    }
+
+    var expectedReturn: String {
+        switch self {
+        case .conservative: return "Market returns"
+        case .moderate: return "Growth potential"
+        case .aggressive: return "15-50%+ (variable)"
+        }
+    }
+
+    var riskLevel: String {
+        switch self {
+        case .conservative: return "Very Low"
+        case .moderate: return "Low-Medium"
+        case .aggressive: return "High"
+        }
+    }
+
+    var lockPeriod: String {
+        switch self {
+        case .conservative: return "3-6 months"
+        case .moderate: return "1-12 months"
+        case .aggressive: return "12-36 months"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .conservative: return .pledgeGreen
+        case .moderate: return .pledgeBlue
+        case .aggressive: return .pledgeOrange
+        }
+    }
+
+    var allocations: [AllocationItem] {
+        switch self {
+        case .conservative:
+            return [
+                AllocationItem(symbol: "AMZN", name: "Amazon", icon: "\u{1F4E6}", percentage: 0.40, fixedAPY: 0, color: .pledgeBlue),
+                AllocationItem(symbol: "NFLX", name: "Netflix", icon: "\u{1F3AC}", percentage: 0.35, fixedAPY: 0, color: .pledgeViolet),
+                AllocationItem(symbol: "AMD", name: "AMD", icon: "\u{1F4BB}", percentage: 0.25, fixedAPY: 0, color: .pledgeGreen),
+            ]
+        case .moderate:
+            return [
+                AllocationItem(symbol: "TSLA", name: "Tesla", icon: "\u{1F697}", percentage: 0.30, fixedAPY: 0, color: .pledgeBlue),
+                AllocationItem(symbol: "AMZN", name: "Amazon", icon: "\u{1F4E6}", percentage: 0.25, fixedAPY: 0, color: .pledgeViolet),
+                AllocationItem(symbol: "PLTR", name: "Palantir", icon: "\u{1F52E}", percentage: 0.25, fixedAPY: 0, color: .pledgeGreen),
+                AllocationItem(symbol: "AMD", name: "AMD", icon: "\u{1F4BB}", percentage: 0.20, fixedAPY: 0, color: .pledgeOrange),
+            ]
+        case .aggressive:
+            return [
+                AllocationItem(symbol: "TSLA", name: "Tesla", icon: "\u{1F697}", percentage: 0.50, fixedAPY: 0, color: .pledgeOrange),
+                AllocationItem(symbol: "PLTR", name: "Palantir", icon: "\u{1F52E}", percentage: 0.30, fixedAPY: 0, color: .pledgeViolet),
+                AllocationItem(symbol: "AMD", name: "AMD", icon: "\u{1F4BB}", percentage: 0.20, fixedAPY: 0, color: .pledgeBlue),
+            ]
+        }
+    }
 }
 
 // MARK: - Mock Data

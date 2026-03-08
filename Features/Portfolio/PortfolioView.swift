@@ -9,16 +9,6 @@ struct PortfolioDataPoint: Identifiable {
     let value: Double
 }
 
-struct AllocationItem: Identifiable {
-    let id = UUID()
-    let symbol: String
-    let name: String
-    let icon: String
-    let percentage: Double
-    let fixedAPY: Double
-    let color: Color
-}
-
 struct TransactionItem: Identifiable {
     let id = UUID()
     let icon: String
