@@ -37,10 +37,12 @@ struct HabitActivityGrid: View {
                     // Today
                     weekData.append(.today)
                 } else {
-                    // Check if this day is in the habit's schedule
-                    // schedule uses 1=Mon(0), 7=Sun(6)
+                    // Past day
                     let scheduleDay = day + 1
-                    if habit.schedule.contains(scheduleDay) {
+                    if habit.currentStreak == 0 && habit.successRate == 0 {
+                        // Brand new habit — no history yet, show neutral
+                        weekData.append(.off)
+                    } else if habit.schedule.contains(scheduleDay) {
                         let roll = rng.next() % 100
                         let successThreshold = UInt64(habit.successRate * 100)
                         if roll < successThreshold {
