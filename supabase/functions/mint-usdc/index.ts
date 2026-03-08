@@ -12,27 +12,21 @@ const corsHeaders = {
 
 // MARK: - Contract Addresses (Robinhood Testnet)
 
-const PLEDGE_VAULT_ADDRESS = "0x47a9110563bc89525174b5b1577916965F075533";
-const USDC_ADDRESS = "0x89621E6a57a6872869fE30F433BE454B40dde7b3";
+const MOCK_USDC_ADDRESS = "0x89621E6a57a6872869fE30F433BE454B40dde7b3";
 const DEFAULT_RPC_URL = "https://rpc.testnet.chain.robinhood.com";
 const EXPLORER_BASE = "https://explorer.testnet.chain.robinhood.com";
 
-// MARK: - Minimal ABIs
+// MARK: - Minimal ABI
 
-const VAULT_ABI = [
-  "function investForUser(address user, uint256 usdcAmount) external",
-];
-
-const ERC20_ABI = [
+const MOCK_USDC_ABI = [
   "function mint(address to, uint256 amount) external",
-  "function approve(address spender, uint256 amount) external returns (bool)",
   "function decimals() view returns (uint8)",
 ];
 
 // MARK: - Input Validation
 
 const ETH_ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/;
-const MAX_USDC_AMOUNT = 1000; // Testnet safety cap
+const MAX_USDC_AMOUNT = 10000; // Testnet safety cap
 
 function validateInput(body: {
   user_wallet?: string;
@@ -150,16 +144,18 @@ serve(async (req: Request) => {
     // Set up ethers provider and signer
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(relayerPrivateKey, provider);
-    const relayerAddress = wallet.address;
 
-    // Contract instances
-    const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, wallet);
-    const vault = new ethers.Contract(PLEDGE_VAULT_ADDRESS, VAULT_ABI, wallet);
+    // Create MockUSDC contract instance
+    const mockUsdc = new ethers.Contract(
+      MOCK_USDC_ADDRESS,
+      MOCK_USDC_ABI,
+      wallet
+    );
 
-    // Query decimals (fallback to 6)
+    // Query decimals (with fallback to 6)
     let decimals = 6;
     try {
-      decimals = Number(await usdc.decimals());
+      decimals = Number(await mockUsdc.decimals());
     } catch (err) {
       console.warn(
         "Failed to query USDC decimals, defaulting to 6:",
@@ -167,47 +163,28 @@ serve(async (req: Request) => {
       );
     }
 
+    // Convert human-readable amount to on-chain units
     const parsedAmount = ethers.parseUnits(
       usdc_amount.toString(),
       decimals
     );
 
-    // Step 1: Mint MockUSDC to relayer (so relayer has balance to invest)
-    // PledgeVaultRH.investForUser() does safeTransferFrom(user, ...) which
-    // requires the "user" to have approved the vault. Since we can't sign
-    // approvals for Privy embedded wallets server-side, we use the relayer
-    // address as both caller and funding source.
-    console.log(`Step 1: mint ${usdc_amount} MockUSDC to relayer ${relayerAddress}`);
-    const mintTx = await usdc.mint(relayerAddress, parsedAmount);
-    await mintTx.wait(1);
-    console.log(`Mint confirmed: ${mintTx.hash}`);
-
-    // Step 2: Approve PledgeVaultRH to spend relayer's USDC
-    console.log(`Step 2: approve vault for ${parsedAmount.toString()}`);
-    const approveTx = await usdc.approve(PLEDGE_VAULT_ADDRESS, parsedAmount);
-    await approveTx.wait(1);
-    console.log(`Approve confirmed: ${approveTx.hash}`);
-
-    // Step 3: Call investForUser with relayer address as the "user"
-    // The contract pulls USDC from this address, takes 2% fee to treasury,
-    // and distributes the rest across defaultAllocations (stock tokens).
-    // On-chain investment is attributed to relayer; per-user tracking
-    // is handled in the iOS app via AppState.
-    console.log(`Step 3: investForUser(${relayerAddress}, ${parsedAmount.toString()}) for app-user ${user_wallet}`);
-    const investTx = await vault.investForUser(relayerAddress, parsedAmount);
-    const investReceipt = await investTx.wait(1);
+    // Mint MockUSDC to user wallet
     console.log(
-      `investForUser confirmed in block ${investReceipt.blockNumber}: ${investReceipt.hash}`
+      `Minting ${usdc_amount} MockUSDC (${parsedAmount.toString()} raw) to ${user_wallet}`
+    );
+    const mintTx = await mockUsdc.mint(user_wallet, parsedAmount);
+    const receipt = await mintTx.wait(1);
+    console.log(
+      `Mint confirmed in block ${receipt.blockNumber}: ${receipt.hash}`
     );
 
     // Return success response
     return new Response(
       JSON.stringify({
         success: true,
-        tx_hash: investReceipt.hash,
-        explorer_url: `${EXPLORER_BASE}/tx/${investReceipt.hash}`,
-        user_wallet: user_wallet,
-        relayer_wallet: relayerAddress,
+        tx_hash: receipt.hash,
+        explorer_url: `${EXPLORER_BASE}/tx/${receipt.hash}`,
       }),
       {
         status: 200,
@@ -215,7 +192,7 @@ serve(async (req: Request) => {
       }
     );
   } catch (err) {
-    console.error("invest-relayer error:", err);
+    console.error("mint-usdc error:", err);
 
     const message =
       err instanceof Error ? err.message : String(err);

@@ -56,6 +56,8 @@
 		9B35B0AF2088CF71E4BDDA7C /* PledgeCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D8376BCD890EE15E97BF80 /* PledgeCards.swift */; };
 		9B6142C21E3D155F9B183307 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F09D4E855560D9DAE90441F /* SupabaseService.swift */; };
 		AA1122334455667788990011 /* InvestRelayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1122334455667788990011 /* InvestRelayerService.swift */; };
+		AA2233445566778899001122 /* OnChainBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2233445566778899002222 /* OnChainBalanceService.swift */; };
+		AB2233445566778899001133 /* MintUSDCService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2233445566778899002233 /* MintUSDCService.swift */; };
 		9C5E20CDC94DD8903B1C47CE /* SetStakesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EB4E1730AF827ED92F5817 /* SetStakesView.swift */; };
 		9E3249FA8972FFEA2B31870A /* Vortex in Frameworks */ = {isa = PBXBuildFile; productRef = 6F4550AC64675E0303E4FF39 /* Vortex */; };
 		A05DE1ABD03236251B074977 /* BeRealVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D686B86BCDCAC8E89F6C79 /* BeRealVerificationView.swift */; };
@@ -112,6 +114,8 @@
 		6CAC1C611A06368669497022 /* RiskProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiskProfileView.swift; sourceTree = "<group>"; };
 		6F09D4E855560D9DAE90441F /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		BB1122334455667788990011 /* InvestRelayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvestRelayerService.swift; sourceTree = "<group>"; };
+		AA2233445566778899002222 /* OnChainBalanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnChainBalanceService.swift; sourceTree = "<group>"; };
+		AB2233445566778899002233 /* MintUSDCService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MintUSDCService.swift; sourceTree = "<group>"; };
 		718A352A42414E5955FA4C23 /* ChooseHabitsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChooseHabitsView.swift; sourceTree = "<group>"; };
 		72D38970CE026E2A1CF932C0 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
 		79160ACE5732BC2449E1F285 /* SignInWithAppleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInWithAppleView.swift; sourceTree = "<group>"; };
@@ -182,6 +186,8 @@
 				5D48D6DD71A8C9D93755239D /* HabitVerificationService.swift */,
 				128E92EA1C63BDC919AC5A21 /* HealthKitManager.swift */,
 				BB1122334455667788990011 /* InvestRelayerService.swift */,
+				AB2233445566778899002233 /* MintUSDCService.swift */,
+				AA2233445566778899002222 /* OnChainBalanceService.swift */,
 				E438A6C4A98D6A79EBBA1477 /* LocationManager.swift */,
 				94B5F3F9DF0938E3857B2EBF /* NotificationManager.swift */,
 				82D8E42DF7DAE008F2F55720 /* PhotoVerificationService.swift */,
@@ -514,6 +520,8 @@
 				18F054B1D6BA1C438C3970AE /* SplashView.swift in Sources */,
 				85BB3A66BCD2295FA6BC6B08 /* SupabaseConfig.swift in Sources */,
 				AA1122334455667788990011 /* InvestRelayerService.swift in Sources */,
+				AB2233445566778899001133 /* MintUSDCService.swift in Sources */,
+				AA2233445566778899001122 /* OnChainBalanceService.swift in Sources */,
 				9B6142C21E3D155F9B183307 /* SupabaseService.swift in Sources */,
 				9A55E6A19F67BBE39241CFF4 /* UsernameSetupView.swift in Sources */,
 			);

@@ -48,12 +48,14 @@ struct PledgeApp: App {
                 // Run initial verification after auth (permissions are handled in setup flow)
                 guard appState.isAuthenticated else { return }
                 await appState.verifyTodayHabits()
+                await appState.refreshOnChainBalance()
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
                 // Re-verify habits when app returns from background
                 guard appState.isAuthenticated else { return }
                 Task {
                     await appState.verifyTodayHabits()
+                    await appState.refreshOnChainBalance()
                 }
             }
         }

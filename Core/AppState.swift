@@ -452,6 +452,51 @@ class AppState: ObservableObject {
         saveHabits()
     }
 
+    // MARK: - Demo: Force Fail
+
+    #if DEBUG
+    /// Force-fails a habit for demo purposes — triggers the full miss → invest flow.
+    func forceFailHabit(_ todayHabitId: UUID) {
+        guard let index = todayHabits.firstIndex(where: { $0.id == todayHabitId }) else { return }
+        guard todayHabits[index].status == .pending else { return }
+
+        todayHabits[index].status = .failed
+        todayHabits[index].detail = "Missed (demo)"
+
+        let habitId = todayHabits[index].habit.id
+
+        // Move stake to investment pool
+        let stakeAmount = min(todayHabits[index].habit.stakeAmount, vaultBalance)
+        if stakeAmount > 0 {
+            investmentPoolValue += stakeAmount
+            vaultBalance -= stakeAmount
+            allocateStakeToStocks(stakeAmount: stakeAmount, habitName: todayHabits[index].habit.name)
+        }
+
+        // Reset streak
+        if let habitIndex = habits.firstIndex(where: { $0.id == habitId }) {
+            habits[habitIndex].currentStreak = 0
+        }
+
+        // Activity item
+        let investAmount = stakeAmount * 0.98
+        let topStock = riskProfile.allocations.max(by: { $0.percentage < $1.percentage })?.symbol ?? "stocks"
+        let activity = ActivityItem(
+            icon: "\u{1F4C8}",
+            title: "$\(Int(investAmount)) \u{2192} \(topStock) & more",
+            detail: "From missed \(todayHabits[index].habit.name)",
+            isFailure: true
+        )
+        recentActivity.insert(activity, at: 0)
+
+        recordHabitLog(for: todayHabits[index], status: .failed)
+        syncHabitAfterVerification(habitId: habitId, status: .failed)
+
+        updateStreakCount()
+        saveHabits()
+    }
+    #endif
+
     // MARK: - Today Habits Generation
 
     func generateTodayHabits() {
@@ -595,6 +640,9 @@ class AppState: ObservableObject {
             updateStreakCount()
             setupGeofenceMonitoring()
             print("[AppState] Loaded \(habits.count) habits from Supabase")
+
+            // Overwrite vault balance with on-chain data
+            await refreshOnChainBalance()
         } catch {
             print("[AppState] Supabase load failed, falling back to local: \(error)")
             loadHabitsLocally()
@@ -742,20 +790,11 @@ class AppState: ObservableObject {
             return
         }
 
-        // Map RiskProfile to contract tier: safe=0, stableCore=1, growth=2
-        let tier: Int
-        switch riskProfile {
-        case .safe: tier = 0
-        case .stableCore: tier = 1
-        case .growth: tier = 2
-        }
-
         Task {
             do {
                 let relayerResult = try await InvestRelayerService.callInvestRelayer(
                     userWallet: wallet,
-                    usdcAmount: stakeAmount,
-                    riskTier: tier
+                    usdcAmount: stakeAmount
                 )
                 await MainActor.run {
                     self.lastInvestmentExplorerURL = relayerResult.explorerURL
@@ -861,6 +900,22 @@ class AppState: ObservableObject {
     /// Get the current Supabase service for direct use by views (e.g., friend search, leaderboard).
     var currentSupabaseService: SupabaseService? {
         supabaseService
+    }
+
+    // MARK: - On-Chain Balance
+
+    /// Fetches the total USDC balance across all chains and updates `vaultBalance`.
+    /// Non-blocking: silently keeps last-known value on failure.
+    func refreshOnChainBalance() async {
+        let wallet = walletAddress
+        guard !wallet.isEmpty else { return }
+        do {
+            let balance = try await OnChainBalanceService.fetchTotalUSDCBalance(walletAddress: wallet)
+            vaultBalance = balance
+            print("[AppState] On-chain balance updated: $\(balance)")
+        } catch {
+            print("[AppState] On-chain balance fetch failed (keeping current): \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Auth

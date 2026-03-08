@@ -66,6 +66,10 @@ struct HomeView: View {
         }
         .task {
             await appState.verifyTodayHabits()
+            await appState.refreshOnChainBalance()
+        }
+        .refreshable {
+            await appState.refreshOnChainBalance()
         }
         .sheet(isPresented: $showAddFunds) {
             AddFundsSheet(appState: appState)
@@ -292,6 +296,14 @@ struct HomeView: View {
                                     photoHabit = todayHabit
                                 } else {
                                     exerciseHabit = todayHabit
+                                }
+                            },
+                            onFail: {
+                                PPHaptic.heavy()
+                                withAnimation(.springBounce) {
+                                    #if DEBUG
+                                    appState.forceFailHabit(todayHabit.id)
+                                    #endif
                                 }
                             }
                         )
@@ -598,8 +610,22 @@ struct AddFundsSheet: View {
                 showPaymentMethods = false
                 switch method {
                 case .applePay, .robinhood:
-                    appState.vaultBalance += amount
+                    let depositAmount = amount
+                    let wallet = appState.walletAddress
+                    appState.vaultBalance += depositAmount
                     dismiss()
+                    // Mint MockUSDC on-chain, then refresh balance
+                    if !wallet.isEmpty {
+                        Task {
+                            do {
+                                let result = try await MintUSDCService.mint(toWallet: wallet, usdcAmount: depositAmount)
+                                print("[AddFunds] Minted \(depositAmount) USDC: \(result.txHash)")
+                            } catch {
+                                print("[AddFunds] Mint failed (non-blocking): \(error.localizedDescription)")
+                            }
+                            await appState.refreshOnChainBalance()
+                        }
+                    }
                 case .coinbase:
                     fundWithCoinbase()
                 }
@@ -650,6 +676,7 @@ struct HabitRowView: View {
     var onVerify: (() -> Void)? = nil
     var onRefresh: (() -> Void)? = nil
     var onOpenCamera: (() -> Void)? = nil
+    var onFail: (() -> Void)? = nil
     @Environment(\.themeColors) var theme
 
     var statusIcon: some View {
@@ -765,6 +792,20 @@ struct HabitRowView: View {
                         }
                         .buttonStyle(SmallCapsuleStyle())
                     }
+
+                    #if DEBUG
+                    Button {
+                        onFail?()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "xmark.circle")
+                                .font(.system(size: 11, weight: .semibold))
+                            Text("Fail")
+                        }
+                    }
+                    .buttonStyle(SmallCapsuleStyle())
+                    .tint(.pledgeRed)
+                    #endif
                 }
             }
         }

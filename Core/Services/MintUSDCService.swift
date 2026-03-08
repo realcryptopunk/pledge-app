@@ -1,10 +1,10 @@
 import Foundation
 
-// MARK: - InvestRelayerService
+// MARK: - MintUSDCService
 
-/// Calls the invest-relayer Supabase edge function to execute on-chain investments
-/// via PledgeVaultRH on Robinhood Testnet when a user misses a habit.
-enum InvestRelayerService {
+/// Calls the mint-usdc Supabase edge function to mint MockUSDC to a wallet on Arbitrum Sepolia.
+/// Used during simulated deposit flows (Apple Pay, Robinhood) so on-chain balance reflects the deposit.
+enum MintUSDCService {
 
     // MARK: - Response Model
 
@@ -15,7 +15,7 @@ enum InvestRelayerService {
 
     // MARK: - Error Types
 
-    enum RelayerError: LocalizedError {
+    enum MintError: LocalizedError {
         case invalidURL
         case serverError(statusCode: Int, body: String)
         case invalidResponse
@@ -23,28 +23,27 @@ enum InvestRelayerService {
         var errorDescription: String? {
             switch self {
             case .invalidURL:
-                return "Invalid Supabase URL for invest-relayer"
+                return "Invalid Supabase URL for mint-usdc"
             case .serverError(let statusCode, let body):
-                return "Relayer HTTP \(statusCode): \(body)"
+                return "Mint HTTP \(statusCode): \(body)"
             case .invalidResponse:
-                return "Could not parse invest-relayer response"
+                return "Could not parse mint-usdc response"
             }
         }
     }
 
     // MARK: - API
 
-    /// Calls the invest-relayer edge function to execute an on-chain investment
-    /// via PledgeVaultRH.investForUser() on Robinhood Testnet.
+    /// Mints MockUSDC to the given wallet on Arbitrum Sepolia.
     ///
     /// - Parameters:
-    ///   - userWallet: The user's embedded wallet address (0x...)
-    ///   - usdcAmount: The USDC amount to invest (e.g., 5.0)
+    ///   - toWallet: The recipient wallet address (0x...)
+    ///   - usdcAmount: The amount of USDC to mint (e.g., 50.0)
     /// - Returns: `Response` containing the transaction hash and explorer URL
-    /// - Throws: `RelayerError` on failure
-    static func callInvestRelayer(userWallet: String, usdcAmount: Double) async throws -> Response {
-        guard let url = URL(string: "\(EnvConfig.supabaseURL)/functions/v1/invest-relayer") else {
-            throw RelayerError.invalidURL
+    /// - Throws: `MintError` on failure
+    static func mint(toWallet: String, usdcAmount: Double) async throws -> Response {
+        guard let url = URL(string: "\(EnvConfig.supabaseURL)/functions/v1/mint-usdc") else {
+            throw MintError.invalidURL
         }
 
         var request = URLRequest(url: url)
@@ -52,7 +51,7 @@ enum InvestRelayerService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let body: [String: Any] = [
-            "user_wallet": userWallet,
+            "user_wallet": toWallet,
             "usdc_amount": usdcAmount
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -60,18 +59,18 @@ enum InvestRelayerService {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw RelayerError.invalidResponse
+            throw MintError.invalidResponse
         }
 
         guard httpResponse.statusCode == 200 else {
             let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
-            throw RelayerError.serverError(statusCode: httpResponse.statusCode, body: errorBody)
+            throw MintError.serverError(statusCode: httpResponse.statusCode, body: errorBody)
         }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let txHash = json["tx_hash"] as? String,
               let explorerURL = json["explorer_url"] as? String else {
-            throw RelayerError.invalidResponse
+            throw MintError.invalidResponse
         }
 
         return Response(txHash: txHash, explorerURL: explorerURL)

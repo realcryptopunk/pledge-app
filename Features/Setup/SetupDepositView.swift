@@ -189,18 +189,25 @@ struct SetupDepositView: View {
 
     private func handlePayment(_ method: PaymentMethodsView.PaymentMethod) {
         switch method {
-        case .applePay:
-            // For now, simulate deposit
-            flowState.depositAmount = depositValue
+        case .applePay, .robinhood:
+            let amount = depositValue
+            let wallet = appState.walletAddress
+            flowState.depositAmount = amount
             flowState.goForward()
+            // Mint MockUSDC on-chain (non-blocking)
+            if !wallet.isEmpty {
+                Task {
+                    do {
+                        let result = try await MintUSDCService.mint(toWallet: wallet, usdcAmount: amount)
+                        print("[SetupDeposit] Minted \(amount) USDC: \(result.txHash)")
+                    } catch {
+                        print("[SetupDeposit] Mint failed (non-blocking): \(error.localizedDescription)")
+                    }
+                }
+            }
 
         case .coinbase:
             fundWithCoinbase()
-
-        case .robinhood:
-            // Robinhood Chain direct deposit
-            flowState.depositAmount = depositValue
-            flowState.goForward()
         }
     }
 
