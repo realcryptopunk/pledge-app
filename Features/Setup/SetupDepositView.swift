@@ -6,6 +6,7 @@ struct SetupDepositView: View {
     @Environment(\.themeColors) var theme
     @State private var depositString = ""
     @State private var isFetchingToken = false
+    @State private var showPaymentMethods = false
     @State private var showOnramp = false
     @State private var sessionToken: String?
     @State private var showError = false
@@ -104,135 +105,52 @@ struct SetupDepositView: View {
             NumberPadView(value: $depositString, maxDigits: 5, allowDecimal: false)
                 .padding(.horizontal, 20)
 
-            Spacer().frame(height: 20)
+            Spacer().frame(height: 24)
 
-            // MARK: - Fund Button
+            // MARK: - Deposit Button
             Button {
                 PPHaptic.heavy()
-                fundWithCoinbase()
+                showPaymentMethods = true
             } label: {
-                HStack(spacing: 8) {
-                    if isFetchingToken {
-                        ProgressView()
-                            .tint(.white)
-                            .scaleEffect(0.9)
-                    } else {
-                        Image(systemName: "dollarsign.circle.fill")
-                            .font(.system(size: 18))
-                    }
-                    Text(isFetchingToken ? "Connecting..." : "Fund with Coinbase")
-                        .font(.system(size: 17, weight: .semibold))
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(red: 0.0, green: 0.32, blue: 1.0), Color(red: 0.0, green: 0.25, blue: 0.85)],
-                                startPoint: .top,
-                                endPoint: .bottom
+                Text("Deposit")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+                    .background(
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [theme.buttonTop, theme.buttonBottom],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
                             )
-                        )
-                )
-                .clipShape(Capsule())
-                .shadow(color: Color(red: 0.0, green: 0.32, blue: 1.0).opacity(0.3), radius: 8, y: 4)
-            }
-            .disabled(!canDeposit || isFetchingToken)
-            .opacity(canDeposit && !isFetchingToken ? 1.0 : 0.35)
-            .padding(.horizontal, 20)
-
-            // Robinhood deposit option
-            Button {
-                PPHaptic.heavy()
-                flowState.depositAmount = depositValue
-                flowState.goForward()
-            } label: {
-                HStack(spacing: 10) {
-                    // Robinhood green feather icon
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(Color(red: 0.0, green: 0.82, blue: 0.33).opacity(0.15))
-                            .frame(width: 40, height: 40)
-                        Image(systemName: "leaf.fill")
-                            .font(.system(size: 18))
-                            .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.33))
-                    }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Robinhood")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                        HStack(spacing: 6) {
-                            Text("No Fees")
-                                .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.33))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(Color(red: 0.0, green: 0.82, blue: 0.33).opacity(0.1))
-                                .clipShape(Capsule())
-                        }
-                    }
-
-                    Spacer()
-
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("No Limits")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.primary)
-                        Text("Unlimited Deposit")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .padding(16)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(Color(red: 0.0, green: 0.82, blue: 0.33).opacity(0.3), lineWidth: 1)
-                        )
-                )
+                    )
+                    .clipShape(Capsule())
+                    .shadow(color: theme.surface.opacity(0.3), radius: 8, y: 4)
             }
             .disabled(!canDeposit)
             .opacity(canDeposit ? 1.0 : 0.35)
             .padding(.horizontal, 20)
 
-            // Or pay with card
-            Button {
-                PPHaptic.light()
-                flowState.depositAmount = depositValue
-                flowState.goForward()
-            } label: {
-                Text("Or pay with card")
-            }
-            .buttonStyle(GhostButtonStyle())
-            .disabled(!canDeposit || isFetchingToken)
-            .opacity(canDeposit && !isFetchingToken ? 1.0 : 0.35)
-            .padding(.top, 8)
-
             // Security note
             HStack(spacing: 6) {
-                Image(systemName: "lock.fill")
+                Image(systemName: "lock.shield.fill")
                     .font(.system(size: 10))
-                Text("Powered by Coinbase. Funds sent as USDC to your wallet.")
+                Text("Secured & encrypted · Powered by Robinhood Chain")
                     .font(.system(size: 11, weight: .medium))
             }
-            .foregroundColor(.secondary.opacity(0.6))
-            .padding(.top, 8)
-
-            HStack(spacing: 6) {
-                Image(systemName: "leaf.fill")
-                    .font(.system(size: 10))
-                    .foregroundColor(Color(red: 0.0, green: 0.82, blue: 0.33))
-                Text("Powered by Robinhood Chain")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.secondary.opacity(0.6))
+            .foregroundColor(.secondary.opacity(0.5))
+            .padding(.top, 12)
+            .padding(.bottom, 20)
+        }
+        .sheet(isPresented: $showPaymentMethods) {
+            PaymentMethodsView(depositAmount: depositValue) { method in
+                showPaymentMethods = false
+                handlePayment(method)
             }
-            .padding(.top, 4)
-            .padding(.bottom, 16)
+            .presentationDetents([.medium])
         }
         .sheet(isPresented: $showOnramp) {
             if let token = sessionToken {
@@ -261,11 +179,29 @@ struct SetupDepositView: View {
         }
     }
 
+    // MARK: - Handle Payment Method Selection
+
+    private func handlePayment(_ method: PaymentMethodsView.PaymentMethod) {
+        switch method {
+        case .applePay:
+            // For now, simulate deposit
+            flowState.depositAmount = depositValue
+            flowState.goForward()
+
+        case .coinbase:
+            fundWithCoinbase()
+
+        case .robinhood:
+            // Robinhood Chain direct deposit
+            flowState.depositAmount = depositValue
+            flowState.goForward()
+        }
+    }
+
     // MARK: - Fund with Coinbase
 
     private func fundWithCoinbase() {
         #if DEBUG
-        // In debug builds, if wallet address is empty, use simulated deposit
         if appState.walletAddress.isEmpty {
             flowState.depositAmount = depositValue
             flowState.goForward()

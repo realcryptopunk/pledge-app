@@ -439,6 +439,7 @@ struct AddFundsSheet: View {
     @State private var sessionToken: String?
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var showPaymentMethods = false
     @Environment(\.themeColors) var theme
 
     private let quickAmounts = ["50", "100", "200", "500"]
@@ -499,7 +500,7 @@ struct AddFundsSheet: View {
                             .animation(.quickSnap, value: amountString)
                     }
 
-                    Text("Minimum deposit: $50")
+                    Text("No minimum deposit")
                         .pledgeCaption()
                         .foregroundColor(.secondary.opacity(0.6))
                 }
@@ -539,52 +540,42 @@ struct AddFundsSheet: View {
                 NumberPadView(value: $amountString, maxDigits: 5, allowDecimal: false)
                     .padding(.horizontal, 20)
 
-                Spacer().frame(height: 20)
+                Spacer().frame(height: 24)
 
                 Button {
                     PPHaptic.heavy()
-                    fundWithCoinbase()
+                    showPaymentMethods = true
                 } label: {
-                    HStack(spacing: 8) {
-                        if isFetchingToken {
-                            ProgressView()
-                                .tint(.white)
-                                .scaleEffect(0.9)
-                        } else {
-                            Image(systemName: "dollarsign.circle.fill")
-                                .font(.system(size: 18))
-                        }
-                        Text(isFetchingToken ? "Connecting..." : "Fund with Coinbase")
-                            .font(.system(size: 17, weight: .semibold))
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color(red: 0.0, green: 0.32, blue: 1.0), Color(red: 0.0, green: 0.25, blue: 0.85)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
+                    Text("Deposit")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                        .background(
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [theme.buttonTop, theme.buttonBottom],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
                                 )
-                            )
-                    )
-                    .clipShape(Capsule())
-                    .shadow(color: Color(red: 0.0, green: 0.32, blue: 1.0).opacity(0.3), radius: 8, y: 4)
+                        )
+                        .clipShape(Capsule())
+                        .shadow(color: theme.surface.opacity(0.3), radius: 8, y: 4)
                 }
-                .disabled(!canDeposit || isFetchingToken)
-                .opacity(canDeposit && !isFetchingToken ? 1.0 : 0.35)
+                .disabled(!canDeposit)
+                .opacity(canDeposit ? 1.0 : 0.35)
                 .padding(.horizontal, 20)
 
                 HStack(spacing: 6) {
-                    Image(systemName: "lock.fill")
+                    Image(systemName: "lock.shield.fill")
                         .font(.system(size: 10))
-                    Text("Powered by Coinbase. Funds sent as USDC to your wallet.")
+                    Text("Secured & encrypted · Powered by Robinhood Chain")
                         .font(.system(size: 11, weight: .medium))
                 }
-                .foregroundColor(.secondary.opacity(0.6))
-                .padding(.top, 8)
+                .foregroundColor(.secondary.opacity(0.5))
+                .padding(.top, 12)
                 .padding(.bottom, 16)
             }
         }
@@ -601,6 +592,19 @@ struct AddFundsSheet: View {
                     }
                 )
             }
+        }
+        .sheet(isPresented: $showPaymentMethods) {
+            PaymentMethodsView(depositAmount: amount) { method in
+                showPaymentMethods = false
+                switch method {
+                case .applePay, .robinhood:
+                    appState.vaultBalance += amount
+                    dismiss()
+                case .coinbase:
+                    fundWithCoinbase()
+                }
+            }
+            .presentationDetents([.medium])
         }
         .alert("Deposit Error", isPresented: $showError) {
             Button("OK", role: .cancel) {}
