@@ -4,6 +4,7 @@ struct OnboardingPage3: View {
     let onGetStarted: () -> Void
 
     @State private var buttonVisible = false
+    @State private var titleVisible = false
     @Environment(\.themeColors) var theme
 
     private var steps: [(icon: String, color: Color, title: String, desc: String)] {
@@ -17,6 +18,27 @@ struct OnboardingPage3: View {
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
+
+            // Title
+            VStack(spacing: 4) {
+                Text("How It Works")
+                    .pledgeHero(32)
+                    .foregroundColor(.primary)
+                    .embossed(.raised)
+                Text("Three simple steps")
+                    .pledgeBody()
+                    .foregroundColor(.secondary)
+            }
+            .multilineTextAlignment(.center)
+            .opacity(titleVisible ? 1 : 0)
+            .offset(y: titleVisible ? 0 : 10)
+            .onAppear {
+                withAnimation(.springBounce.delay(0.1)) {
+                    titleVisible = true
+                }
+            }
+
+            Spacer().frame(height: 32)
 
             VStack(spacing: 12) {
                 ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
