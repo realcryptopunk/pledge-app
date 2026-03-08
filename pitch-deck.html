@@ -7,7 +7,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--deep:#0A0A1A;--surface:#6366F1;--light:#818CF8;--accent:#4F46E5;--green:#22C55E;--red:#EF4444;--text:#F8FAFC;--subtle:#94A3B8;--card:rgba(255,255,255,0.05);--glass:rgba(255,255,255,0.08)}
+:root{--deep:#F4F3FF;--surface:#656AF1;--light:#818CF8;--accent:#4F46E5;--green:#22C55E;--red:#EF4444;--text:#1A1A2E;--subtle:#6B7094;--card:rgba(255,255,255,0.75);--glass:rgba(255,255,255,0.5)}
 body{font-family:'Inter',-apple-system,sans-serif;background:var(--deep);color:var(--text);overflow:hidden}
 .slide{width:100vw;height:100vh;display:none;flex-direction:column;justify-content:center;align-items:center;padding:60px 80px;position:absolute;top:0;left:0;overflow:hidden}
 .slide.active{display:flex;animation:fadeIn 0.4s ease}
@@ -17,16 +17,20 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--deep);color:v
 @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
 
 /* Gradient backgrounds per slide */
-.bg-dark{background:linear-gradient(135deg,#0A0A1A 0%,#1E1B4B 50%,#0A0A1A 100%)}
-.bg-indigo{background:linear-gradient(160deg,#0A0A1A 0%,#1E1B4B 40%,#312E81 100%)}
-.bg-purple{background:linear-gradient(160deg,#0F0A2A 0%,#2E1065 60%,#1E1B4B 100%)}
+.bg-dark{background:linear-gradient(160deg,#F4F3FF 0%,#EEEDF8 40%,#E8E5FF 100%)}
+.bg-indigo{background:linear-gradient(160deg,#F4F3FF 0%,#EBE8FF 50%,#E0DCFF 100%)}
+.bg-purple{background:linear-gradient(160deg,#F0EEFF 0%,#E8E5FF 50%,#DBD7FF 100%)}
 .bg-emerald{background:linear-gradient(160deg,#0A0A1A 0%,#064E3B 60%,#1E1B4B 100%)}
+.bg-emerald .card{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.08);box-shadow:none}
+.bg-emerald .stock-pill{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.1)}
+.bg-emerald p,.bg-emerald h3{color:#F8FAFC}
+.bg-emerald .stat-label{color:#94A3B8}
 
 /* Mesh gradient orbs */
 .orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;animation:glow 6s ease-in-out infinite}
-.orb-1{width:500px;height:500px;background:rgba(99,102,241,0.15);top:-100px;right:-100px}
-.orb-2{width:400px;height:400px;background:rgba(129,140,248,0.1);bottom:-100px;left:-100px}
-.orb-3{width:300px;height:300px;background:rgba(34,197,94,0.08);top:50%;left:50%;transform:translate(-50%,-50%)}
+.orb-1{width:500px;height:500px;background:rgba(101,106,241,0.06);top:-100px;right:-100px}
+.orb-2{width:400px;height:400px;background:rgba(101,106,241,0.04);bottom:-100px;left:-100px}
+.orb-3{width:300px;height:300px;background:rgba(101,106,241,0.03);top:50%;left:50%;transform:translate(-50%,-50%)}
 
 .serif{font-family:'DM Serif Display',serif}
 h1{font-size:64px;font-weight:900;line-height:1.05;letter-spacing:-2px}
@@ -35,16 +39,16 @@ h3{font-size:24px;font-weight:700;line-height:1.3}
 p{font-size:18px;line-height:1.6;color:var(--subtle)}
 .big{font-size:22px}
 
-.gradient-text{background:linear-gradient(135deg,#818CF8,#6366F1,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.gradient-text{background:linear-gradient(135deg,#4F46E5,#656AF1,#3730A3);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .green-text{background:linear-gradient(135deg,#22C55E,#10B981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.shimmer-text{background:linear-gradient(90deg,#818CF8,#C4B5FD,#818CF8);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s linear infinite}
+.shimmer-text{background:linear-gradient(90deg,#4F46E5,#656AF1,#4F46E5);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s linear infinite}
 
 .tag{display:inline-block;padding:8px 18px;border-radius:24px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:1px solid}
-.tag-purple{background:rgba(99,102,241,0.15);color:#A78BFA;border-color:rgba(99,102,241,0.3)}
-.tag-green{background:rgba(34,197,94,0.15);color:#4ADE80;border-color:rgba(34,197,94,0.3)}
-.tag-red{background:rgba(239,68,68,0.15);color:#FCA5A5;border-color:rgba(239,68,68,0.3)}
+.tag-purple{background:rgba(101,106,241,0.15);color:#4F46E5;border-color:rgba(101,106,241,0.3)}
+.tag-green{background:rgba(34,197,94,0.15);color:#16A34A;border-color:rgba(34,197,94,0.3)}
+.tag-red{background:rgba(239,68,68,0.15);color:#DC2626;border-color:rgba(239,68,68,0.3)}
 
-.card{background:var(--card);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px 32px;transition:transform 0.2s,border-color 0.2s}
+.card{background:rgba(255,255,255,0.7);backdrop-filter:blur(20px);border:1px solid rgba(101,106,241,0.08);border-radius:20px;padding:28px 32px;transition:transform 0.2s,border-color 0.2s;box-shadow:0 2px 12px rgba(101,106,241,0.06)}
 .card:hover{border-color:rgba(99,102,241,0.3);transform:translateY(-2px)}
 .card-glow{box-shadow:0 0 40px rgba(99,102,241,0.1),0 8px 32px rgba(0,0,0,0.3)}
 
@@ -68,9 +72,9 @@ p{font-size:18px;line-height:1.6;color:var(--subtle)}
 .stat-num{font-size:64px;font-weight:900;letter-spacing:-2px}
 .stat-label{font-size:13px;font-weight:600;color:var(--subtle);letter-spacing:1px;text-transform:uppercase}
 
-.stock-pill{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:14px;background:var(--glass);border:1px solid rgba(255,255,255,0.1);font-weight:700;font-size:16px}
+.stock-pill{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;border-radius:14px;background:rgba(255,255,255,0.6);border:1px solid rgba(101,106,241,0.08);font-weight:700;font-size:16px;box-shadow:0 1px 6px rgba(101,106,241,0.05)}
 
-.step-circle{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--surface),var(--light));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;flex-shrink:0;box-shadow:0 4px 20px rgba(99,102,241,0.4)}
+.step-circle{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--surface),var(--light));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;flex-shrink:0;box-shadow:0 4px 16px rgba(101,106,241,0.25)}
 
 .divider{width:60px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--surface),var(--light))}
 
@@ -169,8 +173,8 @@ p{font-size:18px;line-height:1.6;color:var(--subtle)}
 </div>
 
 <!-- S6: WHY ROBINHOOD CHAIN -->
-<div class="slide bg-emerald">
-<div class="orb orb-1" style="background:rgba(34,197,94,0.12)"></div><div class="orb orb-2"></div>
+<div class="slide bg-emerald" style="color:#F8FAFC">
+<div class="orb orb-1" style="background:rgba(34,197,94,0.12)"></div><div class="orb orb-2" style="background:rgba(129,140,248,0.1)"></div>
 <div class="flex gap-40 w-full items-center" style="max-width:1200px">
 <div class="flex-col gap-24" style="flex:1">
 <span class="tag tag-green">PERFECT FIT</span>
