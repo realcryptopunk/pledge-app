@@ -93,17 +93,41 @@ struct SettingsView: View {
                                     .padding(.vertical, 10)
                                 }
                                 StatRowDivider()
-                                // View on Arbiscan
+                                // View on Explorer
                                 Button {
-                                    if let url = URL(string: "https://arbiscan.io/address/\(appState.walletAddress)") {
+                                    if let url = URL(string: "https://explorer.testnet.chain.robinhood.com/address/\(appState.walletAddress)") {
                                         UIApplication.shared.open(url)
                                     }
                                 } label: {
                                     HStack(spacing: 12) {
                                         Text("\u{1F50D}")
-                                        Text("View on Arbiscan")
+                                        Text("View on Explorer")
                                             .pledgeHeadline()
                                             .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "arrow.up.right.square")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundColor(.secondary.opacity(0.5))
+                                    }
+                                    .padding(.vertical, 10)
+                                }
+                                StatRowDivider()
+                                // Export Wallet
+                                Button {
+                                    if let url = URL(string: "https://pledgeapp.xyz/wallet") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        Text("\u{1F511}")
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("Export Wallet")
+                                                .pledgeHeadline()
+                                                .foregroundColor(.primary)
+                                            Text("Securely export your private key")
+                                                .pledgeCaption()
+                                                .foregroundColor(.secondary)
+                                        }
                                         Spacer()
                                         Image(systemName: "arrow.up.right.square")
                                             .font(.system(size: 12, weight: .semibold))
@@ -131,6 +155,34 @@ struct SettingsView: View {
                             settingsRow(icon: "💰", label: "Deposit / Withdraw")
                             StatRowDivider()
                             settingsRow(icon: "📊", label: "Pledge History")
+                        }
+
+                        // MARK: - Wallet (always show export option)
+                        if appState.walletAddress.isEmpty {
+                            settingsSection("WALLET") {
+                                Button {
+                                    if let url = URL(string: "https://pledgeapp.xyz/wallet") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        Text("🔑")
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("Export Wallet")
+                                                .pledgeHeadline()
+                                                .foregroundColor(.primary)
+                                            Text("View and export your private key securely")
+                                                .pledgeCaption()
+                                                .foregroundColor(.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "arrow.up.right.square")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundColor(.secondary.opacity(0.5))
+                                    }
+                                    .padding(.vertical, 10)
+                                }
+                            }
                         }
 
                         // MARK: - Preferences
