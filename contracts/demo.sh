@@ -8,7 +8,7 @@
 # ============================================================
 
 # --- CONFIG ---
-export PRIVATE_KEY="0x77f377c43df11ceb0e4d6247e3b119d182bc86572b87403bf8732a504a3ca91b"
+export PRIVATE_KEY="${PRIVATE_KEY:?Set PRIVATE_KEY env var before running}"
 VAULT="0x70D73B04d0C2Ee4f73eb44Cbf5377A2c3FBc52ba"
 RPC="https://rpc.testnet.chain.robinhood.com"
 DEPLOYER="0x936c75C31ddE753A0AFC39dF0a39F9Ac4453d106"
