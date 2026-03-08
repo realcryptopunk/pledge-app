@@ -93,15 +93,15 @@ struct SettingsView: View {
                                     .padding(.vertical, 10)
                                 }
                                 StatRowDivider()
-                                // View on BaseScan
+                                // View on Arbiscan
                                 Button {
-                                    if let url = URL(string: "https://basescan.org/address/\(appState.walletAddress)") {
+                                    if let url = URL(string: "https://arbiscan.io/address/\(appState.walletAddress)") {
                                         UIApplication.shared.open(url)
                                     }
                                 } label: {
                                     HStack(spacing: 12) {
                                         Text("\u{1F50D}")
-                                        Text("View on BaseScan")
+                                        Text("View on Arbiscan")
                                             .pledgeHeadline()
                                             .foregroundColor(.primary)
                                         Spacer()
