@@ -1,5 +1,8 @@
-# Pitch deck
-PITCH.md
+# Markdown files
+*.md
+
+# Planning
+.planning/
 
 # Secrets
 .env
