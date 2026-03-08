@@ -2,12 +2,12 @@
 
 ## Current Position
 
-Phase: 5 of 7 (investment-contracts)
+Phase: 6 of 7 (investment-backend)
 Plan: Not started
 Status: Phase planned, ready for execution
-Last activity: 2026-03-07 - Phase 5 planned (2 plans, 4 tasks)
+Last activity: 2026-03-08 - Phase 6 planned (2 plans, 4 tasks)
 
-Progress: ██████████ 100% Milestone 1 | ░░░░░░░░░░ 0% Milestone 2
+Progress: ██████████ 100% Milestone 1 | ██░░░░░░░░ 20% Milestone 2
 
 ## Accumulated Decisions
 
@@ -27,7 +27,9 @@ Progress: ██████████ 100% Milestone 1 | ░░░░░░�
 | 04-06 | Leaderboard via edge function | service_role key needed for cross-user queries |
 | 05-00 | Smart contract approval pattern (not Privy server signing) | Privy MPC wallets can't be signed from server without authorization keys; contract approval is standard DeFi pattern |
 | 05-00 | Foundry over Hardhat | Superior DeFi testing (fork tests, fuzzing), Solidity-native |
-| 05-00 | Pendle Router V4 on Arbitrum | Latest router at 0x888...946, native USDC at 0xaf88...5831 |
+| 05-00 | PledgeVaultRH on Robinhood Chain Testnet | Pivoted from Pendle/Arbitrum to RH Chain stock allocations |
+| 06-00 | Supabase edge function as relayer (Option B) | Fully integrated e2e: miss habit → on-chain tx → explorer |
+| 06-00 | Non-blocking relayer call | On-chain tx fires async, doesn't block habit failure UX |
 
 ## Deferred Issues
 
@@ -38,11 +40,11 @@ Progress: ██████████ 100% Milestone 1 | ░░░░░░�
 
 - Pre-existing build issue: swift-clocks (Supabase transitive dep) fails with missing module dependency — not caused by our changes
 - Supabase anon key in .env uses sb_publishable_ format — may need standard JWT format from dashboard for some operations
-- Pendle may not have contracts on Arbitrum Sepolia — fork testing against mainnet recommended over testnet deployment
 - Smart contract requires audit before mainnet deployment
+- E2E demo requires: relayer wallet funded with ETH, user wallet approved USDC to PledgeVaultRH
 
 ## Session Continuity
 
-Last session: 2026-03-07
-Stopped at: Phase 5 planned, ready for execution
+Last session: 2026-03-08
+Stopped at: Phase 6 planned, ready for execution
 Resume file: None

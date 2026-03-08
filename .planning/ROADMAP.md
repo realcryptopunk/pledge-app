@@ -48,22 +48,23 @@ Supabase backend with full data persistence, real-time subscriptions, Coinbase O
 
 ## Milestone 2: Investment Infrastructure
 
-### Phase 5: investment-contracts
+### Phase 5: investment-contracts — Complete
 
-PledgeVault smart contract on Arbitrum. Non-custodial vault that pulls pre-approved USDC from user wallets and swaps to Pendle Principal Tokens via Pendle Router. Relayer-operated with emergency withdraw for users. Research: Complete (DISCOVERY.md).
+PledgeVaultRH smart contract on Robinhood Chain Testnet. Non-custodial vault that pulls pre-approved USDC from user wallets and distributes across stock allocations (TSLA/AMZN/PLTR/AMD). Relayer-operated with emergency withdraw for users. Deployed at `0x70d73b04d0c2ee4f73eb44cbf5377a2c3fbc52ba`.
 
 | Plan | Name | Status |
 |------|------|--------|
-| 05-01 | Foundry Setup + PledgeVault Contract | Pending |
-| 05-02 | Contract Tests | Pending |
+| 05-01 | Foundry Setup + PledgeVaultRH Contract | Complete |
+| 05-02 | Contract Tests + Deployment | Complete |
 
 ### Phase 6: investment-backend
 
-Backend service for automated investment execution. Pendle API integration (market discovery, optimal PT selection), relayer wallet management (Privy Server Wallet or EOA), Supabase edge function trigger on habit failure, portfolio value sync.
+Supabase edge function relayer for automated on-chain investment when habits are missed. Calls PledgeVaultRH.investForUser via ethers.js. iOS app integration for end-to-end demo flow.
 
 | Plan | Name | Status |
 |------|------|--------|
-| — | Not yet planned | — |
+| 06-01 | Invest Relayer Edge Function | Pending |
+| 06-02 | iOS App Integration | Pending |
 
 ### Phase 7: portfolio-integration
 
